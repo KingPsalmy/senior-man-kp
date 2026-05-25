@@ -257,3 +257,44 @@ body {
     height: 220px !important;
   }
 }
+
+/* Admin Dashboard Mobile */
+@media (max-width: 768px) {
+  .admin-sidebar {
+    width: 100% !important;
+    height: auto !important;
+    position: relative !important;
+    flex-direction: row !important;
+    padding: 12px 0 !important;
+    overflow-x: auto !important;
+    border-right: none !important;
+    border-bottom: 1px solid var(--border-subtle) !important;
+  }
+  .admin-sidebar nav {
+    display: flex !important;
+    flex-direction: row !important;
+    padding: 0 12px !important;
+    gap: 4px !important;
+  }
+  .admin-sidebar nav a,
+  .admin-sidebar nav button {
+    padding: 8px 12px !important;
+    white-space: nowrap !important;
+    border-right: none !important;
+    border-bottom: 2px solid transparent !important;
+    font-size: 0.7rem !important;
+  }
+  .admin-main {
+    margin-left: 0 !important;
+    padding: 16px !important;
+  }
+  .admin-stats-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  .admin-purchases-table {
+    display: none !important;
+  }
+  .admin-purchases-mobile {
+    display: flex !important;
+  }
+}
