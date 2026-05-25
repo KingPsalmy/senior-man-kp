@@ -165,3 +165,48 @@ body {
 .pulse-gold {
   animation: pulse-gold 1.5s ease-in-out infinite;
 }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .desktop-nav {
+    display: none !important;
+  }
+  .mobile-menu-btn {
+    display: flex !important;
+  }
+}
+
+/* Hero mobile */
+@media (max-width: 768px) {
+  .hero-section .hero-image {
+    width: 100% !important;
+    opacity: 0.3 !important;
+  }
+  .hero-section .hero-content {
+    padding-left: 24px !important;
+    padding-right: 24px !important;
+    max-width: 100% !important;
+  }
+  .hero-stats {
+    gap: 16px !important;
+    flex-wrap: wrap !important;
+  }
+  .genre-tags {
+    flex-wrap: wrap !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-stats {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 20px !important;
+  }
+  .genre-tags {
+    flex-wrap: wrap !important;
+  }
+  .genre-tags a {
+    flex: 1 1 calc(33% - 8px) !important;
+    text-align: center !important;
+  }
+}
