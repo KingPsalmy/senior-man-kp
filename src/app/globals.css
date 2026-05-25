@@ -244,3 +244,16 @@ body {
     display: none !important;
   }
 }
+
+@media (max-width: 768px) {
+  .license-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .beat-detail-top {
+    flex-direction: column !important;
+  }
+  .beat-detail-cover {
+    width: 100% !important;
+    height: 220px !important;
+  }
+}
