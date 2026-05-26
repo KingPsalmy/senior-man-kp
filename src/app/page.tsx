@@ -8,21 +8,70 @@ export default function HomePage() {
       <Navbar />
 
       <section className="hero-section" style={{ position: "relative", minHeight: "100vh", display: "flex", alignItems: "center" }}>
-        <HeroParticles />
 
-        {/* Producer Image */}
+        {/* Producer Image — right side */}
         <div
           className="hero-image"
-          style={{ position: "absolute", right: 0, top: 0, height: "100%", width: "60%", pointerEvents: "none", zIndex: 0 }}
+          style={{ position: "absolute", right: 0, top: 0, height: "100%", width: "70%", pointerEvents: "none", zIndex: 0 }}
         >
           <img
             src="/Hero pic.jpg"
-            alt="Senior Man KP"
-            style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center", opacity: 0.9 }}
+            alt="Senior Man KP Studio"
+            style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center top", opacity: 0.9 }}
           />
-          <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to right, #020202 0%, #020202 10%, rgba(2,2,2,0.9) 30%, rgba(2,2,2,0.3) 65%, transparent 100%)" }} />
+        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to right, #020202 0%, #020202 5%, rgba(2,2,2,0.95) 20%, rgba(2,2,2,0.5) 45%, rgba(2,2,2,0.2) 70%, transparent 100%)" }} />
           <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, #020202 0%, transparent 35%)" }} />
         </div>
+
+       {/* Producer photo — left side blend */}
+<div style={{
+  position: "absolute",
+  left: 0,
+  top: 0,
+  width: "65%",
+  height: "100%",
+  zIndex: 1,
+  pointerEvents: "none",
+}}>
+  <img
+    src="/hero-pic-left.png"
+    alt="Senior Man KP"
+    style={{
+      width: "100%",
+      height: "100%",
+      objectFit: "cover",
+      objectPosition: "center 40%",
+      opacity: 0.55,
+      mixBlendMode: "luminosity",
+      filter: "brightness(0.7) contrast(1.2) grayscale(1)",
+     WebkitMaskImage: "linear-gradient(to right, transparent 0%, rgba(0,0,0,0.3) 15%, rgba(0,0,0,0.7) 40%, rgba(0,0,0,0.5) 70%, transparent 100%)",
+maskImage: "linear-gradient(to right, transparent 0%, rgba(0,0,0,0.3) 15%, rgba(0,0,0,0.7) 40%, rgba(0,0,0,0.5) 70%, transparent 100%)",
+    }}
+  />
+  {/* Bottom fade */}
+  <div style={{
+    position: "absolute", inset: 0,
+    background: "linear-gradient(to top, var(--bg-void) 0%, transparent 25%)",
+  }} />
+  {/* Top fade */}
+  <div style={{
+    position: "absolute", inset: 0,
+    background: "linear-gradient(to bottom, var(--bg-void) 0%, transparent 15%)",
+  }} />
+  {/* Left edge fade */}
+  <div style={{
+    position: "absolute", inset: 0,
+    background: "linear-gradient(to right, var(--bg-void) 0%, transparent 8%)",
+  }} />
+  {/* Right blend into studio image — this kills the dark line */}
+  <div style={{
+    position: "absolute", inset: 0,
+    background: "linear-gradient(to left, transparent 0%, rgba(2,2,2,0.4) 30%, rgba(2,2,2,0.7) 55%, var(--bg-void) 80%)",
+  }} />
+</div>
+
+        {/* Particles — above images, below text */}
+        <HeroParticles />
 
         {/* Left Content */}
         <div
