@@ -1,5 +1,6 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import HeroParticles from "@/components/ui/HeroParticles"
 import Link from "next/link"
 import Navbar from "@/components/layout/Navbar"
@@ -36,6 +37,15 @@ const learnMoreItems = [
 ]
 
 export default function HomePage() {
+  const [heroLeft, setHeroLeft] = useState(1)
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setHeroLeft((prev) => (prev === 1 ? 2 : 1))
+    }, 10000)
+    return () => clearInterval(interval)
+  }, [])
+
   return (
     <main className="relative overflow-hidden" style={{ backgroundColor: "var(--bg-void)", minHeight: "100vh" }}>
       <Navbar />
@@ -54,15 +64,16 @@ export default function HomePage() {
           <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, #020202 0%, transparent 52%)" }} />
         </div>
 
-        {/* Left producer photo */}
+        {/* Left producer photo — slideshow */}
         <div style={{ position: "absolute", left: 0, top: 0, width: "65%", height: "100%", zIndex: 1, pointerEvents: "none" }}>
           <img
-            src="/hero-pic-left.png"
+            src={heroLeft === 1 ? "/hero-pic-left.png" : "/hero-pic-left-2.png"}
             alt="Senior Man KP"
             style={{
               width: "100%", height: "100%", objectFit: "cover", objectPosition: "center 20%",
               opacity: 0.75, mixBlendMode: "luminosity",
               filter: "brightness(0.85) contrast(1.1) grayscale(1)",
+              transition: "opacity 1.5s ease-in-out",
               WebkitMaskImage: "linear-gradient(to right, transparent 0%, rgba(0,0,0,0.3) 15%, rgba(0,0,0,0.7) 40%, rgba(0,0,0,0.5) 70%, transparent 100%)",
               maskImage: "linear-gradient(to right, transparent 0%, rgba(0,0,0,0.3) 15%, rgba(0,0,0,0.7) 40%, rgba(0,0,0,0.5) 70%, transparent 100%)",
             }}
