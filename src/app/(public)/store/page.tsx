@@ -5,23 +5,32 @@ import Navbar from "@/components/layout/Navbar"
 import Link from "next/link"
 
 const mockBeats = [
-  { id: 1, title: "Midnight Drive", genre: "Afrobeat", bpm: 98, key: "F# Minor", price: 10000, isNew: true, color: "#1a0a2e" },
-  { id: 2, title: "Higher", genre: "Afro Fusion", bpm: 104, key: "G Minor", price: 10000, isNew: false, color: "#0a1a2e" },
-  { id: 3, title: "No Limit", genre: "Trap", bpm: 120, key: "C Minor", price: 10000, isNew: false, color: "#2e0a0a" },
-  { id: 4, title: "Timeless", genre: "R&B", bpm: 90, key: "A Minor", price: 10000, isNew: false, color: "#0a2e1a" },
-  { id: 5, title: "Sauce", genre: "Trap", bpm: 140, key: "D Minor", price: 10000, isNew: false, color: "#2e1a0a" },
-  { id: 6, title: "Paradise", genre: "Afro Fusion", bpm: 96, key: "E Minor", price: 10000, isNew: false, color: "#0a2e2e" },
-  { id: 7, title: "Cold World", genre: "Drill", bpm: 143, key: "F Minor", price: 10000, isNew: false, color: "#1a1a2e" },
-  { id: 8, title: "Breathe", genre: "Afro Fusion", bpm: 88, key: "A Minor", price: 10000, isNew: false, color: "#2e0a1a" },
+  { id: 1, title: "Midnight Drive", genre: "Afrobeat", bpm: 98, key: "F# Minor", price: 30000, isNew: true, color: "#1a0a2e" },
+  { id: 2, title: "Higher", genre: "Afro Fusion", bpm: 104, key: "G Minor", price: 30000, isNew: false, color: "#0a1a2e" },
+  { id: 3, title: "No Limit", genre: "Trap", bpm: 120, key: "C Minor", price: 30000, isNew: false, color: "#2e0a0a" },
+  { id: 4, title: "Timeless", genre: "R&B", bpm: 90, key: "A Minor", price: 30000, isNew: false, color: "#0a2e1a" },
+  { id: 5, title: "Sauce", genre: "Trap", bpm: 140, key: "D Minor", price: 30000, isNew: false, color: "#2e1a0a" },
+  { id: 6, title: "Paradise", genre: "Afro Fusion", bpm: 96, key: "E Minor", price: 30000, isNew: false, color: "#0a2e2e" },
+  { id: 7, title: "Cold World", genre: "Drill", bpm: 143, key: "F Minor", price: 30000, isNew: false, color: "#1a1a2e" },
+  { id: 8, title: "Breathe", genre: "Afro Fusion", bpm: 88, key: "A Minor", price: 30000, isNew: false, color: "#2e0a1a" },
 ]
 
 export default function StorePage() {
   const [playing, setPlaying] = useState<number | null>(null)
   const [currentBeat, setCurrentBeat] = useState(mockBeats[0])
 
-  function handlePlay(beat: typeof mockBeats[0]) {
-    setPlaying(playing === beat.id ? null : beat.id)
+  async function handlePlay(beat: typeof mockBeats[0]) {
+    const newPlaying = playing === beat.id ? null : beat.id
+    setPlaying(newPlaying)
     setCurrentBeat(beat)
+
+    if (newPlaying !== null) {
+      await fetch(`/api/plays`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ beat_id: beat.id }),
+      })
+    }
   }
 
   return (
@@ -93,21 +102,26 @@ export default function StorePage() {
         ))}
 
         {/* Sort */}
-        <select style={{
-          padding: "9px 14px",
-          backgroundColor: "var(--bg-elevated)",
-          border: "1px solid var(--border-dim)",
-          borderRadius: "4px",
-          color: "var(--text-secondary)",
-          fontSize: "0.75rem",
-          fontFamily: "var(--font-ui)",
-          outline: "none",
-          cursor: "pointer",
-          marginLeft: "auto",
-        }}>
-          <option>Sort: Newest</option>
-          <option>Sort: Price Low</option>
-          <option>Sort: Price High</option>
+              <select
+          style={{
+            padding: "9px 14px",
+            backgroundColor: "var(--bg-elevated)",
+            border: "1px solid var(--border-dim)",
+            borderRadius: "4px",
+            color: "var(--text-secondary)",
+            fontSize: "0.75rem",
+            fontFamily: "var(--font-ui)",
+            outline: "none",
+            cursor: "pointer",
+            marginLeft: "auto",
+          }}
+        >
+          <option value="newest">Sort: Newest</option>
+          <option value="oldest">Sort: Oldest</option>
+          <option value="duration">Sort: Duration</option>
+          <option value="most_played">Sort: Most Played</option>
+          <option value="price_low">Sort: Price Low</option>
+          <option value="price_high">Sort: Price High</option>
         </select>
       </div>
 
