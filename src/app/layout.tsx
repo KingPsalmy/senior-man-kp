@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import "./globals.css"
 import Footer from "@/components/layout/Footer"
+import FloatingPlayer from "@/components/player/FloatingPlayer"
 
 export const metadata: Metadata = {
   title: "Senior Man KP — Official Beat Store",
@@ -46,6 +47,7 @@ export default function RootLayout({
 
       <body>
         {children}
+         <FloatingPlayer />
         <Footer />
       </body>
     </html>

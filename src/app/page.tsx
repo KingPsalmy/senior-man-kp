@@ -41,8 +41,8 @@ export default function HomePage() {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setHeroLeft((prev) => (prev === 1 ? 2 : 1))
-    }, 10000)
+      setHeroLeft((prev) => (prev === 1 ? 2 : prev === 2 ? 3 : 1))
+    }, 25000)
     return () => clearInterval(interval)
   }, [])
 
@@ -67,7 +67,7 @@ export default function HomePage() {
         {/* Left producer photo — slideshow */}
         <div style={{ position: "absolute", left: 0, top: 0, width: "65%", height: "100%", zIndex: 1, pointerEvents: "none" }}>
           <img
-            src={heroLeft === 1 ? "/hero-pic-left.png" : "/hero-pic-left-2.png"}
+            src={heroLeft === 1 ? "/hero-pic-left.png" : heroLeft === 2 ? "/hero-pic-left-2.png" : "/hero-pic-left-3.png"}
             alt="Senior Man KP"
             style={{
               width: "100%", height: "100%", objectFit: "cover", objectPosition: "center 20%",
@@ -105,7 +105,7 @@ export default function HomePage() {
           <div style={{ position: "relative", display: "flex", marginBottom: "14px", maxWidth: "480px" }}>
             <input
               type="text"
-              placeholder="What do you need today? We've got it!"
+              placeholder="What do you need today?"
               style={{
                 flex: 1, padding: "14px 16px",
                 backgroundColor: "rgba(22,22,22,0.9)",
