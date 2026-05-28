@@ -38,6 +38,7 @@ const learnMoreItems = [
 
 export default function HomePage() {
   const [heroLeft, setHeroLeft] = useState(1)
+  const [shareBeat, setShareBeat] = useState<typeof featuredBeats[0] | null>(null)
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -243,6 +244,14 @@ export default function HomePage() {
                       {beat.title.toUpperCase()}
                     </span>
                   </div>
+                  {/* Share trigger */}
+                  <div
+                    onClick={() => setShareBeat(beat)}
+                    style={{
+                      position: "absolute", top: "10px", right: "12px",
+                      color: "var(--text-muted)", fontSize: "1rem",
+                      zIndex: 2, cursor: "pointer",
+                    }}>···</div>
                   <button style={{
                     position: "absolute", bottom: "12px", right: "12px",
                     width: "36px", height: "36px", borderRadius: "50%",
@@ -317,6 +326,100 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* ── Share Modal ── */}
+      {shareBeat && (
+        <div
+          onClick={() => setShareBeat(null)}
+          style={{
+            position: "fixed", inset: 0, zIndex: 100,
+            backgroundColor: "rgba(0,0,0,0.85)",
+            backdropFilter: "blur(8px)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            padding: "24px",
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              backgroundColor: "var(--bg-card)",
+              border: "1px solid rgba(201,168,76,0.25)",
+              borderRadius: "12px",
+              width: "100%", maxWidth: "420px",
+              padding: "28px",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "20px" }}>
+              <h3 style={{ color: "var(--text-primary)", fontSize: "0.9rem", fontWeight: 700, fontFamily: "var(--font-ui)" }}>
+                Share Beat
+              </h3>
+              <button onClick={() => setShareBeat(null)} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: "1.1rem" }}>✕</button>
+            </div>
+
+            <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "24px", padding: "14px", backgroundColor: "var(--bg-elevated)", borderRadius: "8px" }}>
+              <div style={{
+                width: "44px", height: "44px", borderRadius: "4px", flexShrink: 0,
+                background: `linear-gradient(135deg, ${shareBeat.color}, #0a0a0a)`,
+                display: "flex", alignItems: "center", justifyContent: "center",
+              }}>
+                <span style={{ color: "rgba(255,255,255,0.3)", fontSize: "0.55rem", fontFamily: "var(--font-mono)" }}>
+                  {shareBeat.title.slice(0, 2).toUpperCase()}
+                </span>
+              </div>
+              <div>
+                <div style={{ color: "var(--text-primary)", fontSize: "0.85rem", fontWeight: 700, fontFamily: "var(--font-ui)" }}>{shareBeat.title}</div>
+                <div style={{ color: "var(--gold)", fontSize: "0.7rem", fontFamily: "var(--font-ui)" }}>{shareBeat.genre} • {shareBeat.bpm} BPM</div>
+              </div>
+            </div>
+
+            <div style={{ display: "flex", gap: "8px", marginBottom: "20px" }}>
+              <input
+                readOnly
+                value={`${typeof window !== "undefined" ? window.location.origin : ""}/beat/${shareBeat.id}`}
+                style={{
+                  flex: 1, padding: "10px 12px",
+                  backgroundColor: "var(--bg-elevated)",
+                  border: "1px solid var(--border-dim)",
+                  borderRadius: "4px", color: "var(--text-secondary)",
+                  fontSize: "0.72rem", fontFamily: "var(--font-mono)", outline: "none",
+                }}
+              />
+              <button
+                onClick={() => navigator.clipboard.writeText(`${window.location.origin}/beat/${shareBeat.id}`)}
+                style={{
+                  padding: "10px 16px",
+                  background: "linear-gradient(135deg, #C9A84C, #F5D98B)",
+                  border: "none", borderRadius: "4px",
+                  color: "#000", fontSize: "0.68rem", fontWeight: 700,
+                  fontFamily: "var(--font-ui)", cursor: "pointer",
+                  letterSpacing: "0.08em", textTransform: "uppercase", whiteSpace: "nowrap",
+                }}
+              >Copy</button>
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+              {[
+                { label: "Twitter / X", icon: "✕", url: `https://x.com/intent/tweet?text=Check out "${shareBeat.title}" by Senior Man KP&url=${typeof window !== "undefined" ? window.location.origin : ""}/beat/${shareBeat.id}` },
+                { label: "WhatsApp", icon: "💬", url: `https://wa.me/?text=Check out "${shareBeat.title}" by Senior Man KP — ${typeof window !== "undefined" ? window.location.origin : ""}/beat/${shareBeat.id}` },
+                { label: "Instagram", icon: "◉", url: `https://instagram.com` },
+                { label: "TikTok", icon: "♪", url: `https://tiktok.com` },
+              ].map((s) => (
+                <a key={s.label} href={s.url} target="_blank" rel="noopener noreferrer" style={{
+                  display: "flex", alignItems: "center", gap: "8px",
+                  padding: "10px 14px",
+                  backgroundColor: "var(--bg-elevated)",
+                  border: "1px solid var(--border-dim)",
+                  borderRadius: "6px", textDecoration: "none",
+                  color: "var(--text-secondary)", fontSize: "0.72rem",
+                  fontFamily: "var(--font-ui)", fontWeight: 500,
+                }}>
+                  <span>{s.icon}</span>{s.label}
+                </a>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
     </main>
   )
