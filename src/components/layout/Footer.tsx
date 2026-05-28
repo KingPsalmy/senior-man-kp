@@ -140,7 +140,7 @@ export default function Footer() {
           © 2024 Senior Man KP. All rights reserved.
         </span>
         <span style={{ color: "var(--text-muted)", fontSize: "0.7rem", fontFamily: "var(--font-mono)" }}>
-          Built with 🔥 for artists who move culture forward.
+          Built for artists who move culture forward.
         </span>
       </div>
 
