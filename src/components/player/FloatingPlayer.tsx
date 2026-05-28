@@ -16,21 +16,27 @@ const mockBeats = [
 export default function FloatingPlayer() {
   const {
     currentBeat, isPlaying, volume, progress, duration,
-    queue, toggle, next, prev, setVolume, setProgress, setDuration, setQueue, play,
+    play, toggle, next, prev, setVolume, setProgress, setDuration, setQueue,
   } = usePlayerStore()
 
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const [isShuffle, setIsShuffle] = useState(true)
   const [isRepeat, setIsRepeat] = useState(false)
-  const [mounted, setMounted] = useState(false)
+  const [isMobile, setIsMobile] = useState(true) // 
 
-  // Initialize queue on mount
+
   useEffect(() => {
-    setMounted(true)
-    setQueue(mockBeats)
+    const shuffled = [...mockBeats].sort(() => Math.random() - 0.5)
+    setQueue(shuffled)
+    play(shuffled[0])
+   
+
+    const check = () => setIsMobile(window.innerWidth <= 768)
+    check()
+    window.addEventListener("resize", check)
+    return () => window.removeEventListener("resize", check)
   }, [])
 
-  // Sync audio with state
   useEffect(() => {
     if (!audioRef.current) return
     if (isPlaying) {
@@ -76,24 +82,22 @@ export default function FloatingPlayer() {
     return `${m}:${sec.toString().padStart(2, "0")}`
   }
 
-  if (!mounted || !currentBeat) return null
-
+  // Always use a beat — fallback to first mock beat before store hydrates
+  const beat = currentBeat ?? mockBeats[0]
   const progressPercent = duration ? (progress / duration) * 100 : 0
 
   return (
     <>
-      {/* Hidden audio element */}
-      {currentBeat.preview_url && (
+      {beat.preview_url && (
         <audio
           ref={audioRef}
-          src={currentBeat.preview_url}
+          src={beat.preview_url}
           onTimeUpdate={handleTimeUpdate}
           onEnded={handleEnded}
           onLoadedMetadata={handleTimeUpdate}
         />
       )}
 
-      {/* Player bar */}
       <div style={{
         position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 60,
         backgroundColor: "rgba(6,6,6,0.97)",
@@ -107,52 +111,39 @@ export default function FloatingPlayer() {
       }}>
 
         {/* Cover + Beat Info */}
-        <div className="player-info" style={{ display: "flex", alignItems: "center", gap: "12px", minWidth: "200px", flex: "0 0 220px" }}>
-          <Link href={`/beat/${currentBeat.id}`} style={{ textDecoration: "none", flexShrink: 0 }}>
+        <div className="floating-player-info" style={{
+          display: "flex", alignItems: "center", gap: "12px",
+          flex: isMobile ? "1" : "0 0 220px",
+          minWidth: 0,
+        }}>
+          <Link href={`/beat/${beat.id}`} style={{ textDecoration: "none", flexShrink: 0 }}>
             <div style={{
               width: "44px", height: "44px", borderRadius: "4px", flexShrink: 0,
-              background: `linear-gradient(135deg, ${currentBeat.color || "#1a0a2e"}, #0a0a0a)`,
+              background: `linear-gradient(135deg, ${beat.color || "#1a0a2e"}, #0a0a0a)`,
               display: "flex", alignItems: "center", justifyContent: "center",
               overflow: "hidden",
             }}>
-              {currentBeat.cover_url ? (
-                <img src={currentBeat.cover_url} alt={currentBeat.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              {beat.cover_url ? (
+                <img src={beat.cover_url} alt={beat.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
               ) : (
-                <span style={{ color: "rgba(255,255,255,0.2)", fontSize: "0.55rem", fontFamily: "var(--font-mono)", textAlign: "center", padding: "2px" }}>
-                  {currentBeat.title.slice(0, 2).toUpperCase()}
+                <span style={{ color: "rgba(255,255,255,0.2)", fontSize: "0.55rem", fontFamily: "var(--font-mono)" }}>
+                  {beat.title.slice(0, 2).toUpperCase()}
                 </span>
               )}
             </div>
           </Link>
-          <div style={{ minWidth: 0 }}>
+          <div style={{ minWidth: 0, flex: 1 }}>
             <div style={{ color: "var(--text-primary)", fontSize: "0.82rem", fontWeight: 700, fontFamily: "var(--font-ui)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-              {currentBeat.title}
+              {beat.title}
             </div>
             <div style={{ color: "var(--text-muted)", fontSize: "0.62rem", fontFamily: "var(--font-mono)" }}>
-              {currentBeat.genre} • {currentBeat.bpm} BPM
+              {beat.genre} • {beat.bpm} BPM
             </div>
           </div>
-          <button style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: "1rem", marginLeft: "4px", flexShrink: 0 }}>♡</button>
-        </div>
+          <button style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: "1rem", flexShrink: 0 }}>♡</button>
 
-        {/* Controls + Progress */}
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: "6px" }}>
-          {/* Buttons */}
-          <div style={{ display: "flex", alignItems: "center", gap: "18px" }}>
-            <button
-              onClick={() => setIsShuffle(!isShuffle)}
-              style={{ background: "none", border: "none", cursor: "pointer", fontSize: "0.85rem", color: isShuffle ? "var(--gold)" : "var(--text-muted)", transition: "color 0.2s" }}
-              title="Shuffle"
-            >
-              ⇄
-            </button>
-            <button
-              onClick={prev}
-              style={{ background: "none", border: "none", cursor: "pointer", fontSize: "1rem", color: "var(--text-secondary)" }}
-              title="Previous"
-            >
-              ⏮
-            </button>
+          {/* Mobile-only play button */}
+          {isMobile && (
             <button
               onClick={toggle}
               style={{
@@ -160,70 +151,78 @@ export default function FloatingPlayer() {
                 backgroundColor: "var(--gold)", border: "none",
                 display: "flex", alignItems: "center", justifyContent: "center",
                 cursor: "pointer", flexShrink: 0,
-                boxShadow: "0 0 16px rgba(201,168,76,0.3)",
               }}
             >
               <span style={{ color: "#000", fontSize: "0.85rem", marginLeft: isPlaying ? "0" : "2px" }}>
                 {isPlaying ? "⏸" : "▶"}
               </span>
             </button>
-            <button
-              onClick={next}
-              style={{ background: "none", border: "none", cursor: "pointer", fontSize: "1rem", color: "var(--text-secondary)" }}
-              title="Next"
-            >
-              ⏭
-            </button>
-            <button
-              onClick={() => setIsRepeat(!isRepeat)}
-              style={{ background: "none", border: "none", cursor: "pointer", fontSize: "0.85rem", color: isRepeat ? "var(--gold)" : "var(--text-muted)", transition: "color 0.2s" }}
-              title="Repeat"
-            >
-              ↺
-            </button>
-          </div>
+          )}
+        </div>
 
-          {/* Progress bar */}
-          <div style={{ display: "flex", alignItems: "center", gap: "10px", width: "100%", maxWidth: "560px" }}>
-            <span style={{ color: "var(--text-muted)", fontSize: "0.6rem", fontFamily: "var(--font-mono)", flexShrink: 0, minWidth: "32px", textAlign: "right" }}>
-              {formatTime(progress)}
-            </span>
-            <div
-              onClick={handleProgressClick}
-              style={{ flex: 1, height: "3px", backgroundColor: "var(--bg-elevated)", borderRadius: "2px", cursor: "pointer", position: "relative" }}
-            >
-              <div style={{ width: `${progressPercent}%`, height: "100%", backgroundColor: "var(--gold)", borderRadius: "2px", transition: "width 0.1s linear" }} />
+        {/* Controls + Progress — desktop only */}
+        {!isMobile && (
+          <div className="floating-player-controls" style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: "6px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+              <button onClick={() => setIsShuffle(!isShuffle)} style={{ background: "none", border: "none", cursor: "pointer", fontSize: "0.85rem", color: isShuffle ? "var(--gold)" : "var(--text-muted)" }}>⇄</button>
+              <button onClick={prev} style={{ background: "none", border: "none", cursor: "pointer", fontSize: "1rem", color: "var(--text-secondary)" }}>⏮</button>
+              <button
+                onClick={toggle}
+                style={{
+                  width: "40px", height: "40px", borderRadius: "50%",
+                  backgroundColor: "var(--gold)", border: "none",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  cursor: "pointer", flexShrink: 0,
+                  boxShadow: "0 0 16px rgba(201,168,76,0.3)",
+                }}
+              >
+                <span style={{ color: "#000", fontSize: "0.85rem", marginLeft: isPlaying ? "0" : "2px" }}>
+                  {isPlaying ? "⏸" : "▶"}
+                </span>
+              </button>
+              <button onClick={next} style={{ background: "none", border: "none", cursor: "pointer", fontSize: "1rem", color: "var(--text-secondary)" }}>⏭</button>
+              <button onClick={() => setIsRepeat(!isRepeat)} style={{ background: "none", border: "none", cursor: "pointer", fontSize: "0.85rem", color: isRepeat ? "var(--gold)" : "var(--text-muted)" }}>↺</button>
             </div>
-            <span style={{ color: "var(--text-muted)", fontSize: "0.6rem", fontFamily: "var(--font-mono)", flexShrink: 0, minWidth: "32px" }}>
-              {formatTime(duration)}
-            </span>
-          </div>
-        </div>
 
-        {/* Volume + License */}
-        <div className="player-volume" style={{ display: "flex", alignItems: "center", gap: "12px", flex: "0 0 200px", justifyContent: "flex-end" }}>
-          <span style={{ color: "var(--text-muted)", fontSize: "0.9rem", cursor: "pointer" }}>🔊</span>
-          <div
-            onClick={(e) => {
-              const rect = e.currentTarget.getBoundingClientRect()
-              const ratio = (e.clientX - rect.left) / rect.width
-              setVolume(Math.max(0, Math.min(1, ratio)))
-            }}
-            style={{ width: "80px", height: "3px", backgroundColor: "var(--bg-elevated)", borderRadius: "2px", cursor: "pointer", position: "relative" }}
-          >
-            <div style={{ width: `${volume * 100}%`, height: "100%", backgroundColor: "var(--text-muted)", borderRadius: "2px" }} />
+            <div style={{ display: "flex", alignItems: "center", gap: "10px", width: "100%", maxWidth: "560px" }}>
+              <span style={{ color: "var(--text-muted)", fontSize: "0.6rem", fontFamily: "var(--font-mono)", flexShrink: 0, minWidth: "32px", textAlign: "right" }}>
+                {formatTime(progress)}
+              </span>
+              <div onClick={handleProgressClick} style={{ flex: 1, height: "3px", backgroundColor: "var(--bg-elevated)", borderRadius: "2px", cursor: "pointer" }}>
+                <div style={{ width: `${progressPercent}%`, height: "100%", backgroundColor: "var(--gold)", borderRadius: "2px", transition: "width 0.1s linear" }} />
+              </div>
+              <span style={{ color: "var(--text-muted)", fontSize: "0.6rem", fontFamily: "var(--font-mono)", flexShrink: 0, minWidth: "32px" }}>
+                {formatTime(duration)}
+              </span>
+            </div>
           </div>
-          <Link href={`/beat/${currentBeat.id}`} style={{
-            backgroundColor: "var(--gold)", border: "none",
-            borderRadius: "3px", padding: "8px 14px",
-            color: "#000", fontSize: "0.62rem", fontWeight: 700,
-            fontFamily: "var(--font-ui)", letterSpacing: "0.1em",
-            textTransform: "uppercase", cursor: "pointer",
-            textDecoration: "none",
-          }}>
-            License
-          </Link>
-        </div>
+        )}
+
+        {/* Volume + License — desktop only */}
+        {!isMobile && (
+          <div className="floating-player-volume" style={{ display: "flex", alignItems: "center", gap: "12px", flex: "0 0 200px", justifyContent: "flex-end" }}>
+            <span style={{ color: "var(--text-muted)", fontSize: "0.9rem" }}>🔊</span>
+            <div
+              onClick={(e) => {
+                const rect = e.currentTarget.getBoundingClientRect()
+                const ratio = (e.clientX - rect.left) / rect.width
+                setVolume(Math.max(0, Math.min(1, ratio)))
+              }}
+              style={{ width: "80px", height: "3px", backgroundColor: "var(--bg-elevated)", borderRadius: "2px", cursor: "pointer" }}
+            >
+              <div style={{ width: `${volume * 100}%`, height: "100%", backgroundColor: "var(--text-muted)", borderRadius: "2px" }} />
+            </div>
+            <Link href={`/beat/${beat.id}`} style={{
+              backgroundColor: "var(--gold)", border: "none",
+              borderRadius: "3px", padding: "8px 14px",
+              color: "#000", fontSize: "0.62rem", fontWeight: 700,
+              fontFamily: "var(--font-ui)", letterSpacing: "0.1em",
+              textTransform: "uppercase", textDecoration: "none",
+            }}>
+              License
+            </Link>
+          </div>
+        )}
 
       </div>
     </>
