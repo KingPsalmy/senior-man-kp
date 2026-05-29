@@ -324,7 +324,7 @@ export default function StorePage() {
             <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "24px", padding: "14px", backgroundColor: "var(--bg-elevated)", borderRadius: "8px" }}>
               <div style={{
                 width: "44px", height: "44px", borderRadius: "4px", flexShrink: 0,
-                background: beat.cover_url ? "none" : `linear-gradient(135deg, ${genreColor(shareBeat.genre)}, #0a0a0a)`,
+                background: shareBeat.cover_url ? "none" : `linear-gradient(135deg, ${genreColor(shareBeat.genre)}, #0a0a0a)`,
                 overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center",
               }}>
                 {shareBeat.cover_url

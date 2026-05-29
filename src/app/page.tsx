@@ -4,13 +4,7 @@ import { useState, useEffect } from "react"
 import HeroParticles from "@/components/ui/HeroParticles"
 import Link from "next/link"
 import Navbar from "@/components/layout/Navbar"
-
-const featuredBeats = [
-  { id: 1, title: "Midnight Drive", genre: "Afrobeat", bpm: 98, key: "F# Minor", price: 30000, color: "#1a0a2e" },
-  { id: 2, title: "Higher", genre: "Afro Fusion", bpm: 104, key: "G Minor", price: 30000, color: "#0a1a2e" },
-  { id: 3, title: "No Limit", genre: "Trap", bpm: 120, key: "C Minor", price: 30000, color: "#2e0a0a" },
-  { id: 4, title: "Timeless", genre: "R&B", bpm: 90, key: "A Minor", price: 30000, color: "#0a2e1a" },
-]
+import { supabase } from "@/lib/supabase"
 
 const learnMoreItems = [
   {
@@ -36,11 +30,33 @@ const learnMoreItems = [
   },
 ]
 
+const genreColor: Record<string, string> = {
+  "Afrobeat": "#1a0a2e",
+  "Afro Fusion": "#0a1a2e",
+  "Trap": "#2e0a0a",
+  "R&B": "#0a2e1a",
+  "Amapiano": "#2e1a0a",
+  "Drill": "#1a1a2e",
+}
+
 export default function HomePage() {
   const [heroLeft, setHeroLeft] = useState(1)
-  const [shareBeat, setShareBeat] = useState<typeof featuredBeats[0] | null>(null)
+  const [featuredBeats, setFeaturedBeats] = useState<any[]>([])
+  const [shareBeat, setShareBeat] = useState<any | null>(null)
 
   useEffect(() => {
+    async function fetchFeatured() {
+      const { data } = await supabase
+        .from("beats")
+        .select("*")
+        .eq("is_published", true)
+        .eq("is_featured", true)
+        .order("created_at", { ascending: false })
+        .limit(4)
+      if (data) setFeaturedBeats(data)
+    }
+    fetchFeatured()
+
     const interval = setInterval(() => {
       setHeroLeft((prev) => (prev === 1 ? 2 : prev === 2 ? 3 : 1))
     }, 25000)
@@ -133,8 +149,8 @@ export default function HomePage() {
           {/* Quick filters */}
           <div className="hero-filters" style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginBottom: "28px" }}>
             {[
-              { type: "select", placeholder: "Mood / Feel", options: ["Chill", "Dark", "Energetic", "Emotional", "Melodic", "Happy", "Ambient"] },
-              { type: "select", placeholder: "Genre", options: ["Afrobeat", "Afro Fusion", "Trap", "R&B", "Amapiano", "Drill"] },
+              { placeholder: "Mood / Feel", options: ["Chill", "Dark", "Energetic", "Emotional", "Melodic", "Happy", "Ambient"] },
+              { placeholder: "Genre", options: ["Afrobeat", "Afro Fusion", "Trap", "R&B", "Amapiano", "Drill"] },
             ].map((filter) => (
               <select key={filter.placeholder} style={{
                 padding: "10px 14px",
@@ -238,12 +254,21 @@ export default function HomePage() {
                 borderRadius: "6px", overflow: "hidden",
               }}>
                 {/* Cover */}
-                <div style={{ position: "relative", aspectRatio: "1", background: `linear-gradient(135deg, ${beat.color} 0%, #0a0a0a 100%)` }}>
-                  <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <span style={{ color: "rgba(255,255,255,0.06)", fontSize: "1.4rem", fontWeight: 900, fontFamily: "var(--font-ui)", textAlign: "center", padding: "0 12px" }}>
-                      {beat.title.toUpperCase()}
-                    </span>
-                  </div>
+                <div style={{
+                  position: "relative", aspectRatio: "1",
+                  background: beat.cover_url ? "none" : `linear-gradient(135deg, ${genreColor[beat.genre] ?? "#111"} 0%, #0a0a0a 100%)`,
+                  backgroundColor: "#0a0a0a",
+                }}>
+                  {beat.cover_url ? (
+                    <img src={beat.cover_url} alt={beat.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                  ) : (
+                    <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      <span style={{ color: "rgba(255,255,255,0.06)", fontSize: "1.4rem", fontWeight: 900, fontFamily: "var(--font-ui)", textAlign: "center", padding: "0 12px" }}>
+                        {beat.title.toUpperCase()}
+                      </span>
+                    </div>
+                  )}
+
                   {/* Share trigger */}
                   <div
                     onClick={() => setShareBeat(beat)}
@@ -252,6 +277,7 @@ export default function HomePage() {
                       color: "var(--text-muted)", fontSize: "1rem",
                       zIndex: 2, cursor: "pointer",
                     }}>···</div>
+
                   <button style={{
                     position: "absolute", bottom: "12px", right: "12px",
                     width: "36px", height: "36px", borderRadius: "50%",
@@ -275,8 +301,8 @@ export default function HomePage() {
                     <span style={{ color: "var(--text-muted)", fontSize: "0.65rem", fontFamily: "var(--font-mono)" }}>{beat.key}</span>
                   </div>
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                    <Link href={`/beat/${beat.id}`} style={{ color: "var(--text-primary)", fontSize: "0.82rem", fontWeight: 700, fontFamily: "var(--font-ui)", textDecoration: "none" }}>
-                      from ₦{beat.price.toLocaleString()}
+                    <Link href={`/beat/${beat.slug}`} style={{ color: "var(--text-primary)", fontSize: "0.82rem", fontWeight: 700, fontFamily: "var(--font-ui)", textDecoration: "none" }}>
+                      from ₦{beat.basic_price.toLocaleString()}
                     </Link>
                     <button style={{ width: "30px", height: "30px", borderRadius: "50%", backgroundColor: "var(--gold)", border: "none", cursor: "pointer", fontSize: "0.7rem" }}>
                       🛒
@@ -359,12 +385,13 @@ export default function HomePage() {
             <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "24px", padding: "14px", backgroundColor: "var(--bg-elevated)", borderRadius: "8px" }}>
               <div style={{
                 width: "44px", height: "44px", borderRadius: "4px", flexShrink: 0,
-                background: `linear-gradient(135deg, ${shareBeat.color}, #0a0a0a)`,
-                display: "flex", alignItems: "center", justifyContent: "center",
+                background: shareBeat.cover_url ? "none" : `linear-gradient(135deg, ${genreColor[shareBeat.genre] ?? "#111"}, #0a0a0a)`,
+                overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center",
               }}>
-                <span style={{ color: "rgba(255,255,255,0.3)", fontSize: "0.55rem", fontFamily: "var(--font-mono)" }}>
-                  {shareBeat.title.slice(0, 2).toUpperCase()}
-                </span>
+                {shareBeat.cover_url
+                  ? <img src={shareBeat.cover_url} alt={shareBeat.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                  : <span style={{ color: "rgba(255,255,255,0.3)", fontSize: "0.55rem", fontFamily: "var(--font-mono)" }}>{shareBeat.title.slice(0, 2).toUpperCase()}</span>
+                }
               </div>
               <div>
                 <div style={{ color: "var(--text-primary)", fontSize: "0.85rem", fontWeight: 700, fontFamily: "var(--font-ui)" }}>{shareBeat.title}</div>
@@ -375,7 +402,7 @@ export default function HomePage() {
             <div style={{ display: "flex", gap: "8px", marginBottom: "20px" }}>
               <input
                 readOnly
-                value={`${typeof window !== "undefined" ? window.location.origin : ""}/beat/${shareBeat.id}`}
+                value={`${typeof window !== "undefined" ? window.location.origin : ""}/beat/${shareBeat.slug}`}
                 style={{
                   flex: 1, padding: "10px 12px",
                   backgroundColor: "var(--bg-elevated)",
@@ -385,7 +412,7 @@ export default function HomePage() {
                 }}
               />
               <button
-                onClick={() => navigator.clipboard.writeText(`${window.location.origin}/beat/${shareBeat.id}`)}
+                onClick={() => navigator.clipboard.writeText(`${window.location.origin}/beat/${shareBeat.slug}`)}
                 style={{
                   padding: "10px 16px",
                   background: "linear-gradient(135deg, #C9A84C, #F5D98B)",
@@ -399,8 +426,8 @@ export default function HomePage() {
 
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
               {[
-                { label: "Twitter / X", icon: "✕", url: `https://x.com/intent/tweet?text=Check out "${shareBeat.title}" by Senior Man KP&url=${typeof window !== "undefined" ? window.location.origin : ""}/beat/${shareBeat.id}` },
-                { label: "WhatsApp", icon: "💬", url: `https://wa.me/?text=Check out "${shareBeat.title}" by Senior Man KP — ${typeof window !== "undefined" ? window.location.origin : ""}/beat/${shareBeat.id}` },
+                { label: "Twitter / X", icon: "✕", url: `https://x.com/intent/tweet?text=Check out "${shareBeat.title}" by Senior Man KP&url=${typeof window !== "undefined" ? window.location.origin : ""}/beat/${shareBeat.slug}` },
+                { label: "WhatsApp", icon: "💬", url: `https://wa.me/?text=Check out "${shareBeat.title}" by Senior Man KP — ${typeof window !== "undefined" ? window.location.origin : ""}/beat/${shareBeat.slug}` },
                 { label: "Instagram", icon: "◉", url: `https://instagram.com` },
                 { label: "TikTok", icon: "♪", url: `https://tiktok.com` },
               ].map((s) => (

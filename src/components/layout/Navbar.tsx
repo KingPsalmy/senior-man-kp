@@ -53,7 +53,7 @@ export default function Navbar() {
           <img
             src="/logo-white.png"
             alt="Senior Man KP"
-            style={{ height: "36px", width: "auto", objectFit: "contain" }}
+            style={{ height: "48px", width: "auto", objectFit: "contain" }}
           />
         </Link>
           {/* Desktop Nav */}
