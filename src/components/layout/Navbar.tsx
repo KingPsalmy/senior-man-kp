@@ -48,15 +48,14 @@ export default function Navbar() {
             margin: "0 auto",
           }}
         >
-          {/* Logo */}
-          <Link href="/" style={{ textDecoration: "none", flexShrink: 0 }}>
-            <img
-              src="/logo-white.png"
-              alt="Senior Man KP"
-              style={{ height: "90px", width: "auto", objectFit: "contain", marginTop: "4px" }}
-            />
-          </Link>
-
+         {/* Logo */}
+        <Link href="/" style={{ textDecoration: "none", flexShrink: 0 }}>
+          <img
+            src="/logo-white.png"
+            alt="Senior Man KP"
+            style={{ height: "36px", width: "auto", objectFit: "contain" }}
+          />
+        </Link>
           {/* Desktop Nav */}
           <nav
             className="desktop-nav"
