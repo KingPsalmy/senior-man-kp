@@ -50,6 +50,7 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
+  padding-bottom: 72px;
 }
 
 ::-webkit-scrollbar { width: 4px; }
@@ -128,7 +129,6 @@ body {
   font-size: 0.7rem;
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
-
 .btn-outline-gold:hover {
   background: var(--gold-glow);
   border-color: var(--border-gold-bright);
@@ -167,7 +167,8 @@ body {
   animation: pulse-gold 1.5s ease-in-out infinite;
 }
 
-/* Responsive */
+/* ── Responsive ── */
+
 @media (max-width: 768px) {
   .desktop-nav {
     display: none !important;
@@ -205,7 +206,7 @@ body {
   }
 }
 
-/* Store page responsive */
+/* Store page mobile */
 @media (max-width: 768px) {
   .beat-grid {
     grid-template-columns: repeat(2, 1fr) !important;
@@ -230,14 +231,22 @@ body {
   .store-grid-wrap {
     padding: 20px 20px 0 !important;
   }
-  .floating-player-volume {
-    display: none !important;
-  }
 }
 
+/* Licensing page mobile */
 @media (max-width: 768px) {
   .license-grid {
     grid-template-columns: 1fr !important;
+    gap: 32px !important;
+  }
+  .license-hero {
+    padding: 100px 20px 48px !important;
+  }
+  .license-section {
+    padding: 48px 20px !important;
+  }
+  .license-faq {
+    padding: 48px 20px !important;
   }
   .beat-detail-top {
     flex-direction: column !important;
@@ -328,51 +337,42 @@ body {
     grid-template-columns: 1fr !important;
     gap: 16px !important;
   }
- .footer-grid {
-  grid-template-columns: 1fr 1fr !important;
-  gap: 32px !important;
-}
-.footer-grid > div:nth-child(1) {
-  grid-column: 1 / -1 !important;
-}
-.footer-grid > div:nth-child(2) {
-  grid-column: 1 !important;
-}
-.footer-grid > div:nth-child(3) {
-  grid-column: 2 !important;
-}
-.footer-grid > div:nth-child(4) {
-  grid-column: 1 / -1 !important;
-}
-footer {
-  padding: 40px 20px 32px !important;
-}
-footer > div:last-child {
-  flex-direction: column !important;
-  align-items: flex-start !important;
-  gap: 8px !important;
-}
-}
-
-/* Player clearance */
-body {
-  padding-bottom: 72px;
+  .footer-grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 32px !important;
+  }
+  .footer-grid > div:nth-child(1) {
+    grid-column: 1 / -1 !important;
+  }
+  .footer-grid > div:nth-child(2) {
+    grid-column: 1 !important;
+  }
+  .footer-grid > div:nth-child(3) {
+    grid-column: 2 !important;
+  }
+  .footer-grid > div:nth-child(4) {
+    grid-column: 1 / -1 !important;
+  }
+  footer {
+    padding: 40px 20px 32px !important;
+  }
+  footer > div:last-child {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 8px !important;
+  }
 }
 
 /* Floating player mobile */
 @media (max-width: 768px) {
   .floating-player-info {
     min-width: unset !important;
-  }
-  .floating-player-info {
-    min-width: unset !important;
     flex: 1 !important;
   }
- .floating-player-controls {
+  .floating-player-controls {
     display: none !important;
   }
   .floating-player-volume {
     display: none !important;
   }
 }
-
