@@ -286,23 +286,30 @@ export default function LicensingPage() {
                   Read License
                 </button>
 
-                {/* CTA */}
-                {item.type === "exclusive" ? (
-                  <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-                    
-                      href="mailto:kingpsalmyofficial@gmail.com?subject=Exclusive License Inquiry"
-                      style={{
-                        display: "block", width: "100%", padding: "12px",
-                        border: "1px solid rgba(201,168,76,0.3)", borderRadius: "4px",
-                        color: "var(--gold)", textDecoration: "none", textAlign: "center",
-                        fontSize: "0.72rem", fontWeight: 700, fontFamily: "var(--font-ui)",
-                        letterSpacing: "0.1em", textTransform: "uppercase",
-                      }}
-                    >
-                      Contact Producer
-                    </a>
-                  </div>
-                ) : (
+               {item.type === "exclusive" ? (
+                    <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                        <a
+                        href="mailto:kingpsalmyofficial@gmail.com?subject=Exclusive License Inquiry"
+                        style={{
+                            display: "block",
+                            width: "100%",
+                            padding: "12px",
+                            border: "1px solid rgba(201,168,76,0.3)",
+                            borderRadius: "4px",
+                            color: "var(--gold)",
+                            textDecoration: "none",
+                            textAlign: "center",
+                            fontSize: "0.72rem",
+                            fontWeight: 700,
+                            fontFamily: "var(--font-ui)",
+                            letterSpacing: "0.1em",
+                            textTransform: "uppercase",
+                        }}
+                        >
+                        Contact Producer
+                        </a>
+                    </div>
+                    ) : (
                   <Link
                     href="/store"
                     style={{
