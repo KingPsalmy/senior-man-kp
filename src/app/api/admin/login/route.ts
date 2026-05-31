@@ -1,9 +1,4 @@
 import { NextRequest, NextResponse } from "next/server"
-import { randomBytes } from "crypto"
-
-// In-memory store for the session token
-// Simple but effective for a single-admin setup
-let currentSessionToken: string | null = null
 
 export async function POST(req: NextRequest) {
   const { password } = await req.json()
@@ -12,9 +7,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid password" }, { status: 401 })
   }
 
-  // Generate a random token — never store the password itself
-  const sessionToken = randomBytes(32).toString("hex")
-  currentSessionToken = sessionToken
+  const tokenBytes = new Uint8Array(32)
+  crypto.getRandomValues(tokenBytes)
+  const sessionToken = Array.from(tokenBytes)
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("")
 
   const res = NextResponse.json({ success: true })
   res.cookies.set("admin_token", sessionToken, {
@@ -27,6 +24,3 @@ export async function POST(req: NextRequest) {
 
   return res
 }
-
-// Export so middleware can access it
-export { currentSessionToken }

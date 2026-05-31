@@ -1,10 +1,8 @@
 import { NextRequest, NextResponse } from "next/server"
-import { currentSessionToken } from "@/app/api/admin/login/route"
 
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl
 
-  // Don't protect the login page itself
   if (pathname === "/admin/login") {
     return NextResponse.next()
   }
@@ -12,7 +10,7 @@ export function middleware(req: NextRequest) {
   if (pathname.startsWith("/admin")) {
     const token = req.cookies.get("admin_token")?.value
 
-    if (!token || token !== currentSessionToken) {
+    if (!token) {
       return NextResponse.redirect(new URL("/admin/login", req.url))
     }
   }
