@@ -20,7 +20,6 @@ export default function Footer() {
     { label: "Terms of Use", href: "/terms", external: false },
     { label: "Privacy Policy", href: "/privacy", external: false },
     { label: "YouTube Terms of Service", href: "https://www.youtube.com/t/terms", external: true },
-    { label: "Cookie Preferences", href: "/cookies", external: false },
   ]
 
   return (

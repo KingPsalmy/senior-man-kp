@@ -4,33 +4,18 @@ import { useEffect, useRef, useState } from "react"
 import { usePlayerStore } from "@/store/playerStore"
 import Link from "next/link"
 
-const mockBeats = [
-  { id: 1, title: "Midnight Drive", genre: "Afrobeat", bpm: 98, color: "#1a0a2e", preview_url: null, cover_url: null },
-  { id: 2, title: "Higher", genre: "Afro Fusion", bpm: 104, color: "#0a1a2e", preview_url: null, cover_url: null },
-  { id: 3, title: "No Limit", genre: "Trap", bpm: 120, color: "#2e0a0a", preview_url: null, cover_url: null },
-  { id: 4, title: "Timeless", genre: "R&B", bpm: 90, color: "#0a2e1a", preview_url: null, cover_url: null },
-  { id: 5, title: "Sauce", genre: "Trap", bpm: 140, color: "#2e1a0a", preview_url: null, cover_url: null },
-  { id: 6, title: "Paradise", genre: "Afro Fusion", bpm: 96, color: "#0a2e2e", preview_url: null, cover_url: null },
-]
-
 export default function FloatingPlayer() {
   const {
     currentBeat, isPlaying, volume, progress, duration,
-    play, toggle, next, prev, setVolume, setProgress, setDuration, setQueue,
+    toggle, next, prev, setVolume, setProgress, setDuration,
   } = usePlayerStore()
 
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const [isShuffle, setIsShuffle] = useState(true)
   const [isRepeat, setIsRepeat] = useState(false)
-  const [isMobile, setIsMobile] = useState(true) // 
-
+  const [isMobile, setIsMobile] = useState(true)
 
   useEffect(() => {
-    const shuffled = [...mockBeats].sort(() => Math.random() - 0.5)
-    setQueue(shuffled)
-    play(shuffled[0])
-   
-
     const check = () => setIsMobile(window.innerWidth <= 768)
     check()
     window.addEventListener("resize", check)
@@ -82,8 +67,9 @@ export default function FloatingPlayer() {
     return `${m}:${sec.toString().padStart(2, "0")}`
   }
 
-  // Always use a beat — fallback to first mock beat before store hydrates
-  const beat = currentBeat ?? mockBeats[0]
+  if (!currentBeat) return null
+
+  const beat = currentBeat
   const progressPercent = duration ? (progress / duration) * 100 : 0
 
   return (
@@ -203,16 +189,26 @@ export default function FloatingPlayer() {
           <div className="floating-player-volume" style={{ display: "flex", alignItems: "center", gap: "12px", flex: "0 0 200px", justifyContent: "flex-end" }}>
             <span style={{ color: "var(--text-muted)", fontSize: "0.9rem" }}>🔊</span>
             <div
-              onClick={(e) => {
+              style={{ width: "80px", height: "3px", backgroundColor: "var(--bg-elevated)", borderRadius: "2px", cursor: "pointer", position: "relative" }}
+              onMouseDown={(e) => {
                 const rect = e.currentTarget.getBoundingClientRect()
-                const ratio = (e.clientX - rect.left) / rect.width
-                setVolume(Math.max(0, Math.min(1, ratio)))
+                const updateVol = (clientX: number) => {
+                  const ratio = (clientX - rect.left) / rect.width
+                  setVolume(Math.max(0, Math.min(1, ratio)))
+                }
+                updateVol(e.clientX)
+                const onMove = (me: MouseEvent) => updateVol(me.clientX)
+                const onUp = () => {
+                  window.removeEventListener("mousemove", onMove)
+                  window.removeEventListener("mouseup", onUp)
+                }
+                window.addEventListener("mousemove", onMove)
+                window.addEventListener("mouseup", onUp)
               }}
-              style={{ width: "80px", height: "3px", backgroundColor: "var(--bg-elevated)", borderRadius: "2px", cursor: "pointer" }}
             >
               <div style={{ width: `${volume * 100}%`, height: "100%", backgroundColor: "var(--text-muted)", borderRadius: "2px" }} />
             </div>
-            <Link href={`/beat/${beat.id}`} style={{
+            <Link href={`/beat/${ beat.id}`} style={{
               backgroundColor: "var(--gold)", border: "none",
               borderRadius: "3px", padding: "8px 14px",
               color: "#000", fontSize: "0.62rem", fontWeight: 700,

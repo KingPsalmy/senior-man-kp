@@ -41,22 +41,23 @@ export default function StorePage() {
   }, [sort])
 
   async function fetchBeats() {
-    setLoading(true)
-    let query = supabase
-      .from("beats")
-      .select("*")
-      .eq("is_published", true)
+  setLoading(true)
+  let query = supabase
+    .from("beats")
+    .select("*")
+    .eq("is_published", true)
 
-    if (sort === "newest") query = query.order("created_at", { ascending: false })
-    if (sort === "oldest") query = query.order("created_at", { ascending: true })
-    if (sort === "most_played") query = query.order("play_count", { ascending: false })
-    if (sort === "price_low") query = query.order("basic_price", { ascending: true })
-    if (sort === "price_high") query = query.order("basic_price", { ascending: false })
+  if (sort === "newest") query = query.order("created_at", { ascending: false })
+  if (sort === "oldest") query = query.order("created_at", { ascending: true })
+  if (sort === "most_played") query = query.order("play_count", { ascending: false })
+  if (sort === "price_low") query = query.order("basic_price", { ascending: true })
+  if (sort === "price_high") query = query.order("basic_price", { ascending: false })
 
-    const { data, error } = await query
-    if (!error && data) setBeats(data)
-    setLoading(false)
-  }
+  const { data, error } = await query
+  // Show empty state even if error
+  setBeats(data ?? [])
+  setLoading(false)
+}
 
   const filtered = beats.filter((b) => {
     const matchSearch = b.title.toLowerCase().includes(search.toLowerCase())

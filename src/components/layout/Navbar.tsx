@@ -48,19 +48,17 @@ export default function Navbar() {
             margin: "0 auto",
           }}
         >
-         {/* Logo */}
-        <Link href="/" style={{ textDecoration: "none", flexShrink: 0 }}>
-          <img
-            src="/logo-white.png"
-            alt="Senior Man KP"
-            style={{ height: "48px", width: "auto", objectFit: "contain" }}
-          />
-        </Link>
+          {/* Logo */}
+          <Link href="/" style={{ textDecoration: "none", flexShrink: 0 }}>
+            <img
+              src="/logo-white.png"
+              alt="Senior Man KP"
+              style={{ height: "48px", width: "auto", objectFit: "contain" }}
+            />
+          </Link>
+
           {/* Desktop Nav */}
-          <nav
-            className="desktop-nav"
-            style={{ display: "flex", gap: "32px", alignItems: "center" }}
-          >
+          <nav className="desktop-nav" style={{ display: "flex", gap: "32px", alignItems: "center" }}>
             {links.map((link) => (
               <Link
                 key={link.href}
@@ -82,11 +80,9 @@ export default function Navbar() {
           </nav>
 
           {/* Desktop Cart */}
-          <div
-            className="desktop-nav"
-            style={{ display: "flex", alignItems: "center", gap: "16px" }}
-          >
-            <button
+          <div className="desktop-nav" style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+            <Link
+              href="/cart"
               style={{
                 display: "flex", alignItems: "center", gap: "8px",
                 background: "linear-gradient(135deg, #C9A84C, #F5D98B)",
@@ -95,6 +91,7 @@ export default function Navbar() {
                 fontFamily: "var(--font-ui)", fontWeight: 700,
                 fontSize: "0.68rem", letterSpacing: "0.1em",
                 textTransform: "uppercase", color: "#000",
+                textDecoration: "none",
               }}
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -103,10 +100,10 @@ export default function Navbar() {
                 <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" />
               </svg>
               0 Items
-            </button>
+            </Link>
           </div>
 
-          {/* Mobile Hamburger → X */}
+          {/* Mobile Hamburger */}
           <button
             className="mobile-menu-btn"
             onClick={() => setMenuOpen(!menuOpen)}
@@ -122,27 +119,21 @@ export default function Navbar() {
             }}
           >
             <span style={{
-              display: "block",
-              width: "22px", height: "2px",
+              display: "block", width: "22px", height: "2px",
               backgroundColor: "var(--text-primary)",
-              position: "absolute",
-              transition: "all 0.25s ease",
+              position: "absolute", transition: "all 0.25s ease",
               transform: menuOpen ? "rotate(45deg)" : "translateY(-5px)",
             }} />
             <span style={{
-              display: "block",
-              width: "22px", height: "2px",
+              display: "block", width: "22px", height: "2px",
               backgroundColor: "var(--text-primary)",
-              position: "absolute",
-              transition: "all 0.25s ease",
+              position: "absolute", transition: "all 0.25s ease",
               opacity: menuOpen ? 0 : 1,
             }} />
             <span style={{
-              display: "block",
-              width: "22px", height: "2px",
+              display: "block", width: "22px", height: "2px",
               backgroundColor: "var(--text-primary)",
-              position: "absolute",
-              transition: "all 0.25s ease",
+              position: "absolute", transition: "all 0.25s ease",
               transform: menuOpen ? "rotate(-45deg)" : "translateY(5px)",
             }} />
           </button>
@@ -181,15 +172,17 @@ export default function Navbar() {
             </Link>
           ))}
 
-          <button
+          <Link
+            href="/cart"
+            onClick={() => setMenuOpen(false)}
             style={{
               display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",
               background: "linear-gradient(135deg, #C9A84C, #F5D98B)",
-              border: "none", borderRadius: "3px",
-              padding: "12px 20px", cursor: "pointer",
+              borderRadius: "3px", padding: "12px 20px",
               fontFamily: "var(--font-ui)", fontWeight: 700,
               fontSize: "0.75rem", letterSpacing: "0.1em",
-              textTransform: "uppercase", color: "#000", width: "100%",
+              textTransform: "uppercase", color: "#000",
+              textDecoration: "none", width: "100%",
             }}
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -198,7 +191,7 @@ export default function Navbar() {
               <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" />
             </svg>
             0 Items
-          </button>
+          </Link>
         </div>
       )}
     </>
