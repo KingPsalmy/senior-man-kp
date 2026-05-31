@@ -20,6 +20,14 @@ export const metadata: Metadata = {
     description: "Premium beats by Senior Man KP",
     type: "website",
   },
+  icons: {
+    icon: [
+      { url: "/favicon.png", sizes: "32x32", type: "image/png" },
+      { url: "/favicon.png", sizes: "64x64", type: "image/png" },
+      { url: "/favicon.png", sizes: "192x192", type: "image/png" },
+    ],
+    apple: "/favicon.png",
+  },
 }
 
 export default function RootLayout({
@@ -40,8 +48,6 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,700;1,800;1,900&family=Barlow+Condensed:wght@500;600;700;800;900&family=JetBrains+Mono:wght@300;400;500&display=swap"
           rel="stylesheet"
         />
-        <link rel="icon" type="image/png" href="/favicon.png" sizes="32x32" />
-        <link rel="apple-touch-icon" href="/favicon.png" />
         <script async src="https://js.paystack.co/v1/inline.js" />
       </head>
       <body>

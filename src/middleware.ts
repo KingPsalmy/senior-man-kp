@@ -1,14 +1,18 @@
 import { NextRequest, NextResponse } from "next/server"
-
-const ADMIN_PASSWORD = process.env.ADMIN_SECRET_KEY!
+import { currentSessionToken } from "@/app/api/admin/login/route"
 
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl
 
-  // Protect all /admin routes
+  // Don't protect the login page itself
+  if (pathname === "/admin/login") {
+    return NextResponse.next()
+  }
+
   if (pathname.startsWith("/admin")) {
     const token = req.cookies.get("admin_token")?.value
-    if (token !== ADMIN_PASSWORD) {
+
+    if (!token || token !== currentSessionToken) {
       return NextResponse.redirect(new URL("/admin/login", req.url))
     }
   }
