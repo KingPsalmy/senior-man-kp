@@ -172,6 +172,27 @@ export default function SuccessPage() {
                       </div>
                     </>
                   )}
+
+                                {purchase.license_type === "unlimited" && (
+                <>
+                  <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                    <span style={{ color: "var(--gold)" }}>✓</span>
+                    <span style={{ color: "var(--text-secondary)", fontSize: "0.8rem", fontFamily: "var(--font-ui)" }}>High-quality WAV + Full Stems</span>
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                    <span style={{ color: "var(--gold)" }}>✓</span>
+                    <span style={{ color: "var(--text-secondary)", fontSize: "0.8rem", fontFamily: "var(--font-ui)" }}>Non-exclusive license — 10 years</span>
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                    <span style={{ color: "var(--gold)" }}>✓</span>
+                    <span style={{ color: "var(--text-secondary)", fontSize: "0.8rem", fontFamily: "var(--font-ui)" }}>Radio, TV and commercial advertising</span>
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                    <span style={{ color: "var(--gold)" }}>✓</span>
+                    <span style={{ color: "var(--text-secondary)", fontSize: "0.8rem", fontFamily: "var(--font-ui)" }}>Physical distribution rights</span>
+                  </div>
+                </>
+              )}
                   {purchase.license_type === "exclusive" && (
                     <>
                       <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
