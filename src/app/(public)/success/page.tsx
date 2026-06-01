@@ -8,6 +8,7 @@ import Navbar from "@/components/layout/Navbar"
 export default function SuccessPage() {
   const searchParams = useSearchParams()
   const reference = searchParams.get("reference")
+  const email = searchParams.get("email") ?? ""
   const [status, setStatus] = useState<"loading" | "success" | "error">("loading")
   const [purchase, setPurchase] = useState<any>(null)
 
@@ -19,7 +20,11 @@ export default function SuccessPage() {
 
     async function verifyPayment() {
       try {
-        const res = await fetch(`/api/verify-payment?reference=${reference}`)
+        const res = await fetch("/api/verify-payment", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ reference, customer_email: email }),
+        })
         const data = await res.json()
         if (data.success) {
           setPurchase(data.purchase)
@@ -33,7 +38,7 @@ export default function SuccessPage() {
     }
 
     verifyPayment()
-  }, [reference])
+  }, [reference, email])
 
   return (
     <main style={{ backgroundColor: "var(--bg-void)", minHeight: "100vh" }}>
@@ -66,7 +71,6 @@ export default function SuccessPage() {
 
         {status === "success" && (
           <>
-            {/* Success icon */}
             <div style={{
               width: "80px", height: "80px", borderRadius: "50%",
               backgroundColor: "rgba(74,222,128,0.1)",
@@ -85,7 +89,6 @@ export default function SuccessPage() {
               Thank you for your purchase. Your download link has been sent to your email.
             </p>
 
-            {/* Order Summary */}
             {purchase && (
               <div style={{
                 width: "100%",
@@ -127,7 +130,6 @@ export default function SuccessPage() {
               </div>
             )}
 
-            {/* What you get */}
             {purchase && (
               <div style={{
                 width: "100%",
@@ -146,11 +148,11 @@ export default function SuccessPage() {
                     <>
                       <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                         <span style={{ color: "var(--gold)" }}>✓</span>
-                        <span style={{ color: "var(--text-secondary)", fontSize: "0.8rem", fontFamily: "var(--font-ui)" }}>Waveform (MP3)</span>
+                        <span style={{ color: "var(--text-secondary)", fontSize: "0.8rem", fontFamily: "var(--font-ui)" }}>High-quality WAV file</span>
                       </div>
                       <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                         <span style={{ color: "var(--gold)" }}>✓</span>
-                        <span style={{ color: "var(--text-secondary)", fontSize: "0.8rem", fontFamily: "var(--font-ui)" }}>Non-exclusive license</span>
+                        <span style={{ color: "var(--text-secondary)", fontSize: "0.8rem", fontFamily: "var(--font-ui)" }}>Non-exclusive license — 10 years</span>
                       </div>
                     </>
                   )}
@@ -158,11 +160,11 @@ export default function SuccessPage() {
                     <>
                       <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                         <span style={{ color: "var(--gold)" }}>✓</span>
-                        <span style={{ color: "var(--text-secondary)", fontSize: "0.8rem", fontFamily: "var(--font-ui)" }}>Stems (ZIP)</span>
+                        <span style={{ color: "var(--text-secondary)", fontSize: "0.8rem", fontFamily: "var(--font-ui)" }}>High-quality WAV + Full Stems</span>
                       </div>
                       <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                         <span style={{ color: "var(--gold)" }}>✓</span>
-                        <span style={{ color: "var(--text-secondary)", fontSize: "0.8rem", fontFamily: "var(--font-ui)" }}>WAV + MP3</span>
+                        <span style={{ color: "var(--text-secondary)", fontSize: "0.8rem", fontFamily: "var(--font-ui)" }}>Non-exclusive license — 10 years</span>
                       </div>
                       <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                         <span style={{ color: "var(--gold)" }}>✓</span>
@@ -174,11 +176,15 @@ export default function SuccessPage() {
                     <>
                       <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                         <span style={{ color: "var(--gold)" }}>✓</span>
-                        <span style={{ color: "var(--text-secondary)", fontSize: "0.8rem", fontFamily: "var(--font-ui)" }}>Direct producer contact</span>
+                        <span style={{ color: "var(--text-secondary)", fontSize: "0.8rem", fontFamily: "var(--font-ui)" }}>Full ownership rights — unlimited usage</span>
                       </div>
                       <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                         <span style={{ color: "var(--gold)" }}>✓</span>
-                        <span style={{ color: "var(--text-secondary)", fontSize: "0.8rem", fontFamily: "var(--font-ui)" }}>Collaboration access</span>
+                        <span style={{ color: "var(--text-secondary)", fontSize: "0.8rem", fontFamily: "var(--font-ui)" }}>WAV + Full Stems</span>
+                      </div>
+                      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                        <span style={{ color: "var(--gold)" }}>✓</span>
+                        <span style={{ color: "var(--text-secondary)", fontSize: "0.8rem", fontFamily: "var(--font-ui)" }}>Direct producer contact for collaboration</span>
                       </div>
                     </>
                   )}
@@ -187,18 +193,16 @@ export default function SuccessPage() {
             )}
 
             <div style={{ display: "flex", gap: "12px", width: "100%", flexWrap: "wrap" }}>
-              {purchase?.download_token && (
-                <Link href={`/download?token=${purchase.download_token}`} style={{
-                  flex: 1, padding: "13px",
-                  background: "linear-gradient(135deg, #C9A84C, #F5D98B)",
-                  borderRadius: "4px", textDecoration: "none",
-                  color: "#000", fontSize: "0.75rem", fontWeight: 800,
-                  fontFamily: "var(--font-ui)", letterSpacing: "0.1em",
-                  textTransform: "uppercase", textAlign: "center",
-                }}>
-                  Download Files
-                </Link>
-              )}
+              <Link href="/my-downloads" style={{
+                flex: 1, padding: "13px",
+                background: "linear-gradient(135deg, #C9A84C, #F5D98B)",
+                borderRadius: "4px", textDecoration: "none",
+                color: "#000", fontSize: "0.75rem", fontWeight: 800,
+                fontFamily: "var(--font-ui)", letterSpacing: "0.1em",
+                textTransform: "uppercase", textAlign: "center",
+              }}>
+                Access Downloads
+              </Link>
               <Link href="/store" style={{
                 flex: 1, padding: "13px",
                 backgroundColor: "transparent",
@@ -213,7 +217,11 @@ export default function SuccessPage() {
             </div>
 
             <p style={{ color: "var(--text-muted)", fontSize: "0.68rem", fontFamily: "var(--font-mono)", marginTop: "20px" }}>
-              A download link has also been sent to your email. Links expire in 48 hours.
+              Access your downloads anytime at{" "}
+              <Link href="/my-downloads" style={{ color: "var(--gold)" }}>
+                /my-downloads
+              </Link>
+              {" "}using your email address.
             </p>
           </>
         )}
@@ -234,8 +242,8 @@ export default function SuccessPage() {
             </h1>
             <p style={{ color: "var(--text-muted)", fontSize: "0.85rem", fontFamily: "var(--font-ui)", marginBottom: "28px", lineHeight: 1.7 }}>
               We couldn't verify your payment. If you were charged, please contact us at{" "}
-              <a href="mailto:kingpsalmyofficial@gmail.com" style={{ color: "var(--gold)" }}>
-                kingpsalmyofficial@gmail.com
+              <a href="mailto:contact@seniormankp.com" style={{ color: "var(--gold)" }}>
+                contact@seniormankp.com
               </a>
             </p>
             <Link href="/store" style={{
@@ -250,7 +258,6 @@ export default function SuccessPage() {
             </Link>
           </>
         )}
-
       </div>
 
       <style>{`

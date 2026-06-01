@@ -1,12 +1,13 @@
 import { supabase } from "./supabase"
 import { getGuestId } from "./guest"
 
-export type LicenseType = "basic" | "premium" | "exclusive"
+export type LicenseType = "basic" | "premium" | "unlimited" | "exclusive"
 
 export const LICENSE_PRICES: Record<LicenseType, number> = {
   basic: 30000,
   premium: 70000,
-  exclusive: 150000,
+  unlimited: 120000,
+  exclusive: 180000,
 }
 
 export async function getCart() {

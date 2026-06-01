@@ -5,11 +5,12 @@ import HeroParticles from "@/components/ui/HeroParticles"
 import Link from "next/link"
 import Navbar from "@/components/layout/Navbar"
 import { supabase } from "@/lib/supabase"
+import { usePlayerStore } from "@/store/playerStore"  
 
 const learnMoreItems = [
   {
     title: "Licensing Info",
-    desc: "Understand what you get with each license tier — Basic, Premium, and Exclusive.",
+    desc: "Understand what you get with each license tier — Basic, Premium, Unlimited, and Exclusive.",
     link: "/licensing",
     cta: "View Licenses",
     external: false,
@@ -24,7 +25,7 @@ const learnMoreItems = [
   {
     title: "Contact Producer",
     desc: "Have a custom project in mind? Reach out directly to discuss collaboration.",
-    link: "mailto:kingpsalmyofficial@gmail.com",
+    link: "mailto:contact@seniormankp.com",
     cta: "Get in Touch",
     external: true,
   },
@@ -43,19 +44,25 @@ export default function HomePage() {
   const [heroLeft, setHeroLeft] = useState(1)
   const [featuredBeats, setFeaturedBeats] = useState<any[]>([])
   const [shareBeat, setShareBeat] = useState<any | null>(null)
+  const { setQueue, play } = usePlayerStore()
 
   useEffect(() => {
-    async function fetchFeatured() {
-      const { data } = await supabase
-        .from("beats")
-        .select("*")
-        .eq("is_published", true)
-        .eq("is_featured", true)
-        .order("created_at", { ascending: false })
-        .limit(4)
-      if (data) setFeaturedBeats(data)
+  async function fetchFeatured() {
+    const { data } = await supabase
+      .from("beats")
+      .select("*")
+      .eq("is_published", true)
+      .eq("is_featured", true)
+      .order("created_at", { ascending: false })
+      .limit(4)
+    if (data) {
+      setFeaturedBeats(data)
+      setQueue(data)
+      play(data[0])
     }
-    fetchFeatured()
+  }
+  fetchFeatured()
+
 
     const interval = setInterval(() => {
       setHeroLeft((prev) => (prev === 1 ? 2 : prev === 2 ? 3 : 1))

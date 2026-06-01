@@ -5,7 +5,8 @@ import { calculateDiscount } from "@/lib/discount"
 const LICENSE_PRICES = {
   basic: 30000,
   premium: 70000,
-  exclusive: 150000,
+  unlimited: 120000,
+  exclusive: 180000,
 }
 
 export async function POST(req: NextRequest) {
@@ -20,7 +21,7 @@ export async function POST(req: NextRequest) {
     const beatIds = items.map((i: any) => i.beat_id)
     const { data: beats, error } = await supabase
       .from("beats")
-      .select("id, title, is_published, is_exclusive_sold, basic_price, premium_price, exclusive_price")
+      .select("id, title, is_published, is_exclusive_sold, basic_price, premium_price, unlimited_price, exclusive_price")
       .in("id", beatIds)
 
     if (error || !beats) {
@@ -41,23 +42,25 @@ export async function POST(req: NextRequest) {
       if (beat.is_exclusive_sold) {
         return NextResponse.json({ error: `Beat sold exclusively: ${beat.title}` }, { status: 400 })
       }
-      if (!["basic", "premium", "exclusive"].includes(item.license_type)) {
-        return NextResponse.json({ error: "Invalid license type" }, { status: 400 })
-      }
+      if (!["basic", "premium", "unlimited", "exclusive"].includes(item.license_type)) {
+      return NextResponse.json({ error: "Invalid license type" }, { status: 400 })
+    }
 
       // Use DB prices — not frontend prices
       const priceMap: Record<string, number> = {
-        basic: Number(beat.basic_price),
-        premium: Number(beat.premium_price),
-        exclusive: Number(beat.exclusive_price),
-      }
+    basic: Number(beat.basic_price),
+    premium: Number(beat.premium_price),
+   unlimited: Number(beat.unlimited_price),
+  exclusive: Number(beat.exclusive_price),
+}
 
-      validatedItems.push({
-        beat_id: beat.id,
-        title: beat.title,
-        license_type: item.license_type,
-        beats: beat,
-      })
+    validatedItems.push({
+     beat_id: beat.id,
+     title: beat.title,
+     license_type: item.license_type,
+     price: priceMap[item.license_type],
+     beats: beat,
+})
     }
 
     // Calculate discount server-side

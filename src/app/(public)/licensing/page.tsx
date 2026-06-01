@@ -13,13 +13,19 @@ const licenses = [
     tag: null as string | null,
     features: [
       "MP3 & WAV files",
-      "Non-exclusive rights",
-      "YouTube & Social Media",
-      "Unlimited Streams (Audio & Video)",
-      "For Profit Live Performances",
+      "One commercial song",
+      "Streaming on all major platforms",
+      "YouTube monetization",
+      "Social media usage",
+      "Live performances",
     ],
-    bulkDeal: "Buy 3 Beats, Get 1 FREE!" as string | null,
-    cta: "Browse Store",
+    restrictions: [
+      "No stems",
+      "No advertising or film usage",
+      "No Content ID registration",
+      "No exclusivity",
+    ],
+    bulkDeal: "Buy 2 Beats, Get 1 FREE" as string | null,
     ctaStyle: "outline",
   },
   {
@@ -29,114 +35,222 @@ const licenses = [
     popular: true,
     tag: "POPULAR" as string | null,
     features: [
-      "MP3, WAV & Track Stems",
-      "Non-exclusive rights",
-      "Unlimited streams",
-      "Unlimited Music Videos",
-      "Radio Broadcasting Rights",
-      "For Profit Live Performances",
-      "Commercial use",
+      "MP3, WAV & full stems",
+      "One commercial song",
+      "Streaming & global distribution",
+      "Unlimited music videos",
+      "Radio broadcasting rights",
+      "Online commercial promotion",
+      "Live performances",
     ],
-    bulkDeal: "Buy 2 Beats, Get 1 FREE!" as string | null,
-    cta: "Browse Store",
+    restrictions: [
+      "No TV or large-scale advertising",
+      "No Content ID registration",
+      "No exclusivity",
+    ],
+    bulkDeal: "Buy 2 Beats, Get 1 Basic Beat FREE" as string | null,
     ctaStyle: "filled",
+  },
+  {
+    type: "unlimited",
+    name: "Unlimited License",
+    price: "₦120,000",
+    popular: false,
+    tag: "BEST VALUE" as string | null,
+    features: [
+      "MP3, WAV & full stems",
+      "One commercial song",
+      "Streaming & global distribution",
+      "Unlimited music videos",
+      "Radio & television usage",
+      "Commercial advertising usage",
+      "Physical distribution",
+      "Live performances",
+    ],
+    restrictions: [
+      "No exclusivity",
+      "No Content ID registration",
+      "No ownership of instrumental",
+    ],
+    bulkDeal: "Buy 2 Beats, Get 1 Premium Beat FREE" as string | null,
+    ctaStyle: "outline",
   },
   {
     type: "exclusive",
     name: "Exclusive License",
-    price: "From ₦150,000",
+    price: "₦180,000",
     popular: false,
     tag: null as string | null,
     features: [
-      "MP3, WAV & Track Stems",
-      "100% Exclusive rights",
-      "Unlimited everything",
+      "MP3, WAV & full stems",
+      "Full commercial exploitation rights",
+      "Streaming, video, radio & TV",
+      "Film, documentary & advertising",
+      "Physical & digital distribution",
+      "Beat permanently removed from store",
       "Direct producer access",
-      "Beat customization",
-      "Consultation & support",
-      "Project collaboration",
+      "Beat modifications & collaboration",
     ],
-    bulkDeal: "Buy 3 Beats, Get 2 FREE!" as string | null,
-    cta: "Browse Store",
+    restrictions: [
+      "Prior licenses remain valid",
+    ],
+    bulkDeal: "Buy 1 Exclusive, Get 1 Exclusive FREE" as string | null,
     ctaStyle: "gold",
   },
 ]
 
 const licenseTexts: Record<string, string> = {
-  basic: `This Non-Exclusive Basic License Agreement is made between Senior Man KP (the "Producer") and the Licensee.
+  basic: `BASIC LICENSE AGREEMENT
+Producer: Senior Man KP
 
-WHAT YOU GET:
-- High-quality MP3 & WAV audio files
-- Non-exclusive rights to use the beat
-- YouTube & Social Media usage
-- Up to 10,000 streams
-- 1 Music Video
-- For Profit Live Performances
+LICENSE TYPE
+Non-Exclusive License
 
-RESTRICTIONS:
-- Rights are NON-TRANSFERABLE
-- Cannot register the beat with Content ID systems
-- Cannot sublicense or resell the beat
-- Beat remains property of Senior Man KP
+RIGHTS GRANTED
+Licensee may:
+- Receive MP3 and WAV files of the Instrumental.
+- Create and commercially release one (1) new Song.
+- Monetize the Song on digital streaming platforms.
+- Distribute the Song through Spotify, Apple Music, Audiomack, Boomplay, YouTube Music, Deezer, and similar services.
+- Upload and monetize the Song on YouTube.
+- Use the Song on social media platforms.
+- Perform the Song live for commercial and non-commercial purposes.
 
-CREDIT:
-Licensee shall credit the Producer as "Prod. by KP" on all releases.
+RESTRICTIONS
+Licensee may not:
+- Register the Song or Instrumental with YouTube Content ID.
+- Register the Song or Instrumental with Meta Rights Manager.
+- Register the Song or Instrumental with TikTok Rights Management.
+- Register the Song or Instrumental with any automated fingerprinting or copyright-claiming system.
+- Use the Song in television, film, gaming, or advertising productions.
+- Claim ownership of the Instrumental.
+- Resell, sublicense, lease, transfer, or redistribute the Instrumental.
 
-TERM:
-10 years from date of purchase.
+OWNERSHIP
+Senior Man KP retains 100% ownership of the Instrumental.
+Licensee retains ownership of their original lyrics and vocal performance embodied in the Song.
 
-By purchasing this license, you agree to all terms stated above.`,
+TERM
+Ten (10) years from the date of purchase.`,
 
-  premium: `This Non-Exclusive Premium License Agreement is made between Senior Man KP (the "Producer") and the Licensee.
+  premium: `PREMIUM LICENSE AGREEMENT
+Producer: Senior Man KP
 
-WHAT YOU GET:
-- High-quality MP3, WAV & Track Stems
-- Non-exclusive rights to use the beat
-- Unlimited streams (audio & video)
-- Unlimited Music Videos
-- Radio Broadcasting rights
-- For Profit Live Performances
-- Commercial use rights
+LICENSE TYPE
+Non-Exclusive License
 
-RESTRICTIONS:
-- Rights are NON-TRANSFERABLE
-- Cannot register the beat with Content ID systems
-- Cannot sublicense or resell the beat
-- Beat remains property of Senior Man KP
+RIGHTS GRANTED
+Licensee may:
+- Receive MP3, WAV, and Stem files.
+- Create and commercially release one (1) new Song.
+- Monetize the Song worldwide.
+- Distribute the Song through all major digital streaming platforms.
+- Create and monetize unlimited music videos.
+- Broadcast the Song on radio stations.
+- Use the Song for online commercial promotional campaigns.
+- Perform the Song live without limitation.
 
-CREDIT:
-Licensee shall credit the Producer as "Prod. by KP" on all releases.
+RESTRICTIONS
+Licensee may not:
+- Register the Song or Instrumental with YouTube Content ID.
+- Register the Song or Instrumental with Meta Rights Manager.
+- Register the Song or Instrumental with TikTok Rights Management.
+- Register the Song or Instrumental with any automated copyright-claiming system.
+- Claim ownership of the Instrumental.
+- Resell, sublicense, lease, transfer, or redistribute the Instrumental.
 
-TERM:
-10 years from date of purchase.
+OWNERSHIP
+Senior Man KP retains 100% ownership of the Instrumental.
+Licensee retains ownership of their original lyrics and vocal performance embodied in the Song.
 
-By purchasing this license, you agree to all terms stated above.`,
+TERM
+Ten (10) years from the date of purchase.`,
 
-  exclusive: `This Exclusive License Agreement is made between Senior Man KP (the "Producer") and the Licensee.
+  unlimited: `UNLIMITED LICENSE AGREEMENT
+Producer: Senior Man KP
 
-WHAT YOU GET:
-- High-quality MP3, WAV & Track Stems
-- 100% Exclusive rights
-- Beat removed from store
-- Unlimited streams, downloads & performances
-- Direct producer access
-- Beat customization
-- Consultation & collaboration support
+LICENSE TYPE
+Non-Exclusive Unlimited License
 
-OWNERSHIP:
-Producer assigns all master rights to Licensee.
-Producer retains 50% publishing/composition rights.
+RIGHTS GRANTED
+Licensee may:
+- Receive MP3, WAV, and Stem files.
+- Create and commercially release one (1) new Song.
+- Monetize the Song worldwide.
+- Distribute the Song through all major digital streaming platforms.
+- Create and monetize unlimited music videos.
+- Broadcast the Song through radio and television outlets.
+- Use the Song in commercial advertising campaigns.
+- Manufacture and distribute physical copies of the Song.
+- Perform the Song live without limitation.
+- Use the Song for commercial promotional purposes.
 
-CREDIT:
-Licensee shall credit the Producer as "Prod. by KP" on all releases.
+NON-EXCLUSIVE NATURE
+Licensee acknowledges that this is a non-exclusive license. Senior Man KP reserves the unrestricted right to continue licensing the Instrumental to additional parties. No exclusivity is granted under this Agreement.
 
-CONTACT:
-kingpsalmyofficial@gmail.com
+RESTRICTIONS
+Licensee may not:
+- Register the Song or Instrumental with YouTube Content ID.
+- Register the Song or Instrumental with Meta Rights Manager.
+- Register the Song or Instrumental with TikTok Rights Management.
+- Register the Song or Instrumental with any automated copyright-claiming system.
+- Claim ownership of the Instrumental.
+- Resell, sublicense, lease, transfer, or redistribute the Instrumental.
+- Use the Song in major motion pictures, television network productions, or national advertising campaigns without obtaining an Exclusive License or prior written approval from Senior Man KP.
 
-TERM:
+OWNERSHIP
+Senior Man KP retains 100% ownership of the Instrumental.
+Licensee retains ownership of their original lyrics and vocal performance embodied in the Song.
+
+TERM
+Ten (10) years from the date of purchase.`,
+
+  exclusive: `EXCLUSIVE LICENSE AGREEMENT
+Producer: Senior Man KP
+
+LICENSE TYPE
+Exclusive License
+
+RIGHTS GRANTED
+Licensee may:
+- Receive MP3, WAV, and Stem files.
+- Create and commercially release one (1) new Song.
+- Monetize the Song worldwide.
+- Distribute the Song through all digital streaming platforms.
+- Create and monetize unlimited music videos.
+- Broadcast the Song through radio and television outlets.
+- Use the Song in commercial advertising campaigns.
+- Use the Song in film, television, documentary, and audiovisual productions.
+- Use the Song in major motion pictures, television network productions, and national advertising campaigns.
+- Manufacture and distribute physical copies of the Song.
+- Perform the Song live without limitation.
+- Monetize the Song through all currently existing and future media formats.
+
+EXCLUSIVITY
+Following execution of this Agreement, Senior Man KP shall cease offering the Instrumental for future sale or licensing. The Instrumental shall be removed from public sale within a reasonable period following purchase. No future licenses shall be issued after the effective date of this Agreement.
+
+PRIOR LICENSES
+Licensee acknowledges that any licenses issued before the execution of this Agreement shall remain valid and enforceable. Nothing in this Agreement revokes rights previously granted to earlier purchasers.
+
+OWNERSHIP
+Senior Man KP retains ownership of the underlying musical composition and authorship of the Instrumental unless otherwise agreed in writing. Licensee receives exclusive commercial exploitation rights as granted under this Agreement.
+
+PUBLISHING
+Unless otherwise agreed in writing:
+- Senior Man KP shall retain fifty percent (50%) of the writer's and publishing share attributable to the Instrumental.
+- Licensee shall retain fifty percent (50%) of the writer's and publishing share attributable to the Song.
+
+CONTENT ID
+Licensee may register the Song with YouTube Content ID, Meta Rights Manager, TikTok Rights Management, and similar systems, provided such registration does not interfere with the legitimate rights of previous license holders.
+
+TERM
 Perpetual (Lifetime).
 
-By purchasing this license, you agree to all terms stated above.`,
+BREACH
+Any violation of this Agreement immediately terminates all rights granted herein. Any continued use following termination constitutes copyright infringement.
+
+GOVERNING LAW
+This Agreement shall be governed by and construed in accordance with the laws of the Federal Republic of Nigeria.`,
 }
 
 export default function LicensingPage() {
@@ -147,14 +261,11 @@ export default function LicensingPage() {
       <Navbar />
 
       {/* Hero */}
-      <section
-        className="license-hero"
-        style={{
-          padding: "120px 48px 80px",
-          textAlign: "center",
-          borderBottom: "1px solid var(--border-subtle)",
-        }}
-      >
+      <section style={{
+        padding: "120px 48px 80px",
+        textAlign: "center",
+        borderBottom: "1px solid var(--border-subtle)",
+      }}>
         <span style={{
           color: "var(--gold)", fontSize: "0.65rem",
           fontFamily: "var(--font-mono)", letterSpacing: "0.3em",
@@ -178,8 +289,8 @@ export default function LicensingPage() {
           color: "var(--text-muted)", fontSize: "0.9rem", lineHeight: 1.8,
           maxWidth: "620px", margin: "0 auto", fontFamily: "var(--font-ui)",
         }}>
-          Every beat includes transparent licensing terms designed for
-          independent artists, commercial releases, and serious creators.
+          Four tiers designed for every stage of your career — from your first
+          single to your biggest commercial release.
         </p>
 
         <div style={{ display: "flex", justifyContent: "center", gap: "14px", marginTop: "32px", flexWrap: "wrap" }}>
@@ -205,144 +316,163 @@ export default function LicensingPage() {
       </section>
 
       {/* License Cards */}
-      <section className="license-section" style={{ padding: "80px 48px" }}>
-        <div style={{ maxWidth: "1150px", margin: "0 auto" }}>
-          <div
-            className="license-grid"
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(3, 1fr)",
-              gap: "24px",
-              alignItems: "start",
-            }}
-          >
+      <section style={{ padding: "80px 48px" }}>
+        <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
+          <div style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(4, 1fr)",
+            gap: "20px",
+            alignItems: "start",
+          }}>
             {licenses.map((item) => (
               <div
                 key={item.type}
                 style={{
                   backgroundColor: item.popular ? "rgba(201,168,76,0.05)" : "var(--bg-card)",
                   border: `1px solid ${item.popular ? "rgba(201,168,76,0.4)" : "var(--border-subtle)"}`,
-                  borderRadius: "10px", padding: "32px", position: "relative",
+                  borderRadius: "10px", padding: "28px", position: "relative",
                 }}
               >
-                {/* Tag */}
                 {item.tag && (
                   <div style={{
                     position: "absolute", top: "-14px", left: "50%",
                     transform: "translateX(-50%)",
-                    backgroundColor: "var(--gold)", color: "#000",
+                    backgroundColor: item.type === "unlimited" ? "var(--bg-elevated)" : "var(--gold)",
+                    color: item.type === "unlimited" ? "var(--gold)" : "#000",
+                    border: item.type === "unlimited" ? "1px solid var(--gold)" : "none",
                     fontSize: "0.6rem", fontWeight: 700,
                     padding: "6px 16px", borderRadius: "20px",
                     fontFamily: "var(--font-mono)", letterSpacing: "0.14em",
+                    whiteSpace: "nowrap",
                   }}>
                     {item.tag}
                   </div>
                 )}
 
-                {/* Name */}
                 <div style={{
-                  color: "var(--text-muted)", fontSize: "0.68rem",
+                  color: "var(--text-muted)", fontSize: "0.65rem",
                   letterSpacing: "0.15em", textTransform: "uppercase",
                   fontFamily: "var(--font-mono)", marginBottom: "10px",
                 }}>
                   {item.name}
                 </div>
 
-                {/* Price */}
                 <div style={{
                   color: item.popular ? "var(--gold)" : "var(--text-primary)",
-                  fontSize: "2rem", fontWeight: 800, fontFamily: "var(--font-ui)",
+                  fontSize: "1.7rem", fontWeight: 800, fontFamily: "var(--font-ui)",
                   letterSpacing: "-0.03em", marginBottom: "24px",
                 }}>
                   {item.price}
                 </div>
 
                 {/* Features */}
-                <div style={{ display: "flex", flexDirection: "column", gap: "12px", marginBottom: "28px" }}>
-                  {item.features.map((feature) => (
-                    <div key={feature} style={{ display: "flex", gap: "10px", alignItems: "flex-start" }}>
-                      <span style={{ color: "var(--gold)", marginTop: "2px", flexShrink: 0 }}>•</span>
-                      <span style={{ color: "var(--text-secondary)", fontSize: "0.78rem", lineHeight: 1.5, fontFamily: "var(--font-ui)" }}>
-                        {feature}
-                      </span>
-                    </div>
-                  ))}
+                <div style={{ marginBottom: "16px" }}>
+                  <div style={{
+                    color: "var(--text-muted)", fontSize: "0.6rem",
+                    letterSpacing: "0.1em", textTransform: "uppercase",
+                    fontFamily: "var(--font-mono)", marginBottom: "10px",
+                  }}>
+                    Included
+                  </div>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                    {item.features.map((feature) => (
+                      <div key={feature} style={{ display: "flex", gap: "10px", alignItems: "flex-start" }}>
+                        <span style={{ color: "var(--gold)", marginTop: "2px", flexShrink: 0 }}>✓</span>
+                        <span style={{ color: "var(--text-secondary)", fontSize: "0.75rem", lineHeight: 1.5, fontFamily: "var(--font-ui)" }}>
+                          {feature}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
 
-                {/* Read License Button */}
+                {/* Restrictions */}
+                <div style={{ marginBottom: "24px" }}>
+                  <div style={{
+                    color: "var(--text-muted)", fontSize: "0.6rem",
+                    letterSpacing: "0.1em", textTransform: "uppercase",
+                    fontFamily: "var(--font-mono)", marginBottom: "10px",
+                  }}>
+                    Limitations
+                  </div>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                    {item.restrictions.map((restriction) => (
+                      <div key={restriction} style={{ display: "flex", gap: "10px", alignItems: "flex-start" }}>
+                        <span style={{ color: "var(--text-muted)", marginTop: "2px", flexShrink: 0 }}>×</span>
+                        <span style={{ color: "var(--text-muted)", fontSize: "0.72rem", lineHeight: 1.5, fontFamily: "var(--font-ui)" }}>
+                          {restriction}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Read License */}
                 <button
                   onClick={() => setModalLicense(item.type)}
                   style={{
-                    width: "100%", padding: "12px", marginBottom: "12px",
+                    width: "100%", padding: "11px", marginBottom: "10px",
                     borderRadius: "4px", cursor: "pointer",
-                    border: `1px solid ${item.ctaStyle === "outline" ? "var(--border-dim)" : "var(--gold)"}`,
-                    backgroundColor: item.ctaStyle === "outline" ? "transparent" : "var(--gold)",
-                    color: item.ctaStyle === "outline" ? "var(--text-primary)" : "#000",
-                    fontSize: "0.72rem", fontWeight: 700, fontFamily: "var(--font-ui)",
+                    border: "1px solid var(--gold)",
+                    backgroundColor: "transparent",
+                    color: "var(--gold)",
+                    fontSize: "0.7rem", fontWeight: 700, fontFamily: "var(--font-ui)",
                     letterSpacing: "0.1em", textTransform: "uppercase",
                   }}
                 >
                   Read License
                 </button>
 
-               {item.type === "exclusive" ? (
-                    <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-                        <a
-                        href="mailto:kingpsalmyofficial@gmail.com?subject=Exclusive License Inquiry"
-                        style={{
-                            display: "block",
-                            width: "100%",
-                            padding: "12px",
-                            border: "1px solid rgba(201,168,76,0.3)",
-                            borderRadius: "4px",
-                            color: "var(--gold)",
-                            textDecoration: "none",
-                            textAlign: "center",
-                            fontSize: "0.72rem",
-                            fontWeight: 700,
-                            fontFamily: "var(--font-ui)",
-                            letterSpacing: "0.1em",
-                            textTransform: "uppercase",
-                        }}
-                        >
-                        Contact Producer
-                        </a>
-                    </div>
-                    ) : (
+                {item.type === "exclusive" ? (
+                  <a
+                    href="mailto:contact@seniormankp.com?subject=Exclusive License Inquiry"
+                    style={{
+                      display: "block", width: "100%", padding: "11px",
+                      background: "linear-gradient(135deg, #C9A84C, #F5D98B)",
+                      borderRadius: "4px", color: "#000",
+                      textDecoration: "none", textAlign: "center",
+                      fontSize: "0.7rem", fontWeight: 700,
+                      fontFamily: "var(--font-ui)", letterSpacing: "0.1em",
+                      textTransform: "uppercase", boxSizing: "border-box",
+                    }}
+                    >
+                    Contact Producer
+                  </a>
+                ) : (
                   <Link
                     href="/store"
                     style={{
-                      display: "block", width: "100%", padding: "12px",
+                      display: "block", width: "100%", padding: "11px",
                       border: "1px solid var(--border-dim)", borderRadius: "4px",
-                      color: "var(--text-secondary)", textDecoration: "none", textAlign: "center",
-                      fontSize: "0.72rem", fontWeight: 700, fontFamily: "var(--font-ui)",
-                      letterSpacing: "0.1em", textTransform: "uppercase",
+                      color: "var(--text-secondary)", textDecoration: "none",
+                      textAlign: "center", fontSize: "0.7rem", fontWeight: 700,
+                      fontFamily: "var(--font-ui)", letterSpacing: "0.1em",
+                      textTransform: "uppercase", boxSizing: "border-box",
                     }}
                   >
-                    {item.cta}
+                    Browse Store
                   </Link>
                 )}
 
                 {/* Bulk Deal */}
                 {item.bulkDeal && (
                   <div style={{
-                    marginTop: "20px", padding: "14px",
+                    marginTop: "18px", padding: "12px",
                     backgroundColor: "var(--bg-elevated)",
                     borderRadius: "6px", textAlign: "center",
                   }}>
                     <div style={{
-                      color: "var(--text-muted)", fontSize: "0.6rem",
+                      color: "var(--text-muted)", fontSize: "0.58rem",
                       letterSpacing: "0.1em", textTransform: "uppercase",
                       fontFamily: "var(--font-mono)", marginBottom: "5px",
                     }}>
                       Bundle Deal
                     </div>
                     <div style={{
-                      color: "var(--text-primary)", fontSize: "0.72rem",
+                      color: "var(--gold)", fontSize: "0.7rem",
                       fontWeight: 700, fontFamily: "var(--font-ui)", lineHeight: 1.5,
                     }}>
                       {item.bulkDeal}
-                      {item.type === "exclusive" && " • Direct Producer Access"}
                     </div>
                   </div>
                 )}
@@ -353,14 +483,11 @@ export default function LicensingPage() {
       </section>
 
       {/* FAQ CTA */}
-      <section
-        className="license-faq"
-        style={{
-          padding: "80px 48px",
-          borderTop: "1px solid var(--border-subtle)",
-          backgroundColor: "var(--bg-deep)",
-        }}
-      >
+      <section style={{
+        padding: "80px 48px",
+        borderTop: "1px solid var(--border-subtle)",
+        backgroundColor: "var(--bg-deep)",
+      }}>
         <div style={{ maxWidth: "820px", margin: "0 auto", textAlign: "center" }}>
           <span style={{
             color: "var(--gold)", fontSize: "0.65rem",
@@ -381,8 +508,8 @@ export default function LicensingPage() {
             color: "var(--text-muted)", fontSize: "0.88rem", lineHeight: 1.8,
             fontFamily: "var(--font-ui)", marginBottom: "32px",
           }}>
-            Visit the FAQ page or contact the producer directly for
-            custom licensing, collaborations, and exclusive negotiations.
+            Visit the FAQ page or contact the producer directly for custom
+            licensing, collaborations, and exclusive negotiations.
           </p>
 
           <div style={{ display: "flex", justifyContent: "center", gap: "14px", flexWrap: "wrap" }}>
@@ -395,7 +522,7 @@ export default function LicensingPage() {
             }}>
               Visit FAQ
             </Link>
-            <a href="mailto:kingpsalmyofficial@gmail.com" style={{
+            <a href="mailto:contact@seniormankp.com" style={{
               padding: "13px 28px",
               border: "1px solid rgba(201,168,76,0.3)",
               color: "var(--gold)", textDecoration: "none", borderRadius: "4px",
@@ -436,7 +563,10 @@ export default function LicensingPage() {
               </h2>
               <button
                 onClick={() => setModalLicense(null)}
-                style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: "1.1rem" }}
+                style={{
+                  background: "none", border: "none",
+                  color: "var(--text-muted)", cursor: "pointer", fontSize: "1.1rem",
+                }}
               >
                 ✕
               </button>
