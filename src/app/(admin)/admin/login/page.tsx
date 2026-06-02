@@ -24,9 +24,10 @@ export default function AdminLoginPage() {
       return
     }
 
+    router.refresh()
     router.push("/admin/dashboard")
   }
-
+  
   return (
     <main style={{
       minHeight: "100vh",

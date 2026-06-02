@@ -17,6 +17,7 @@ type Beat = {
   key: string
   basic_price: number
   premium_price: number
+  unlimited_price: number
   exclusive_price: number
   is_published: boolean
   is_featured: boolean
@@ -39,7 +40,7 @@ export default function AdminBeatsPage() {
   const [form, setForm] = useState({
     title: "", genre: "Afrobeat", mood: "Dark", bpm: "",
     key: "A Minor", description: "", duration: "",
-    basic_price: "", premium_price: "", exclusive_price: "",
+    basic_price: "", premium_price: "", unlimited_price: "", exclusive_price: "",
     is_published: false, is_featured: false,
   })
 
@@ -131,6 +132,7 @@ export default function AdminBeatsPage() {
         duration: form.duration || null,
         basic_price: parseFloat(form.basic_price),
         premium_price: parseFloat(form.premium_price),
+        unlimited_price: parseFloat(form.unlimited_price),
         exclusive_price: parseFloat(form.exclusive_price),
         cover_url,
         preview_url,
@@ -145,7 +147,7 @@ export default function AdminBeatsPage() {
       setForm({
         title: "", genre: "Afrobeat", mood: "Dark", bpm: "",
         key: "A Minor", description: "", duration: "",
-        basic_price: "", premium_price: "", exclusive_price: "",
+        basic_price: "", premium_price: "", unlimited_price: "", exclusive_price: "",
         is_published: false, is_featured: false,
       })
       setFiles({ cover: null, preview: null, stems: null })
@@ -441,7 +443,8 @@ export default function AdminBeatsPage() {
                     {[
                       { name: "basic_price", label: "Basic License", placeholder: "30000" },
                       { name: "premium_price", label: "Premium License", placeholder: "70000" },
-                      { name: "exclusive_price", label: "Exclusive License", placeholder: "150000" },
+                      { name: "unlimited_price", label: "Unlimited License", placeholder: "120000" },
+                      { name: "exclusive_price", label: "Exclusive License", placeholder: "180000" },
                     ].map((field) => (
                       <div key={field.name}>
                         <label style={labelStyle}>{field.label} *</label>

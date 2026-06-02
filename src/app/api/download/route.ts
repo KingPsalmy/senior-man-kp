@@ -9,7 +9,6 @@ const supabase = createClient(
 export async function GET(req: NextRequest) {
   const token = req.nextUrl.searchParams.get("token")
 
-  // 1. Token must be present
   if (!token) {
     return NextResponse.json(
       { error: "Missing download token" },
@@ -17,7 +16,7 @@ export async function GET(req: NextRequest) {
     )
   }
 
-  // 2. Look up the purchase by token
+  // Look up purchase by token
   const { data: purchase, error } = await supabase
     .from("purchases")
     .select("*")
@@ -27,46 +26,48 @@ export async function GET(req: NextRequest) {
 
   if (error || !purchase) {
     return NextResponse.json(
-      { error: "Invalid or expired download link" },
+      { error: "Invalid download token" },
       { status: 404 }
     )
   }
 
-  // 3. Check expiry
-  const now = new Date()
-  const expires = new Date(purchase.download_expires_at)
+  // Determine file paths based on license type
+  const filePaths: { path: string; label: string }[] = []
 
-  if (now > expires) {
-    return NextResponse.json(
-      { error: "Download link has expired. Please contact support." },
-      { status: 410 }
-    )
+  if (["basic", "premium", "unlimited", "exclusive"].includes(purchase.license_type)) {
+    filePaths.push({
+      path: `beats/${purchase.beat_id}/wav`,
+      label: "WAV File",
+    })
   }
 
-  // 4. Determine file path based on license type
-  const filePaths: string[] = []
-
-  if (["basic", "premium", "exclusive"].includes(purchase.license_type)) {
-    filePaths.push(`beats/${purchase.beat_id}/wav`)
-  }
-  if (["premium", "exclusive"].includes(purchase.license_type)) {
-    filePaths.push(`beats/${purchase.beat_id}/stems`)
+  if (["premium", "unlimited", "exclusive"].includes(purchase.license_type)) {
+    filePaths.push({
+      path: `beats/${purchase.beat_id}/stems`,
+      label: "Stems (ZIP)",
+    })
   }
 
-  // 5. Generate fresh signed URLs (short-lived — 1 hour)
-  const signedUrls: { path: string; url: string }[] = []
+  // Add license agreement PDF
+  filePaths.push({
+    path: `licenses/${purchase.license_type}-license.pdf`,
+    label: "License Agreement (PDF)",
+  })
 
-  for (const path of filePaths) {
+  // Generate fresh 1-hour signed URLs
+  const signedUrls: { label: string; url: string }[] = []
+
+  for (const file of filePaths) {
     const { data: signed, error: signError } = await supabase.storage
       .from("beat-files")
-      .createSignedUrl(path, 60 * 60) // 1 hour only
+      .createSignedUrl(file.path, 60 * 60)
 
     if (signError || !signed) {
-      console.error(`Failed to sign URL for ${path}:`, signError)
+      console.error(`Failed to sign URL for ${file.path}:`, signError)
       continue
     }
 
-    signedUrls.push({ path, url: signed.signedUrl })
+    signedUrls.push({ label: file.label, url: signed.signedUrl })
   }
 
   if (signedUrls.length === 0) {
@@ -76,12 +77,10 @@ export async function GET(req: NextRequest) {
     )
   }
 
-  // 6. Return the signed URLs
   return NextResponse.json({
     success: true,
     license_type: purchase.license_type,
     customer_email: purchase.customer_email,
-    expires_at: purchase.download_expires_at,
     files: signedUrls,
   })
 }

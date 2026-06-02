@@ -8,39 +8,69 @@ import Link from "next/link"
 const navItems = [
   { icon: "⊞", label: "Dashboard", href: "/admin/dashboard", active: true },
   { icon: "♪", label: "Beats", href: "/admin/dashboard/beats", active: false },
-  { icon: "≡", label: "Licenses", href: "/admin/dashboard/licenses", active: false },
-  { icon: "↑", label: "Uploads", href: "/admin/dashboard/uploads", active: false },
   { icon: "💳", label: "Purchases", href: "/admin/dashboard/purchases", active: false },
   { icon: "👤", label: "Customers", href: "/admin/dashboard/customers", active: false },
   { icon: "⚙", label: "Settings", href: "/admin/dashboard/settings", active: false },
-  { icon: "→", label: "Logout", href: "#", active: false },
 ]
 
-const stats = [
-  { label: "Total Sales", value: "₦2,450,000", change: "+234%", positive: true },
-  { label: "Total Orders", value: "48", change: "+18.2%", positive: true },
-  { label: "Total Customers", value: "36", change: "+12.4%", positive: true },
-  { label: "Conversion Rate", value: "3.6%", change: "+6.3%", positive: true },
-]
+type Order = {
+  id: string
+  email: string
+  total: number
+  status: string
+  items: any[]
+  created_at: string
+  paystack_reference: string
+}
 
-const recentPurchases = [
-  { customer: "olami@gmail.com", beat: "Midnight Drive", license: "Premium", amount: "₦30,000", date: "May 21, 10:45 AM" },
-  { customer: "theo@proton.com", beat: "No Limit", license: "Basic", amount: "₦10,000", date: "May 21, 9:15 AM" },
-  { customer: "beatbytes@gmail.com", beat: "Paradise", license: "Premium", amount: "₦30,000", date: "May 20, 11:28 PM" },
-  { customer: "iam_jolly@cloud.com", beat: "Timeless", license: "Exclusive", amount: "₦250,000", date: "May 20, 8:15 PM" },
-  { customer: "officejay@gmail.com", beat: "Higher", license: "Basic", amount: "₦10,000", date: "May 20, 4:05 PM" },
-]
+type Stats = {
+  totalRevenue: number
+  totalOrders: number
+  totalCustomers: number
+  totalBeats: number
+}
 
 export default function AdminDashboard() {
   const router = useRouter()
   const [checking, setChecking] = useState(true)
+  const [stats, setStats] = useState<Stats | null>(null)
+  const [recentOrders, setRecentOrders] = useState<Order[]>([])
+  const [loadingStats, setLoadingStats] = useState(true)
+  const [sidebarOpen, setSidebarOpen] = useState(false)
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
       if (!data.session) router.push("/admin/login")
-      else setChecking(false)
+      else {
+        setChecking(false)
+        fetchDashboardData()
+      }
     })
   }, [router])
+
+  async function fetchDashboardData() {
+    setLoadingStats(true)
+
+    const { data: orders } = await supabase
+      .from("orders")
+      .select("id, email, total, status, items, created_at, paystack_reference")
+      .eq("status", "paid")
+      .order("created_at", { ascending: false })
+
+    const totalRevenue = orders?.reduce((sum, o) => sum + Number(o.total), 0) ?? 0
+    const totalOrders = orders?.length ?? 0
+    const uniqueEmails = new Set(orders?.map((o) => o.email) ?? [])
+    const totalCustomers = uniqueEmails.size
+
+    const { count: totalBeats } = await supabase
+      .from("beats")
+      .select("*", { count: "exact", head: true })
+      .eq("is_published", true)
+
+    setStats({ totalRevenue, totalOrders, totalCustomers, totalBeats: totalBeats ?? 0 })
+    setRecentOrders((orders ?? []).slice(0, 10))
+    setLoadingStats(false)
+  }
 
   async function handleLogout() {
     await supabase.auth.signOut()
@@ -54,83 +84,80 @@ export default function AdminDashboard() {
   )
 
   return (
-    <main style={{ minHeight: "100vh", backgroundColor: "var(--bg-void)", display: "flex", flexDirection: "column" }}>
+    <main style={{ minHeight: "100vh", backgroundColor: "var(--bg-void)", display: "flex" }}>
+
+      {/* Mobile overlay */}
+      {sidebarOpen && (
+        <div
+          onClick={() => setSidebarOpen(false)}
+          style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.7)", zIndex: 39 }}
+        />
+      )}
 
       {/* Sidebar */}
-      <aside className="admin-sidebar" style={{
+      <aside style={{
         width: "220px", flexShrink: 0,
         backgroundColor: "var(--bg-deep)",
         borderRight: "1px solid var(--border-subtle)",
         display: "flex", flexDirection: "column",
         padding: "24px 0",
-        position: "fixed", top: 0, left: 0, bottom: 0,
-        zIndex: 40,
-      }}>
-        {/* Logo */}
+        position: "fixed", top: 0, left: 0, bottom: 0, zIndex: 40,
+        transform: sidebarOpen ? "translateX(0)" : undefined,
+      }}
+        className="admin-sidebar"
+      >
         <div style={{ padding: "0 24px 24px", borderBottom: "1px solid var(--border-subtle)" }}>
-          <div style={{ color: "var(--text-muted)", fontSize: "0.5rem", letterSpacing: "0.3em", textTransform: "uppercase", fontFamily: "var(--font-mono)", marginBottom: "4px" }}>
-            Senior Man
-          </div>
-          <div style={{
-            background: "linear-gradient(135deg, #C9A84C, #F5D98B)",
-            WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
-            fontSize: "1.8rem", fontWeight: 800, fontFamily: "var(--font-ui)", lineHeight: 1,
-          }}>
-            KP
-          </div>
+          <div style={{ color: "var(--text-muted)", fontSize: "0.5rem", letterSpacing: "0.3em", textTransform: "uppercase", fontFamily: "var(--font-mono)", marginBottom: "4px" }}>Senior Man</div>
+          <div style={{ background: "linear-gradient(135deg, #C9A84C, #F5D98B)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", fontSize: "1.8rem", fontWeight: 800, fontFamily: "var(--font-ui)", lineHeight: 1 }}>KP</div>
         </div>
-
-        {/* Nav */}
         <nav style={{ flex: 1, padding: "16px 0" }}>
           {navItems.map((item) => (
-            item.label === "Logout" ? (
-              <button
-                key={item.label}
-                onClick={handleLogout}
-                style={{
-                  width: "100%", display: "flex", alignItems: "center", gap: "12px",
-                  padding: "10px 24px", background: "none", border: "none",
-                  color: "var(--text-muted)", fontSize: "0.78rem",
-                  fontFamily: "var(--font-ui)", fontWeight: 500,
-                  cursor: "pointer", textAlign: "left",
-                }}
-              >
-                <span>{item.icon}</span>
-                {item.label}
-              </button>
-            ) : (
-              <Link
-                key={item.label}
-                href={item.href}
-                style={{
-                  display: "flex", alignItems: "center", gap: "12px",
-                  padding: "10px 24px", textDecoration: "none",
-                  color: item.active ? "var(--gold)" : "var(--text-secondary)",
-                  fontSize: "0.78rem", fontFamily: "var(--font-ui)", fontWeight: 500,
-                  backgroundColor: item.active ? "rgba(201,168,76,0.06)" : "transparent",
-                  borderRight: item.active ? "2px solid var(--gold)" : "2px solid transparent",
-                  transition: "all 0.2s",
-                }}
-              >
-                <span>{item.icon}</span>
-                {item.label}
-              </Link>
-            )
+            <Link key={item.label} href={item.href} onClick={() => setSidebarOpen(false)} style={{
+              display: "flex", alignItems: "center", gap: "12px",
+              padding: "10px 24px", textDecoration: "none",
+              color: item.active ? "var(--gold)" : "var(--text-secondary)",
+              fontSize: "0.78rem", fontFamily: "var(--font-ui)", fontWeight: 500,
+              backgroundColor: item.active ? "rgba(201,168,76,0.06)" : "transparent",
+              borderRight: item.active ? "2px solid var(--gold)" : "2px solid transparent",
+            }}>
+              <span>{item.icon}</span>{item.label}
+            </Link>
           ))}
+          <button
+            onClick={handleLogout}
+            style={{ width: "100%", display: "flex", alignItems: "center", gap: "12px", padding: "10px 24px", background: "none", border: "none", color: "var(--text-muted)", fontSize: "0.78rem", fontFamily: "var(--font-ui)", cursor: "pointer" }}
+          >
+            <span>→</span> Logout
+          </button>
         </nav>
       </aside>
 
-      {/* Main Content */}
-      <div className="admin-main" style={{ marginLeft: "220px", flex: 1, padding: "32px" }}>
+      {/* Main */}
+      <div className="admin-main" style={{ marginLeft: "220px", flex: 1, padding: "32px", minWidth: 0 }}>
 
-        {/* Header */}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "32px", flexWrap: "wrap", gap: "12px" }}>
+        {/* Mobile header */}
+        <div className="admin-mobile-header" style={{
+          display: "none", alignItems: "center", justifyContent: "space-between",
+          marginBottom: "24px",
+        }}>
+          <button
+            onClick={() => setSidebarOpen(true)}
+            style={{ background: "none", border: "none", color: "var(--text-primary)", cursor: "pointer", fontSize: "1.2rem", padding: "4px" }}
+          >
+            ☰
+          </button>
+          <span style={{ color: "var(--text-primary)", fontWeight: 800, fontFamily: "var(--font-ui)", fontSize: "1rem" }}>Dashboard</span>
+          <Link href="/store" style={{ fontSize: "0.65rem", color: "var(--gold)", fontFamily: "var(--font-ui)", textDecoration: "none" }}>Store →</Link>
+        </div>
+
+        {/* Desktop header */}
+        <div className="admin-desktop-header" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "32px", flexWrap: "wrap", gap: "12px" }}>
           <h1 style={{ color: "var(--text-primary)", fontSize: "1.5rem", fontWeight: 800, fontFamily: "var(--font-ui)" }}>
             Dashboard
           </h1>
           <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
             <span style={{ color: "var(--text-muted)", fontSize: "0.72rem", fontFamily: "var(--font-mono)" }}>
-              May 14 – May 21, 2024
+              {new Date().toLocaleDateString("en-NG", { day: "numeric", month: "long", year: "numeric" })}
             </span>
             <Link href="/store" style={{
               padding: "8px 16px", fontSize: "0.68rem", fontWeight: 700,
@@ -143,111 +170,134 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* Stats Grid */}
+        {/* Stats */}
         <div className="admin-stats-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "16px", marginBottom: "32px" }}>
-          {stats.map((stat) => (
-            <div key={stat.label} style={{
-              backgroundColor: "var(--bg-card)",
-              border: "1px solid var(--border-subtle)",
-              borderRadius: "8px", padding: "20px",
-            }}>
-              <div style={{ color: "var(--text-muted)", fontSize: "0.65rem", fontFamily: "var(--font-mono)", letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: "8px" }}>
-                {stat.label}
+          {loadingStats ? (
+            [...Array(4)].map((_, i) => (
+              <div key={i} style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-subtle)", borderRadius: "8px", padding: "20px", height: "100px", opacity: 0.5 }} />
+            ))
+          ) : (
+            [
+              { label: "Total Revenue", value: `₦${stats?.totalRevenue.toLocaleString() ?? 0}` },
+              { label: "Total Orders", value: String(stats?.totalOrders ?? 0) },
+              { label: "Unique Customers", value: String(stats?.totalCustomers ?? 0) },
+              { label: "Published Beats", value: String(stats?.totalBeats ?? 0) },
+            ].map((stat) => (
+              <div key={stat.label} style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-subtle)", borderRadius: "8px", padding: "20px" }}>
+                <div style={{ color: "var(--text-muted)", fontSize: "0.65rem", fontFamily: "var(--font-mono)", letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: "8px" }}>
+                  {stat.label}
+                </div>
+                <div style={{ color: "var(--text-primary)", fontSize: "1.6rem", fontWeight: 800, fontFamily: "var(--font-ui)", letterSpacing: "-0.02em" }}>
+                  {stat.value}
+                </div>
               </div>
-              <div style={{ color: "var(--text-primary)", fontSize: "1.6rem", fontWeight: 800, fontFamily: "var(--font-ui)", letterSpacing: "-0.02em", marginBottom: "6px" }}>
-                {stat.value}
-              </div>
-              <div style={{ color: stat.positive ? "#4ade80" : "#f87171", fontSize: "0.7rem", fontFamily: "var(--font-mono)" }}>
-                {stat.change}
-              </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
 
-        {/* Recent Purchases */}
-        <div style={{
-          backgroundColor: "var(--bg-card)",
-          border: "1px solid var(--border-subtle)",
-          borderRadius: "8px", overflow: "hidden",
-        }}>
+        {/* Recent Orders */}
+        <div style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-subtle)", borderRadius: "8px", overflow: "hidden" }}>
           <div style={{ padding: "20px 24px", borderBottom: "1px solid var(--border-subtle)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <h2 style={{ color: "var(--text-primary)", fontSize: "0.85rem", fontWeight: 700, fontFamily: "var(--font-ui)" }}>
-              Recent Purchases
+              Recent Orders
             </h2>
-            <span style={{ color: "var(--gold)", fontSize: "0.72rem", fontFamily: "var(--font-ui)", cursor: "pointer" }}>
-              View all purchases →
-            </span>
+            <Link href="/admin/dashboard/purchases" style={{ color: "var(--gold)", fontSize: "0.72rem", fontFamily: "var(--font-ui)", textDecoration: "none" }}>
+              View all →
+            </Link>
           </div>
 
-          {/* Desktop Table */}
-          <div className="admin-purchases-table">
-            <div style={{
-              display: "grid", gridTemplateColumns: "2fr 1.5fr 1fr 1fr 1.5fr",
-              padding: "12px 24px", borderBottom: "1px solid var(--border-subtle)",
-            }}>
-              {["Customer", "Beat", "License", "Amount", "Date"].map((h) => (
-                <span key={h} style={{ color: "var(--text-muted)", fontSize: "0.6rem", fontFamily: "var(--font-mono)", letterSpacing: "0.15em", textTransform: "uppercase" }}>
-                  {h}
-                </span>
-              ))}
+          {loadingStats ? (
+            <div style={{ padding: "40px", textAlign: "center", color: "var(--text-muted)", fontFamily: "var(--font-mono)", fontSize: "0.8rem" }}>
+              Loading orders...
             </div>
-
-            {recentPurchases.map((p, i) => (
-              <div key={i} style={{
-                display: "grid", gridTemplateColumns: "2fr 1.5fr 1fr 1fr 1.5fr",
-                padding: "14px 24px",
-                borderBottom: i < recentPurchases.length - 1 ? "1px solid var(--border-subtle)" : "none",
-                alignItems: "center",
-              }}>
-                <span style={{ color: "var(--text-secondary)", fontSize: "0.75rem", fontFamily: "var(--font-ui)" }}>{p.customer}</span>
-                <span style={{ color: "var(--text-primary)", fontSize: "0.75rem", fontFamily: "var(--font-ui)", fontWeight: 600 }}>{p.beat}</span>
-                <span style={{
-                  display: "inline-block",
-                  backgroundColor: p.license === "Exclusive" ? "rgba(201,168,76,0.12)" : "var(--bg-elevated)",
-                  color: p.license === "Exclusive" ? "var(--gold)" : "var(--text-secondary)",
-                  fontSize: "0.62rem", fontFamily: "var(--font-mono)",
-                  padding: "3px 8px", borderRadius: "2px", width: "fit-content",
-                }}>{p.license}</span>
-                <span style={{ color: "var(--text-primary)", fontSize: "0.75rem", fontFamily: "var(--font-ui)", fontWeight: 700 }}>{p.amount}</span>
-                <span style={{ color: "var(--text-muted)", fontSize: "0.68rem", fontFamily: "var(--font-mono)" }}>{p.date}</span>
-              </div>
-            ))}
-          </div>
-
-          {/* Mobile Purchases */}
-          <div className="admin-purchases-mobile" style={{ display: "none", flexDirection: "column" }}>
-            {recentPurchases.map((p, i) => (
-              <div key={i} style={{
-                padding: "14px 20px",
-                borderBottom: i < recentPurchases.length - 1 ? "1px solid var(--border-subtle)" : "none",
-                display: "flex", flexDirection: "column", gap: "6px",
-              }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <span style={{ color: "var(--text-primary)", fontSize: "0.82rem", fontWeight: 700, fontFamily: "var(--font-ui)" }}>{p.beat}</span>
-                  <span style={{ color: "var(--text-primary)", fontSize: "0.82rem", fontWeight: 700, fontFamily: "var(--font-ui)" }}>{p.amount}</span>
+          ) : recentOrders.length === 0 ? (
+            <div style={{ padding: "60px", textAlign: "center" }}>
+              <p style={{ color: "var(--text-muted)", fontFamily: "var(--font-ui)", fontSize: "0.85rem" }}>No orders yet.</p>
+            </div>
+          ) : (
+            <>
+              {/* Desktop table */}
+              <div className="admin-orders-desktop">
+                <div style={{ display: "grid", gridTemplateColumns: "2fr 1.5fr 1fr 1fr 1.5fr", padding: "12px 24px", borderBottom: "1px solid var(--border-subtle)" }}>
+                  {["Customer", "Items", "Total", "Status", "Date"].map((h) => (
+                    <span key={h} style={{ color: "var(--text-muted)", fontSize: "0.6rem", fontFamily: "var(--font-mono)", letterSpacing: "0.15em", textTransform: "uppercase" }}>{h}</span>
+                  ))}
                 </div>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <span style={{ color: "var(--text-muted)", fontSize: "0.68rem", fontFamily: "var(--font-ui)" }}>{p.customer}</span>
-                  <span style={{
-                    backgroundColor: p.license === "Exclusive" ? "rgba(201,168,76,0.12)" : "var(--bg-elevated)",
-                    color: p.license === "Exclusive" ? "var(--gold)" : "var(--text-secondary)",
-                    fontSize: "0.58rem", fontFamily: "var(--font-mono)",
-                    padding: "2px 8px", borderRadius: "2px",
-                  }}>{p.license}</span>
-                </div>
-                <span style={{ color: "var(--text-muted)", fontSize: "0.62rem", fontFamily: "var(--font-mono)" }}>{p.date}</span>
+                {recentOrders.map((order, i) => (
+                  <div key={order.id} style={{
+                    display: "grid", gridTemplateColumns: "2fr 1.5fr 1fr 1fr 1.5fr",
+                    padding: "14px 24px", alignItems: "center",
+                    borderBottom: i < recentOrders.length - 1 ? "1px solid var(--border-subtle)" : "none",
+                  }}>
+                    <span style={{ color: "var(--text-secondary)", fontSize: "0.75rem", fontFamily: "var(--font-ui)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{order.email}</span>
+                    <span style={{ color: "var(--text-muted)", fontSize: "0.72rem", fontFamily: "var(--font-ui)" }}>{order.items?.length ?? 0} beat{(order.items?.length ?? 0) !== 1 ? "s" : ""}</span>
+                    <span style={{ color: "var(--gold)", fontSize: "0.75rem", fontFamily: "var(--font-ui)", fontWeight: 700 }}>₦{Number(order.total).toLocaleString()}</span>
+                    <span style={{ display: "inline-block", backgroundColor: "rgba(74,222,128,0.12)", color: "#4ade80", fontSize: "0.6rem", fontFamily: "var(--font-mono)", padding: "3px 8px", borderRadius: "2px", width: "fit-content", textTransform: "uppercase" }}>{order.status}</span>
+                    <span style={{ color: "var(--text-muted)", fontSize: "0.68rem", fontFamily: "var(--font-mono)" }}>{new Date(order.created_at).toLocaleDateString("en-NG", { day: "numeric", month: "short", year: "numeric" })}</span>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+
+              {/* Mobile cards */}
+              <div className="admin-orders-mobile" style={{ display: "none", flexDirection: "column" }}>
+                {recentOrders.map((order, i) => (
+                  <div key={order.id} style={{
+                    padding: "16px 20px",
+                    borderBottom: i < recentOrders.length - 1 ? "1px solid var(--border-subtle)" : "none",
+                  }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
+                      <span style={{ color: "var(--text-primary)", fontSize: "0.78rem", fontWeight: 700, fontFamily: "var(--font-ui)" }}>₦{Number(order.total).toLocaleString()}</span>
+                      <span style={{ backgroundColor: "rgba(74,222,128,0.12)", color: "#4ade80", fontSize: "0.58rem", fontFamily: "var(--font-mono)", padding: "2px 8px", borderRadius: "2px", textTransform: "uppercase" }}>{order.status}</span>
+                    </div>
+                    <div style={{ color: "var(--text-muted)", fontSize: "0.7rem", fontFamily: "var(--font-ui)", marginBottom: "4px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{order.email}</div>
+                    <div style={{ display: "flex", justifyContent: "space-between" }}>
+                      <span style={{ color: "var(--text-muted)", fontSize: "0.65rem", fontFamily: "var(--font-mono)" }}>{order.items?.length ?? 0} beat{(order.items?.length ?? 0) !== 1 ? "s" : ""}</span>
+                      <span style={{ color: "var(--text-muted)", fontSize: "0.65rem", fontFamily: "var(--font-mono)" }}>{new Date(order.created_at).toLocaleDateString("en-NG", { day: "numeric", month: "short", year: "numeric" })}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
 
           <div style={{ padding: "14px 24px", borderTop: "1px solid var(--border-subtle)", textAlign: "right" }}>
-            <span style={{ color: "var(--gold)", fontSize: "0.72rem", fontFamily: "var(--font-ui)", cursor: "pointer" }}>
-              View all purchases →
-            </span>
+            <Link href="/admin/dashboard/purchases" style={{ color: "var(--gold)", fontSize: "0.72rem", fontFamily: "var(--font-ui)", textDecoration: "none" }}>
+              View all orders →
+            </Link>
           </div>
         </div>
-
       </div>
+
+      <style>{`
+        @media (max-width: 768px) {
+          .admin-sidebar {
+            transform: translateX(-100%) !important;
+            transition: transform 0.25s ease;
+          }
+          .admin-sidebar.open {
+            transform: translateX(0) !important;
+          }
+          .admin-main {
+            margin-left: 0 !important;
+            padding: 20px 16px !important;
+          }
+          .admin-mobile-header {
+            display: flex !important;
+          }
+          .admin-desktop-header {
+            display: none !important;
+          }
+          .admin-stats-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+          }
+          .admin-orders-desktop {
+            display: none !important;
+          }
+          .admin-orders-mobile {
+            display: flex !important;
+          }
+        }
+      `}</style>
     </main>
   )
 }
