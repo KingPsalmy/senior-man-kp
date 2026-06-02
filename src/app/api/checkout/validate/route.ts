@@ -43,24 +43,50 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: `Beat sold exclusively: ${beat.title}` }, { status: 400 })
       }
       if (!["basic", "premium", "unlimited", "exclusive"].includes(item.license_type)) {
-      return NextResponse.json({ error: "Invalid license type" }, { status: 400 })
-    }
+        return NextResponse.json({ error: "Invalid license type" }, { status: 400 })
+      }
 
       // Use DB prices — not frontend prices
       const priceMap: Record<string, number> = {
-    basic: Number(beat.basic_price),
-    premium: Number(beat.premium_price),
-   unlimited: Number(beat.unlimited_price),
-  exclusive: Number(beat.exclusive_price),
-}
+        basic: Number(beat.basic_price),
+        premium: Number(beat.premium_price),
+        unlimited: Number(beat.unlimited_price),
+        exclusive: Number(beat.exclusive_price),
+      }
 
-    validatedItems.push({
-     beat_id: beat.id,
-     title: beat.title,
-     license_type: item.license_type,
-     price: priceMap[item.license_type],
-     beats: beat,
-})
+      validatedItems.push({
+        beat_id: beat.id,
+        title: beat.title,
+        license_type: item.license_type,
+        price: priceMap[item.license_type],
+        beats: beat,
+      })
+    }
+
+    // Lock exclusive beats before proceeding to payment
+    for (const item of validatedItems) {
+      if (item.license_type === "exclusive") {
+        // Check if beat is already locked by someone else
+        const { data: beatStatus } = await supabase
+          .from("beats")
+          .select("status")
+          .eq("id", item.beat_id)
+          .single()
+
+        if (beatStatus?.status === "locked") {
+          return NextResponse.json(
+            { error: `"${item.title}" is currently being purchased by someone else. Please try again in a few minutes.` },
+            { status: 409 }
+          )
+        }
+
+        // Lock the beat — only if still available (guards against race conditions)
+        await supabase
+          .from("beats")
+          .update({ status: "locked", locked_at: new Date().toISOString() })
+          .eq("id", item.beat_id)
+          .eq("status", "available")
+      }
     }
 
     // Calculate discount server-side

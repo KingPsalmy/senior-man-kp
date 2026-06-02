@@ -39,7 +39,7 @@ export default function AdminDashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
+    supabase.auth.getSession().then(({ data }: { data: { session: any } }) => {
       if (!data.session) router.push("/admin/login")
       else {
         setChecking(false)
@@ -48,18 +48,20 @@ export default function AdminDashboard() {
     })
   }, [router])
 
-  async function fetchDashboardData() {
+async function fetchDashboardData() {
     setLoadingStats(true)
 
-    const { data: orders } = await supabase
+    const { data } = await supabase
       .from("orders")
       .select("id, email, total, status, items, created_at, paystack_reference")
       .eq("status", "paid")
       .order("created_at", { ascending: false })
 
-    const totalRevenue = orders?.reduce((sum, o) => sum + Number(o.total), 0) ?? 0
-    const totalOrders = orders?.length ?? 0
-    const uniqueEmails = new Set(orders?.map((o) => o.email) ?? [])
+    const orders = (data ?? []) as Order[]
+
+    const totalRevenue = orders.reduce((sum: number, o: Order) => sum + Number(o.total), 0)
+    const totalOrders = orders.length
+    const uniqueEmails = new Set(orders.map((o: Order) => o.email))
     const totalCustomers = uniqueEmails.size
 
     const { count: totalBeats } = await supabase
@@ -68,7 +70,7 @@ export default function AdminDashboard() {
       .eq("is_published", true)
 
     setStats({ totalRevenue, totalOrders, totalCustomers, totalBeats: totalBeats ?? 0 })
-    setRecentOrders((orders ?? []).slice(0, 10))
+    setRecentOrders(orders.slice(0, 10))
     setLoadingStats(false)
   }
 
