@@ -8,6 +8,8 @@ import { getCart, removeFromCart, updateCartLicense, LICENSE_PRICES } from "@/li
 import { getGuestId } from "@/lib/guest"
 import type { LicenseType } from "@/lib/cart"
 
+const TEST_EMAIL = "kingpsalmyofficial@gmail.com"
+
 type CartItem = {
   id: string
   beat_id: string
@@ -114,6 +116,41 @@ export default function CheckoutPage() {
     setPaying(true)
     setError(null)
 
+    // Test email bypass — skips Paystack entirely
+    if (email.toLowerCase() === TEST_EMAIL.toLowerCase()) {
+      try {
+        const res = await fetch("/api/checkout/test-order", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email,
+            name,
+            guest_id: getGuestId(),
+            items: cartItems.map((i) => ({
+              beat_id: i.beat_id,
+              title: i.beats.title,
+              license_type: i.license_type,
+            })),
+            subtotal: validation.subtotal,
+            discount: validation.discount,
+            total: validation.total,
+          }),
+        })
+        const data = await res.json()
+        if (data.success) {
+          router.push(`/success?reference=${data.reference}&email=${encodeURIComponent(email)}`)
+        } else {
+          setError(data.error ?? "Test order failed.")
+          setPaying(false)
+        }
+      } catch {
+        setError("Test order failed. Please try again.")
+        setPaying(false)
+      }
+      return
+    }
+
+    // Real Paystack flow
     const handler = (window as any).PaystackPop?.setup({
       key: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY,
       email,
@@ -206,7 +243,6 @@ export default function CheckoutPage() {
               {cartItems.map((item) => (
                 <div key={item.beat_id} style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-subtle)", borderRadius: "8px", padding: "20px", display: "flex", gap: "16px", alignItems: "center" }}>
 
-                  {/* Cover */}
                   <div style={{ width: "60px", height: "60px", borderRadius: "4px", flexShrink: 0, overflow: "hidden", background: `linear-gradient(135deg, ${item.beats.color || "#1a0a2e"}, #0a0a0a)`, display: "flex", alignItems: "center", justifyContent: "center" }}>
                     {item.beats.cover_url
                       ? <img src={item.beats.cover_url} alt={item.beats.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
@@ -214,7 +250,6 @@ export default function CheckoutPage() {
                     }
                   </div>
 
-                  {/* Info */}
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ color: "var(--text-primary)", fontSize: "0.88rem", fontWeight: 700, fontFamily: "var(--font-ui)", marginBottom: "4px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                       {item.beats.title}
@@ -222,8 +257,6 @@ export default function CheckoutPage() {
                     <div style={{ color: "var(--text-muted)", fontSize: "0.65rem", fontFamily: "var(--font-mono)", marginBottom: "12px" }}>
                       {item.beats.genre} • {item.beats.bpm} BPM
                     </div>
-
-                    {/* License selector */}
                     <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
                       {(["basic", "premium", "unlimited", "exclusive"] as LicenseType[]).map((license) => (
                         <button
@@ -245,7 +278,6 @@ export default function CheckoutPage() {
                     </div>
                   </div>
 
-                  {/* Price + Remove */}
                   <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "8px", flexShrink: 0 }}>
                     <span style={{ color: "var(--gold)", fontSize: "0.9rem", fontWeight: 700, fontFamily: "var(--font-ui)" }}>
                       ₦{getPriceForLicense(item, item.license_type)?.toLocaleString()}
@@ -261,7 +293,6 @@ export default function CheckoutPage() {
               ))}
             </div>
 
-            {/* Free items notice */}
             {validation && validation.freeItems.length > 0 && (
               <div style={{ backgroundColor: "rgba(201,168,76,0.08)", border: "1px solid rgba(201,168,76,0.25)", borderRadius: "8px", padding: "16px 20px", marginBottom: "24px" }}>
                 <div style={{ color: "var(--gold)", fontSize: "0.7rem", fontWeight: 700, fontFamily: "var(--font-ui)", marginBottom: "8px", letterSpacing: "0.05em" }}>
@@ -282,7 +313,6 @@ export default function CheckoutPage() {
               <h2 style={{ color: "var(--text-primary)", fontSize: "0.75rem", fontWeight: 700, fontFamily: "var(--font-mono)", letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: "20px" }}>
                 Order Summary
               </h2>
-
               {validating ? (
                 <div style={{ textAlign: "center", padding: "20px 0" }}>
                   <div style={{ width: "24px", height: "24px", borderRadius: "50%", border: "2px solid var(--border-dim)", borderTop: "2px solid var(--gold)", animation: "spin 1s linear infinite", margin: "0 auto" }} />
@@ -312,12 +342,9 @@ export default function CheckoutPage() {
               <h2 style={{ color: "var(--text-primary)", fontSize: "0.75rem", fontWeight: 700, fontFamily: "var(--font-mono)", letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: "20px" }}>
                 Your Details
               </h2>
-
               <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
                 <div>
-                  <label style={{ color: "var(--text-muted)", fontSize: "0.65rem", fontFamily: "var(--font-mono)", letterSpacing: "0.1em", textTransform: "uppercase", display: "block", marginBottom: "6px" }}>
-                    Name
-                  </label>
+                  <label style={{ color: "var(--text-muted)", fontSize: "0.65rem", fontFamily: "var(--font-mono)", letterSpacing: "0.1em", textTransform: "uppercase", display: "block", marginBottom: "6px" }}>Name</label>
                   <input
                     type="text"
                     value={name}
@@ -327,9 +354,7 @@ export default function CheckoutPage() {
                   />
                 </div>
                 <div>
-                  <label style={{ color: "var(--text-muted)", fontSize: "0.65rem", fontFamily: "var(--font-mono)", letterSpacing: "0.1em", textTransform: "uppercase", display: "block", marginBottom: "6px" }}>
-                    Email
-                  </label>
+                  <label style={{ color: "var(--text-muted)", fontSize: "0.65rem", fontFamily: "var(--font-mono)", letterSpacing: "0.1em", textTransform: "uppercase", display: "block", marginBottom: "6px" }}>Email</label>
                   <input
                     type="email"
                     value={email}
@@ -344,6 +369,15 @@ export default function CheckoutPage() {
               </div>
             </div>
 
+            {/* Test email indicator */}
+            {email.toLowerCase() === TEST_EMAIL.toLowerCase() && (
+              <div style={{ backgroundColor: "rgba(201,168,76,0.08)", border: "1px solid rgba(201,168,76,0.3)", borderRadius: "6px", padding: "10px 14px", marginBottom: "14px" }}>
+                <p style={{ color: "var(--gold)", fontSize: "0.72rem", fontFamily: "var(--font-mono)" }}>
+                  ⚡ Test mode — payment will be bypassed
+                </p>
+              </div>
+            )}
+
             {error && (
               <div style={{ backgroundColor: "rgba(255,100,100,0.1)", border: "1px solid rgba(255,100,100,0.3)", borderRadius: "6px", padding: "12px 16px", marginBottom: "14px" }}>
                 <p style={{ color: "#ff6464", fontSize: "0.75rem", fontFamily: "var(--font-ui)" }}>{error}</p>
@@ -355,17 +389,20 @@ export default function CheckoutPage() {
               disabled={paying || validating || !validation}
               style={{
                 width: "100%", padding: "15px",
-                background: paying || validating || !validation
-                  ? "var(--bg-elevated)"
-                  : "linear-gradient(135deg, #C9A84C, #F5D98B)",
-                border: "none", borderRadius: "4px", cursor: paying || validating || !validation ? "not-allowed" : "pointer",
+                background: paying || validating || !validation ? "var(--bg-elevated)" : "linear-gradient(135deg, #C9A84C, #F5D98B)",
+                border: "none", borderRadius: "4px",
+                cursor: paying || validating || !validation ? "not-allowed" : "pointer",
                 color: paying || validating || !validation ? "var(--text-muted)" : "#000",
                 fontSize: "0.78rem", fontWeight: 800,
                 fontFamily: "var(--font-ui)", letterSpacing: "0.12em",
                 textTransform: "uppercase",
               }}
             >
-              {paying ? "Processing..." : validating ? "Validating..." : validation ? `Pay ₦${validation.total.toLocaleString()}` : "Loading..."}
+              {paying ? "Processing..." : validating ? "Validating..." : validation
+                ? email.toLowerCase() === TEST_EMAIL.toLowerCase()
+                  ? `Test Order — ₦${validation.total.toLocaleString()}`
+                  : `Pay ₦${validation.total.toLocaleString()}`
+                : "Loading..."}
             </button>
 
             <p style={{ color: "var(--text-muted)", fontSize: "0.62rem", fontFamily: "var(--font-ui)", textAlign: "center", marginTop: "12px", lineHeight: 1.6 }}>

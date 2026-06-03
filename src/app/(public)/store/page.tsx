@@ -15,6 +15,7 @@ type Beat = {
   key: string
   basic_price: number
   premium_price: number
+  unlimited_price: number
   exclusive_price: number
   cover_url: string | null
   preview_url: string | null

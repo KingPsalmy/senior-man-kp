@@ -9,7 +9,8 @@ import { calculateDiscount } from "@/lib/discount"
 const LICENSE_OPTIONS = [
   { value: "basic", label: "Basic", price: 30000 },
   { value: "premium", label: "Premium", price: 70000 },
-  { value: "exclusive", label: "Exclusive", price: 150000 },
+  { value: "unlimited", label: "Unlimited", price: 120000 },
+  { value: "exclusive", label: "Exclusive", price: 180000 },
 ]
 
 function genreColor(genre: string) {

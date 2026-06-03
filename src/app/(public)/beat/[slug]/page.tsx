@@ -24,6 +24,13 @@ const LICENSE_OPTIONS = [
     price: 70000,
     features: ["MP3, WAV & Track Stems", "Non-exclusive rights", "Unlimited streams", "Unlimited Music Videos", "Radio Broadcasting Rights", "Commercial use"],
   },
+
+  { value:"unlimited",
+    label: "Unlimited License",
+    price: 120000,
+    features: ["MP3, WAV & Track Stems", "Non-exclusive rights", "Unlimited Streams", "Unlimited Music Videos", "Radio Broadcasting Rights", "Commercial use"],
+  },
+  
   {
     value: "exclusive",
     label: "Exclusive License",

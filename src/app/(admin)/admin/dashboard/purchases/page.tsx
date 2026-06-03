@@ -45,7 +45,7 @@ export default function PurchasesPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
+    supabase.auth.getSession().then(({ data }: { data: any }) => {
       if (!data.session) router.push("/admin/login")
       else {
         setChecking(false)
