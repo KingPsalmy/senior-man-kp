@@ -116,40 +116,6 @@ export default function CheckoutPage() {
     setPaying(true)
     setError(null)
 
-    // Test email bypass — skips Paystack entirely
-    if (email.toLowerCase() === TEST_EMAIL.toLowerCase()) {
-      try {
-        const res = await fetch("/api/checkout/test-order", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email,
-            name,
-            guest_id: getGuestId(),
-            items: cartItems.map((i) => ({
-              beat_id: i.beat_id,
-              title: i.beats.title,
-              license_type: i.license_type,
-            })),
-            subtotal: validation.subtotal,
-            discount: validation.discount,
-            total: validation.total,
-          }),
-        })
-        const data = await res.json()
-        if (data.success) {
-          router.push(`/success?reference=${data.reference}&email=${encodeURIComponent(email)}`)
-        } else {
-          setError(data.error ?? "Test order failed.")
-          setPaying(false)
-        }
-      } catch {
-        setError("Test order failed. Please try again.")
-        setPaying(false)
-      }
-      return
-    }
-
     // Real Paystack flow
     const handler = (window as any).PaystackPop?.setup({
       key: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY,
