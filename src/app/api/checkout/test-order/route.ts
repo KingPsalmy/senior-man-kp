@@ -25,7 +25,7 @@ const LICENSE_LABELS: Record<string, string> = {
   exclusive: "Exclusive License",
 }
 
-type CartItem = {
+export type CartItem = {
   beat_id: string
   title: string
   license_type: string
