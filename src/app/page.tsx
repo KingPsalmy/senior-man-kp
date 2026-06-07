@@ -47,21 +47,22 @@ export default function HomePage() {
   const { setQueue, play } = usePlayerStore()
 
   useEffect(() => {
-    async function fetchFeatured() {
-      const { data } = await supabase
-        .from("beats")
-        .select("*")
-        .eq("is_published", true)
-        .eq("is_featured", true)
-        .order("created_at", { ascending: false })
-        .limit(4)
-      if (data) {
-        setFeaturedBeats(data)
-        setQueue(data)
-        play(data[0])
-      }
+  async function fetchFeatured() {
+    const { data } = await supabase
+      .from("beats")
+      .select("*")
+      .eq("is_published", true)
+      .eq("is_featured", true)
+      .order("created_at", { ascending: false })
+      .limit(4)
+    if (data) {
+      setFeaturedBeats(data)
+      setQueue(data)
+      play(data[0])
     }
-    fetchFeatured()
+  }
+  fetchFeatured()
+
 
     const interval = setInterval(() => {
       setHeroLeft((prev) => (prev === 1 ? 2 : prev === 2 ? 3 : 1))
@@ -110,9 +111,9 @@ export default function HomePage() {
         <HeroParticles />
 
         {/* Hero content */}
-        <div className="hero-content" style={{ position: "relative", zIndex: 10, paddingLeft: "clamp(24px, 8vw, 140px)", paddingRight: "24px", maxWidth: "640px", width: "100%" }}>
+        <div className="hero-content" style={{ position: "relative", zIndex: 10, paddingLeft: "clamp(24px, 8vw, 140px)", paddingRight: "24px", maxWidth: "600px", width: "100%" }}>
 
-          <h1 style={{ fontSize: "clamp(3.2rem, 5.5vw, 6rem)", lineHeight: 1.05, fontWeight: 800, letterSpacing: "-0.03em", marginBottom: "24px", fontFamily: "var(--font-serif)" }}>
+          <h1 style={{ fontSize: "clamp(2.5rem, 3.8vw, 4.2rem)", lineHeight: 1.08, fontWeight: 800, letterSpacing: "-0.02em", marginBottom: "20px", fontFamily: "var(--font-ui)" }}>
             <span style={{ color: "var(--text-primary)", display: "block" }}>Find Your Sound.</span>
             <span style={{ color: "var(--text-primary)", display: "block" }}>Own It.</span>
             <span style={{ display: "block", fontStyle: "italic", background: "linear-gradient(135deg, #C9A84C, #F5D98B)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
@@ -120,32 +121,32 @@ export default function HomePage() {
             </span>
           </h1>
 
-          <p style={{ color: "var(--text-secondary)", fontSize: "1.05rem", lineHeight: 1.8, marginBottom: "28px", maxWidth: "420px", fontFamily: "var(--font-ui)" }}>
+          <p style={{ color: "var(--text-secondary)", fontSize: "0.9rem", lineHeight: 1.8, marginBottom: "24px", maxWidth: "380px", fontFamily: "var(--font-ui)" }}>
             Original instrumentals for artists building something real.
           </p>
 
           {/* Search bar */}
-          <div style={{ position: "relative", display: "flex", marginBottom: "16px", maxWidth: "480px" }}>
+          <div style={{ position: "relative", display: "flex", marginBottom: "14px", maxWidth: "480px" }}>
             <input
               type="text"
               placeholder="What do you need today?"
               style={{
-                flex: 1, padding: "16px 18px",
+                flex: 1, padding: "14px 16px",
                 backgroundColor: "rgba(22,22,22,0.9)",
                 border: "1px solid var(--border-gold)",
                 borderRadius: "4px 0 0 4px",
-                color: "var(--text-primary)", fontSize: "0.9rem",
+                color: "var(--text-primary)", fontSize: "0.78rem",
                 fontFamily: "var(--font-ui)", outline: "none",
                 backdropFilter: "blur(10px)",
               }}
             />
             <button style={{
-              padding: "16px 20px",
+              padding: "14px 18px",
               background: "linear-gradient(135deg, #C9A84C, #F5D98B)",
               border: "none", borderRadius: "0 4px 4px 0",
               cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
             }}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="11" cy="11" r="8" />
                 <line x1="21" y1="21" x2="16.65" y2="16.65" />
               </svg>
@@ -153,17 +154,17 @@ export default function HomePage() {
           </div>
 
           {/* Quick filters */}
-          <div className="hero-filters" style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginBottom: "32px" }}>
+          <div className="hero-filters" style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginBottom: "28px" }}>
             {[
               { placeholder: "Mood / Feel", options: ["Chill", "Dark", "Energetic", "Emotional", "Melodic", "Happy", "Ambient"] },
               { placeholder: "Genre", options: ["Afrobeat", "Afro Fusion", "Trap", "R&B", "Amapiano", "Drill"] },
             ].map((filter) => (
               <select key={filter.placeholder} style={{
-                padding: "12px 16px",
+                padding: "10px 14px",
                 backgroundColor: "var(--bg-card)",
                 border: "1px solid var(--border-subtle)",
                 borderRadius: "4px", color: "var(--text-secondary)",
-                fontSize: "0.85rem", fontFamily: "var(--font-ui)",
+                fontSize: "0.72rem", fontFamily: "var(--font-ui)",
                 outline: "none", cursor: "pointer",
               }}>
                 <option>{filter.placeholder}</option>
@@ -174,19 +175,19 @@ export default function HomePage() {
               type="number"
               placeholder="BPM"
               style={{
-                padding: "12px 16px", width: "100px",
+                padding: "10px 14px", width: "90px",
                 backgroundColor: "var(--bg-card)",
                 border: "1px solid var(--border-subtle)",
                 borderRadius: "4px", color: "var(--text-secondary)",
-                fontSize: "0.85rem", fontFamily: "var(--font-ui)", outline: "none",
+                fontSize: "0.72rem", fontFamily: "var(--font-ui)", outline: "none",
               }}
             />
           </div>
 
           {/* CTAs */}
-          <div style={{ display: "flex", alignItems: "center", gap: "14px", marginBottom: "40px", flexWrap: "wrap" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "32px", flexWrap: "wrap" }}>
             <Link href="/store" style={{
-              padding: "15px 32px", fontSize: "0.82rem", fontWeight: 700, letterSpacing: "0.1em",
+              padding: "13px 28px", fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.1em",
               textTransform: "uppercase", textDecoration: "none", color: "#000",
               background: "linear-gradient(135deg, #C9A84C, #F5D98B)", borderRadius: "3px",
               fontFamily: "var(--font-ui)",
@@ -194,7 +195,7 @@ export default function HomePage() {
               Browse Beats
             </Link>
             <Link href="/licensing" style={{
-              padding: "15px 32px", fontSize: "0.82rem", fontWeight: 600, letterSpacing: "0.1em",
+              padding: "13px 28px", fontSize: "0.72rem", fontWeight: 600, letterSpacing: "0.1em",
               textTransform: "uppercase", textDecoration: "none", color: "var(--gold)",
               border: "1px solid rgba(201,168,76,0.3)", borderRadius: "3px",
               fontFamily: "var(--font-ui)",
@@ -206,18 +207,18 @@ export default function HomePage() {
           {/* Genre tags */}
           <div>
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "12px" }}>
-              <span style={{ color: "var(--text-muted)", fontSize: "0.7rem", letterSpacing: "0.2em", textTransform: "uppercase", fontFamily: "var(--font-mono)" }}>
+              <span style={{ color: "var(--text-muted)", fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", fontFamily: "var(--font-mono)" }}>
                 Browse by Genre
               </span>
-              <Link href="/store" style={{ color: "var(--gold)", fontSize: "0.7rem", textDecoration: "none", fontFamily: "var(--font-mono)" }}>
+              <Link href="/store" style={{ color: "var(--gold)", fontSize: "0.6rem", textDecoration: "none", fontFamily: "var(--font-mono)" }}>
                 View all
               </Link>
             </div>
             <div className="genre-tags" style={{ display: "flex", gap: "8px", flexWrap: "nowrap" }}>
               {["Afrobeat", "Afro Fusion", "Trap", "R&B", "Amapiano", "Drill"].map((genre) => (
                 <Link key={genre} href={`/store?genre=${genre.toLowerCase()}`} style={{
-                  padding: "10px 16px", border: "1px solid var(--border-dim)", borderRadius: "3px",
-                  color: "var(--text-secondary)", fontSize: "0.78rem", textDecoration: "none",
+                  padding: "8px 14px", border: "1px solid var(--border-dim)", borderRadius: "3px",
+                  color: "var(--text-secondary)", fontSize: "0.65rem", textDecoration: "none",
                   backgroundColor: "var(--bg-elevated)", whiteSpace: "nowrap",
                   fontFamily: "var(--font-ui)", fontWeight: 500,
                 }}>
@@ -231,19 +232,19 @@ export default function HomePage() {
       </section>
 
       {/* ── Featured Beats ── */}
-      <section className="section-padding" style={{ padding: "100px 48px", backgroundColor: "var(--bg-void)" }}>
+      <section className="section-padding" style={{ padding: "80px 48px", backgroundColor: "var(--bg-void)" }}>
         <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "40px" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "32px" }}>
             <div>
-              <span style={{ color: "var(--gold)", fontSize: "0.75rem", fontFamily: "var(--font-mono)", letterSpacing: "0.2em", textTransform: "uppercase" }}>
+              <span style={{ color: "var(--gold)", fontSize: "0.65rem", fontFamily: "var(--font-mono)", letterSpacing: "0.2em", textTransform: "uppercase" }}>
                 Featured Beats
               </span>
-              <h2 style={{ color: "var(--text-primary)", fontSize: "2.4rem", fontWeight: 800, fontFamily: "var(--font-serif)", letterSpacing: "-0.02em", marginTop: "6px" }}>
+              <h2 style={{ color: "var(--text-primary)", fontSize: "1.8rem", fontWeight: 800, fontFamily: "var(--font-ui)", letterSpacing: "-0.02em", marginTop: "4px" }}>
                 Latest Drops
               </h2>
             </div>
             <Link href="/store" style={{
-              padding: "12px 28px", fontSize: "0.8rem", fontWeight: 700,
+              padding: "10px 24px", fontSize: "0.7rem", fontWeight: 700,
               background: "linear-gradient(135deg, #C9A84C, #F5D98B)",
               borderRadius: "3px", textDecoration: "none", color: "#000",
               fontFamily: "var(--font-ui)", letterSpacing: "0.1em", textTransform: "uppercase",
@@ -275,41 +276,42 @@ export default function HomePage() {
                     </div>
                   )}
 
+                  {/* Share trigger */}
                   <div
                     onClick={() => setShareBeat(beat)}
                     style={{
                       position: "absolute", top: "10px", right: "12px",
-                      color: "var(--text-muted)", fontSize: "1.2rem",
+                      color: "var(--text-muted)", fontSize: "1rem",
                       zIndex: 2, cursor: "pointer",
                     }}>···</div>
 
                   <button style={{
                     position: "absolute", bottom: "12px", right: "12px",
-                    width: "40px", height: "40px", borderRadius: "50%",
+                    width: "36px", height: "36px", borderRadius: "50%",
                     backgroundColor: "var(--gold)", border: "none",
                     display: "flex", alignItems: "center", justifyContent: "center",
                     cursor: "pointer",
                   }}>
-                    <span style={{ color: "#000", fontSize: "0.8rem", marginLeft: "2px" }}>▶</span>
+                    <span style={{ color: "#000", fontSize: "0.7rem", marginLeft: "2px" }}>▶</span>
                   </button>
                 </div>
 
                 {/* Info */}
-                <div style={{ padding: "16px" }}>
-                  <h3 style={{ color: "var(--text-primary)", fontSize: "1.05rem", fontWeight: 700, fontFamily: "var(--font-ui)", marginBottom: "4px" }}>
+                <div style={{ padding: "14px" }}>
+                  <h3 style={{ color: "var(--text-primary)", fontSize: "0.95rem", fontWeight: 700, fontFamily: "var(--font-ui)", marginBottom: "4px" }}>
                     {beat.title}
                   </h3>
-                  <div style={{ color: "var(--gold)", fontSize: "0.8rem", fontFamily: "var(--font-ui)", marginBottom: "8px" }}>{beat.genre}</div>
-                  <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "14px" }}>
-                    <span style={{ color: "var(--text-muted)", fontSize: "0.75rem", fontFamily: "var(--font-mono)" }}>{beat.bpm} BPM</span>
+                  <div style={{ color: "var(--gold)", fontSize: "0.7rem", fontFamily: "var(--font-ui)", marginBottom: "8px" }}>{beat.genre}</div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "12px" }}>
+                    <span style={{ color: "var(--text-muted)", fontSize: "0.65rem", fontFamily: "var(--font-mono)" }}>{beat.bpm} BPM</span>
                     <span style={{ color: "var(--border-dim)" }}>•</span>
-                    <span style={{ color: "var(--text-muted)", fontSize: "0.75rem", fontFamily: "var(--font-mono)" }}>{beat.key}</span>
+                    <span style={{ color: "var(--text-muted)", fontSize: "0.65rem", fontFamily: "var(--font-mono)" }}>{beat.key}</span>
                   </div>
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                    <Link href={`/beat/${beat.slug}`} style={{ color: "var(--text-primary)", fontSize: "0.9rem", fontWeight: 700, fontFamily: "var(--font-ui)", textDecoration: "none" }}>
+                    <Link href={`/beat/${beat.slug}`} style={{ color: "var(--text-primary)", fontSize: "0.82rem", fontWeight: 700, fontFamily: "var(--font-ui)", textDecoration: "none" }}>
                       from ₦{beat.basic_price.toLocaleString()}
                     </Link>
-                    <button style={{ width: "34px", height: "34px", borderRadius: "50%", backgroundColor: "var(--gold)", border: "none", cursor: "pointer", fontSize: "0.8rem" }}>
+                    <button style={{ width: "30px", height: "30px", borderRadius: "50%", backgroundColor: "var(--gold)", border: "none", cursor: "pointer", fontSize: "0.7rem" }}>
                       🛒
                     </button>
                   </div>
@@ -321,12 +323,12 @@ export default function HomePage() {
       </section>
 
       {/* ── Learn More ── */}
-      <section className="section-padding" style={{ padding: "100px 48px", backgroundColor: "var(--bg-deep)", borderTop: "1px solid var(--border-subtle)" }}>
+      <section className="section-padding" style={{ padding: "80px 48px", backgroundColor: "var(--bg-deep)", borderTop: "1px solid var(--border-subtle)" }}>
         <div style={{ maxWidth: "1200px", margin: "0 auto", textAlign: "center" }}>
-          <span style={{ color: "var(--gold)", fontSize: "0.75rem", fontFamily: "var(--font-mono)", letterSpacing: "0.2em", textTransform: "uppercase" }}>
+          <span style={{ color: "var(--gold)", fontSize: "0.65rem", fontFamily: "var(--font-mono)", letterSpacing: "0.2em", textTransform: "uppercase" }}>
             Learn More
           </span>
-          <h2 style={{ color: "var(--text-primary)", fontSize: "2.8rem", fontWeight: 800, fontFamily: "var(--font-serif)", marginTop: "10px", marginBottom: "56px", letterSpacing: "-0.02em" }}>
+          <h2 style={{ color: "var(--text-primary)", fontSize: "2rem", fontWeight: 800, fontFamily: "var(--font-ui)", marginTop: "8px", marginBottom: "48px" }}>
             Everything You Need to Know
           </h2>
 
@@ -335,20 +337,20 @@ export default function HomePage() {
               <div key={item.title} style={{
                 backgroundColor: "var(--bg-card)",
                 border: "1px solid var(--border-subtle)",
-                borderRadius: "8px", padding: "36px", textAlign: "left",
+                borderRadius: "8px", padding: "32px", textAlign: "left",
               }}>
-                <h3 style={{ color: "var(--text-primary)", fontSize: "1.15rem", fontWeight: 700, fontFamily: "var(--font-ui)", marginBottom: "14px" }}>
+                <h3 style={{ color: "var(--text-primary)", fontSize: "1rem", fontWeight: 700, fontFamily: "var(--font-ui)", marginBottom: "12px" }}>
                   {item.title}
                 </h3>
-                <p style={{ color: "var(--text-muted)", fontSize: "0.92rem", fontFamily: "var(--font-ui)", lineHeight: 1.8, marginBottom: "24px" }}>
+                <p style={{ color: "var(--text-muted)", fontSize: "0.8rem", fontFamily: "var(--font-ui)", lineHeight: 1.7, marginBottom: "20px" }}>
                   {item.desc}
                 </p>
                 {item.external ? (
-                  <a href={item.link} style={{ color: "var(--gold)", fontSize: "0.82rem", fontFamily: "var(--font-ui)", fontWeight: 600, textDecoration: "none" }}>
+                  <a href={item.link} style={{ color: "var(--gold)", fontSize: "0.72rem", fontFamily: "var(--font-ui)", fontWeight: 600, textDecoration: "none" }}>
                     {item.cta} →
                   </a>
                 ) : (
-                  <Link href={item.link} style={{ color: "var(--gold)", fontSize: "0.82rem", fontFamily: "var(--font-ui)", fontWeight: 600, textDecoration: "none" }}>
+                  <Link href={item.link} style={{ color: "var(--gold)", fontSize: "0.72rem", fontFamily: "var(--font-ui)", fontWeight: 600, textDecoration: "none" }}>
                     {item.cta} →
                   </Link>
                 )}
@@ -377,30 +379,30 @@ export default function HomePage() {
               border: "1px solid rgba(201,168,76,0.25)",
               borderRadius: "12px",
               width: "100%", maxWidth: "420px",
-              padding: "32px",
+              padding: "28px",
             }}
           >
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "24px" }}>
-              <h3 style={{ color: "var(--text-primary)", fontSize: "1rem", fontWeight: 700, fontFamily: "var(--font-ui)" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "20px" }}>
+              <h3 style={{ color: "var(--text-primary)", fontSize: "0.9rem", fontWeight: 700, fontFamily: "var(--font-ui)" }}>
                 Share Beat
               </h3>
-              <button onClick={() => setShareBeat(null)} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: "1.2rem" }}>✕</button>
+              <button onClick={() => setShareBeat(null)} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: "1.1rem" }}>✕</button>
             </div>
 
             <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "24px", padding: "14px", backgroundColor: "var(--bg-elevated)", borderRadius: "8px" }}>
               <div style={{
-                width: "48px", height: "48px", borderRadius: "4px", flexShrink: 0,
+                width: "44px", height: "44px", borderRadius: "4px", flexShrink: 0,
                 background: shareBeat.cover_url ? "none" : `linear-gradient(135deg, ${genreColor[shareBeat.genre] ?? "#111"}, #0a0a0a)`,
                 overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center",
               }}>
                 {shareBeat.cover_url
                   ? <img src={shareBeat.cover_url} alt={shareBeat.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                  : <span style={{ color: "rgba(255,255,255,0.3)", fontSize: "0.6rem", fontFamily: "var(--font-mono)" }}>{shareBeat.title.slice(0, 2).toUpperCase()}</span>
+                  : <span style={{ color: "rgba(255,255,255,0.3)", fontSize: "0.55rem", fontFamily: "var(--font-mono)" }}>{shareBeat.title.slice(0, 2).toUpperCase()}</span>
                 }
               </div>
               <div>
-                <div style={{ color: "var(--text-primary)", fontSize: "0.92rem", fontWeight: 700, fontFamily: "var(--font-ui)" }}>{shareBeat.title}</div>
-                <div style={{ color: "var(--gold)", fontSize: "0.78rem", fontFamily: "var(--font-ui)" }}>{shareBeat.genre} • {shareBeat.bpm} BPM</div>
+                <div style={{ color: "var(--text-primary)", fontSize: "0.85rem", fontWeight: 700, fontFamily: "var(--font-ui)" }}>{shareBeat.title}</div>
+                <div style={{ color: "var(--gold)", fontSize: "0.7rem", fontFamily: "var(--font-ui)" }}>{shareBeat.genre} • {shareBeat.bpm} BPM</div>
               </div>
             </div>
 
@@ -409,20 +411,20 @@ export default function HomePage() {
                 readOnly
                 value={`${typeof window !== "undefined" ? window.location.origin : ""}/beat/${shareBeat.slug}`}
                 style={{
-                  flex: 1, padding: "12px 14px",
+                  flex: 1, padding: "10px 12px",
                   backgroundColor: "var(--bg-elevated)",
                   border: "1px solid var(--border-dim)",
                   borderRadius: "4px", color: "var(--text-secondary)",
-                  fontSize: "0.78rem", fontFamily: "var(--font-mono)", outline: "none",
+                  fontSize: "0.72rem", fontFamily: "var(--font-mono)", outline: "none",
                 }}
               />
               <button
                 onClick={() => navigator.clipboard.writeText(`${window.location.origin}/beat/${shareBeat.slug}`)}
                 style={{
-                  padding: "12px 18px",
+                  padding: "10px 16px",
                   background: "linear-gradient(135deg, #C9A84C, #F5D98B)",
                   border: "none", borderRadius: "4px",
-                  color: "#000", fontSize: "0.75rem", fontWeight: 700,
+                  color: "#000", fontSize: "0.68rem", fontWeight: 700,
                   fontFamily: "var(--font-ui)", cursor: "pointer",
                   letterSpacing: "0.08em", textTransform: "uppercase", whiteSpace: "nowrap",
                 }}
@@ -438,11 +440,11 @@ export default function HomePage() {
               ].map((s) => (
                 <a key={s.label} href={s.url} target="_blank" rel="noopener noreferrer" style={{
                   display: "flex", alignItems: "center", gap: "8px",
-                  padding: "12px 16px",
+                  padding: "10px 14px",
                   backgroundColor: "var(--bg-elevated)",
                   border: "1px solid var(--border-dim)",
                   borderRadius: "6px", textDecoration: "none",
-                  color: "var(--text-secondary)", fontSize: "0.82rem",
+                  color: "var(--text-secondary)", fontSize: "0.72rem",
                   fontFamily: "var(--font-ui)", fontWeight: 500,
                 }}>
                   <span>{s.icon}</span>{s.label}
