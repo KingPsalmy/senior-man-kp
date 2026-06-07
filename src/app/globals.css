@@ -28,6 +28,7 @@
   --text-primary: #F5F0E8;
   --text-secondary: rgba(245, 240, 232, 0.6);
   --text-muted: rgba(245, 240, 232, 0.35);
+  --font-serif: 'DM Serif Display', serif;
   --font-display: 'Barlow Condensed', sans-serif;
   --font-ui: 'Barlow', sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
