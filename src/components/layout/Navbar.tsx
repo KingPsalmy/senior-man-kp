@@ -34,7 +34,7 @@ export default function Navbar() {
           backdropFilter: "blur(24px)",
           WebkitBackdropFilter: "blur(24px)",
           borderBottom: "1px solid rgba(255,255,255,0.06)",
-          height: "64px",
+          height: "72px",
         }}
       >
         <div
@@ -43,7 +43,7 @@ export default function Navbar() {
             alignItems: "center",
             justifyContent: "space-between",
             height: "100%",
-            padding: "0 24px",
+            padding: "0 32px",
             maxWidth: "1400px",
             margin: "0 auto",
           }}
@@ -53,19 +53,19 @@ export default function Navbar() {
             <img
               src="/logo-white.png"
               alt="Senior Man KP"
-              style={{ height: "48px", width: "auto", objectFit: "contain" }}
+              style={{ height: "60px", width: "auto", objectFit: "contain" }}
             />
           </Link>
 
           {/* Desktop Nav */}
-          <nav className="desktop-nav" style={{ display: "flex", gap: "32px", alignItems: "center" }}>
+          <nav className="desktop-nav" style={{ display: "flex", gap: "40px", alignItems: "center" }}>
             {links.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
                 style={{
                   fontFamily: "var(--font-ui)",
-                  fontSize: "0.72rem",
+                  fontSize: "0.85rem",
                   letterSpacing: "0.12em",
                   textTransform: "uppercase",
                   textDecoration: "none",
@@ -87,14 +87,14 @@ export default function Navbar() {
                 display: "flex", alignItems: "center", gap: "8px",
                 background: "linear-gradient(135deg, #C9A84C, #F5D98B)",
                 border: "none", borderRadius: "3px",
-                padding: "9px 18px", cursor: "pointer",
+                padding: "11px 22px", cursor: "pointer",
                 fontFamily: "var(--font-ui)", fontWeight: 700,
-                fontSize: "0.68rem", letterSpacing: "0.1em",
+                fontSize: "0.8rem", letterSpacing: "0.1em",
                 textTransform: "uppercase", color: "#000",
                 textDecoration: "none",
               }}
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="8" cy="21" r="1" />
                 <circle cx="19" cy="21" r="1" />
                 <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" />
@@ -114,27 +114,27 @@ export default function Navbar() {
               flexDirection: "column",
               justifyContent: "center",
               alignItems: "center",
-              width: "32px", height: "32px",
+              width: "36px", height: "36px",
               position: "relative",
             }}
           >
             <span style={{
-              display: "block", width: "22px", height: "2px",
+              display: "block", width: "24px", height: "2px",
               backgroundColor: "var(--text-primary)",
               position: "absolute", transition: "all 0.25s ease",
-              transform: menuOpen ? "rotate(45deg)" : "translateY(-5px)",
+              transform: menuOpen ? "rotate(45deg)" : "translateY(-6px)",
             }} />
             <span style={{
-              display: "block", width: "22px", height: "2px",
+              display: "block", width: "24px", height: "2px",
               backgroundColor: "var(--text-primary)",
               position: "absolute", transition: "all 0.25s ease",
               opacity: menuOpen ? 0 : 1,
             }} />
             <span style={{
-              display: "block", width: "22px", height: "2px",
+              display: "block", width: "24px", height: "2px",
               backgroundColor: "var(--text-primary)",
               position: "absolute", transition: "all 0.25s ease",
-              transform: menuOpen ? "rotate(-45deg)" : "translateY(5px)",
+              transform: menuOpen ? "rotate(-45deg)" : "translateY(6px)",
             }} />
           </button>
         </div>
@@ -145,14 +145,14 @@ export default function Navbar() {
         <div
           style={{
             position: "fixed",
-            top: "64px", left: 0, right: 0,
+            top: "72px", left: 0, right: 0,
             zIndex: 49,
             background: "rgba(2,2,2,0.98)",
             borderBottom: "1px solid var(--border-subtle)",
-            padding: "24px",
+            padding: "28px 24px",
             display: "flex",
             flexDirection: "column",
-            gap: "20px",
+            gap: "24px",
           }}
         >
           {links.map((link) => (
@@ -162,7 +162,7 @@ export default function Navbar() {
               onClick={() => setMenuOpen(false)}
               style={{
                 fontFamily: "var(--font-ui)",
-                fontSize: "1rem", fontWeight: 600,
+                fontSize: "1.1rem", fontWeight: 600,
                 textDecoration: "none",
                 color: pathname === link.href ? "var(--gold)" : "var(--text-primary)",
                 letterSpacing: "0.05em",
@@ -178,14 +178,14 @@ export default function Navbar() {
             style={{
               display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",
               background: "linear-gradient(135deg, #C9A84C, #F5D98B)",
-              borderRadius: "3px", padding: "12px 20px",
+              borderRadius: "3px", padding: "14px 20px",
               fontFamily: "var(--font-ui)", fontWeight: 700,
-              fontSize: "0.75rem", letterSpacing: "0.1em",
+              fontSize: "0.85rem", letterSpacing: "0.1em",
               textTransform: "uppercase", color: "#000",
               textDecoration: "none", width: "100%",
             }}
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="8" cy="21" r="1" />
               <circle cx="19" cy="21" r="1" />
               <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" />
