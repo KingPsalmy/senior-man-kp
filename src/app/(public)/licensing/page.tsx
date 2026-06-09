@@ -264,27 +264,27 @@ export default function LicensingPage() {
       <section
         className="license-hero"
         style={{
-          padding: "120px 48px 80px",
+          padding: "140px 48px 100px",
           textAlign: "center",
           borderBottom: "1px solid var(--border-subtle)",
         }}
       >
-        <span style={{ color: "var(--gold)", fontSize: "0.65rem", fontFamily: "var(--font-mono)", letterSpacing: "0.3em", textTransform: "uppercase" }}>
+        <span style={{ color: "var(--gold)", fontSize: "0.78rem", fontFamily: "var(--font-mono)", letterSpacing: "0.3em", textTransform: "uppercase" }}>
           Licensing
         </span>
-        <h1 style={{ color: "var(--text-primary)", fontSize: "clamp(2.4rem, 5vw, 4rem)", fontWeight: 800, fontFamily: "var(--font-ui)", letterSpacing: "-0.03em", marginTop: "10px", marginBottom: "18px" }}>
+        <h1 style={{ color: "var(--text-primary)", marginTop: "14px", marginBottom: "20px" }}>
           Clear Licensing.
           <br />
           Real Ownership.
         </h1>
-        <p style={{ color: "var(--text-muted)", fontSize: "0.9rem", lineHeight: 1.8, maxWidth: "620px", margin: "0 auto", fontFamily: "var(--font-ui)" }}>
+        <p style={{ color: "var(--text-muted)", fontSize: "1.1rem", lineHeight: 1.8, maxWidth: "620px", margin: "0 auto 36px", fontFamily: "var(--font-ui)" }}>
           Four tiers designed for every stage of your career — from your first single to your biggest commercial release.
         </p>
-        <div style={{ display: "flex", justifyContent: "center", gap: "14px", marginTop: "32px", flexWrap: "wrap" }}>
-          <Link href="/store" style={{ padding: "13px 28px", background: "linear-gradient(135deg, #C9A84C, #F5D98B)", color: "#000", textDecoration: "none", borderRadius: "4px", fontSize: "0.72rem", fontWeight: 700, fontFamily: "var(--font-ui)", letterSpacing: "0.1em", textTransform: "uppercase" }}>
+        <div style={{ display: "flex", justifyContent: "center", gap: "14px", flexWrap: "wrap" }}>
+          <Link href="/store" style={{ padding: "15px 32px", background: "linear-gradient(135deg, #C9A84C, #F5D98B)", color: "#000", textDecoration: "none", borderRadius: "4px", fontSize: "0.85rem", fontWeight: 700, fontFamily: "var(--font-ui)", letterSpacing: "0.1em", textTransform: "uppercase" }}>
             Browse Store
           </Link>
-          <Link href="/faq" style={{ padding: "13px 28px", border: "1px solid rgba(201,168,76,0.3)", color: "var(--gold)", textDecoration: "none", borderRadius: "4px", fontSize: "0.72rem", fontWeight: 700, fontFamily: "var(--font-ui)", letterSpacing: "0.1em", textTransform: "uppercase" }}>
+          <Link href="/faq" style={{ padding: "15px 32px", border: "1px solid rgba(201,168,76,0.3)", color: "var(--gold)", textDecoration: "none", borderRadius: "4px", fontSize: "0.85rem", fontWeight: 700, fontFamily: "var(--font-ui)", letterSpacing: "0.1em", textTransform: "uppercase" }}>
             View FAQ
           </Link>
         </div>
@@ -293,12 +293,12 @@ export default function LicensingPage() {
       {/* License Cards */}
       <section
         className="license-section"
-        style={{ padding: "80px 48px" }}
+        style={{ padding: "100px 48px" }}
       >
-        <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
+        <div style={{ maxWidth: "1280px", margin: "0 auto" }}>
           <div
             className="license-grid"
-            style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "20px", alignItems: "start" }}
+            style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "24px", alignItems: "start" }}
           >
             {licenses.map((item) => (
               <div
@@ -306,72 +306,98 @@ export default function LicensingPage() {
                 style={{
                   backgroundColor: item.popular ? "rgba(201,168,76,0.05)" : "var(--bg-card)",
                   border: `1px solid ${item.popular ? "rgba(201,168,76,0.4)" : "var(--border-subtle)"}`,
-                  borderRadius: "10px", padding: "28px", position: "relative",
+                  borderRadius: "12px", padding: "32px", position: "relative",
                 }}
               >
                 {item.tag && (
                   <div style={{
-                    position: "absolute", top: "-14px", left: "50%", transform: "translateX(-50%)",
+                    position: "absolute", top: "-16px", left: "50%", transform: "translateX(-50%)",
                     backgroundColor: item.type === "unlimited" ? "var(--bg-elevated)" : "var(--gold)",
                     color: item.type === "unlimited" ? "var(--gold)" : "#000",
                     border: item.type === "unlimited" ? "1px solid var(--gold)" : "none",
-                    fontSize: "0.6rem", fontWeight: 700, padding: "6px 16px", borderRadius: "20px",
+                    fontSize: "0.65rem", fontWeight: 700, padding: "6px 18px", borderRadius: "20px",
                     fontFamily: "var(--font-mono)", letterSpacing: "0.14em", whiteSpace: "nowrap",
                   }}>
                     {item.tag}
                   </div>
                 )}
 
-                <div style={{ color: "var(--text-muted)", fontSize: "0.65rem", letterSpacing: "0.15em", textTransform: "uppercase", fontFamily: "var(--font-mono)", marginBottom: "10px" }}>
+                <div style={{ color: "var(--text-muted)", fontSize: "0.72rem", letterSpacing: "0.15em", textTransform: "uppercase", fontFamily: "var(--font-mono)", marginBottom: "12px" }}>
                   {item.name}
                 </div>
 
-                <div style={{ color: item.popular ? "var(--gold)" : "var(--text-primary)", fontSize: "1.7rem", fontWeight: 800, fontFamily: "var(--font-ui)", letterSpacing: "-0.03em", marginBottom: "24px" }}>
+                <div style={{ color: item.popular ? "var(--gold)" : "var(--text-primary)", fontSize: "2.2rem", fontWeight: 800, fontFamily: "var(--font-ui)", letterSpacing: "-0.03em", marginBottom: "28px" }}>
                   {item.price}
                 </div>
 
-                <div style={{ marginBottom: "16px" }}>
-                  <div style={{ color: "var(--text-muted)", fontSize: "0.6rem", letterSpacing: "0.1em", textTransform: "uppercase", fontFamily: "var(--font-mono)", marginBottom: "10px" }}>Included</div>
-                  <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                <div style={{ marginBottom: "20px" }}>
+                  <div style={{ color: "var(--text-muted)", fontSize: "0.68rem", letterSpacing: "0.1em", textTransform: "uppercase", fontFamily: "var(--font-mono)", marginBottom: "12px" }}>Included</div>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
                     {item.features.map((feature) => (
                       <div key={feature} style={{ display: "flex", gap: "10px", alignItems: "flex-start" }}>
                         <span style={{ color: "var(--gold)", marginTop: "2px", flexShrink: 0 }}>✓</span>
-                        <span style={{ color: "var(--text-secondary)", fontSize: "0.75rem", lineHeight: 1.5, fontFamily: "var(--font-ui)" }}>{feature}</span>
+                        <span style={{ color: "var(--text-secondary)", fontSize: "0.88rem", lineHeight: 1.5, fontFamily: "var(--font-ui)" }}>{feature}</span>
                       </div>
                     ))}
                   </div>
                 </div>
 
-                <div style={{ marginBottom: "24px" }}>
-                  <div style={{ color: "var(--text-muted)", fontSize: "0.6rem", letterSpacing: "0.1em", textTransform: "uppercase", fontFamily: "var(--font-mono)", marginBottom: "10px" }}>Limitations</div>
-                  <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                <div style={{ marginBottom: "28px" }}>
+                  <div style={{ color: "var(--text-muted)", fontSize: "0.68rem", letterSpacing: "0.1em", textTransform: "uppercase", fontFamily: "var(--font-mono)", marginBottom: "12px" }}>Limitations</div>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
                     {item.restrictions.map((restriction) => (
                       <div key={restriction} style={{ display: "flex", gap: "10px", alignItems: "flex-start" }}>
                         <span style={{ color: "var(--text-muted)", marginTop: "2px", flexShrink: 0 }}>×</span>
-                        <span style={{ color: "var(--text-muted)", fontSize: "0.72rem", lineHeight: 1.5, fontFamily: "var(--font-ui)" }}>{restriction}</span>
+                        <span style={{ color: "var(--text-muted)", fontSize: "0.85rem", lineHeight: 1.5, fontFamily: "var(--font-ui)" }}>{restriction}</span>
                       </div>
                     ))}
                   </div>
                 </div>
 
-                <button onClick={() => setModalLicense(item.type)} style={{ width: "100%", padding: "11px", marginBottom: "10px", borderRadius: "4px", cursor: "pointer", border: "1px solid var(--gold)", backgroundColor: "transparent", color: "var(--gold)", fontSize: "0.7rem", fontWeight: 700, fontFamily: "var(--font-ui)", letterSpacing: "0.1em", textTransform: "uppercase" }}>
+                <button
+                  onClick={() => setModalLicense(item.type)}
+                  style={{
+                    width: "100%", padding: "13px", marginBottom: "10px",
+                    borderRadius: "4px", cursor: "pointer",
+                    border: "1px solid var(--gold)", backgroundColor: "transparent",
+                    color: "var(--gold)", fontSize: "0.82rem", fontWeight: 700,
+                    fontFamily: "var(--font-ui)", letterSpacing: "0.1em", textTransform: "uppercase",
+                  }}>
                   Read License
                 </button>
 
                 {item.type === "exclusive" ? (
-                  <a href="mailto:contact@seniormankp.com?subject=Exclusive License Inquiry" style={{ display: "block", width: "100%", padding: "11px", background: "linear-gradient(135deg, #C9A84C, #F5D98B)", borderRadius: "4px", color: "#000", textDecoration: "none", textAlign: "center", fontSize: "0.7rem", fontWeight: 700, fontFamily: "var(--font-ui)", letterSpacing: "0.1em", textTransform: "uppercase", boxSizing: "border-box" }}>
+                  <a
+                    href="mailto:contact@seniormankp.com?subject=Exclusive License Inquiry"
+                    style={{
+                      display: "block", width: "100%", padding: "13px",
+                      background: "linear-gradient(135deg, #C9A84C, #F5D98B)",
+                      borderRadius: "4px", color: "#000", textDecoration: "none",
+                      textAlign: "center", fontSize: "0.82rem", fontWeight: 700,
+                      fontFamily: "var(--font-ui)", letterSpacing: "0.1em",
+                      textTransform: "uppercase", boxSizing: "border-box",
+                    }}>
                     Contact Producer
                   </a>
                 ) : (
-                  <Link href="/store" style={{ display: "block", width: "100%", padding: "11px", border: "1px solid var(--border-dim)", borderRadius: "4px", color: "var(--text-secondary)", textDecoration: "none", textAlign: "center", fontSize: "0.7rem", fontWeight: 700, fontFamily: "var(--font-ui)", letterSpacing: "0.1em", textTransform: "uppercase", boxSizing: "border-box" }}>
+                  <Link
+                    href="/store"
+                    style={{
+                      display: "block", width: "100%", padding: "13px",
+                      border: "1px solid var(--border-dim)", borderRadius: "4px",
+                      color: "var(--text-secondary)", textDecoration: "none",
+                      textAlign: "center", fontSize: "0.82rem", fontWeight: 700,
+                      fontFamily: "var(--font-ui)", letterSpacing: "0.1em",
+                      textTransform: "uppercase", boxSizing: "border-box",
+                    }}>
                     Browse Store
                   </Link>
                 )}
 
                 {item.bulkDeal && (
-                  <div style={{ marginTop: "18px", padding: "12px", backgroundColor: "var(--bg-elevated)", borderRadius: "6px", textAlign: "center" }}>
-                    <div style={{ color: "var(--text-muted)", fontSize: "0.58rem", letterSpacing: "0.1em", textTransform: "uppercase", fontFamily: "var(--font-mono)", marginBottom: "5px" }}>Bundle Deal</div>
-                    <div style={{ color: "var(--gold)", fontSize: "0.7rem", fontWeight: 700, fontFamily: "var(--font-ui)", lineHeight: 1.5 }}>{item.bulkDeal}</div>
+                  <div style={{ marginTop: "20px", padding: "14px", backgroundColor: "var(--bg-elevated)", borderRadius: "6px", textAlign: "center" }}>
+                    <div style={{ color: "var(--text-muted)", fontSize: "0.62rem", letterSpacing: "0.1em", textTransform: "uppercase", fontFamily: "var(--font-mono)", marginBottom: "6px" }}>Bundle Deal</div>
+                    <div style={{ color: "var(--gold)", fontSize: "0.82rem", fontWeight: 700, fontFamily: "var(--font-ui)", lineHeight: 1.5 }}>{item.bulkDeal}</div>
                   </div>
                 )}
               </div>
@@ -383,19 +409,21 @@ export default function LicensingPage() {
       {/* FAQ CTA */}
       <section
         className="license-faq"
-        style={{ padding: "80px 48px", borderTop: "1px solid var(--border-subtle)", backgroundColor: "var(--bg-deep)" }}
+        style={{ padding: "100px 48px", borderTop: "1px solid var(--border-subtle)", backgroundColor: "var(--bg-deep)" }}
       >
         <div style={{ maxWidth: "820px", margin: "0 auto", textAlign: "center" }}>
-          <span style={{ color: "var(--gold)", fontSize: "0.65rem", fontFamily: "var(--font-mono)", letterSpacing: "0.2em", textTransform: "uppercase" }}>Need Help?</span>
-          <h2 style={{ color: "var(--text-primary)", fontSize: "2rem", fontWeight: 800, fontFamily: "var(--font-ui)", marginTop: "10px", marginBottom: "18px" }}>Still Have Questions?</h2>
-          <p style={{ color: "var(--text-muted)", fontSize: "0.88rem", lineHeight: 1.8, fontFamily: "var(--font-ui)", marginBottom: "32px" }}>
+          <span style={{ color: "var(--gold)", fontSize: "0.78rem", fontFamily: "var(--font-mono)", letterSpacing: "0.2em", textTransform: "uppercase" }}>Need Help?</span>
+          <h2 style={{ color: "var(--text-primary)", marginTop: "12px", marginBottom: "20px" }}>
+            Still Have Questions?
+          </h2>
+          <p style={{ color: "var(--text-muted)", fontSize: "1rem", lineHeight: 1.8, fontFamily: "var(--font-ui)", marginBottom: "36px" }}>
             Visit the FAQ page or contact the producer directly for custom licensing, collaborations, and exclusive negotiations.
           </p>
           <div style={{ display: "flex", justifyContent: "center", gap: "14px", flexWrap: "wrap" }}>
-            <Link href="/faq" style={{ padding: "13px 28px", background: "linear-gradient(135deg, #C9A84C, #F5D98B)", color: "#000", textDecoration: "none", borderRadius: "4px", fontSize: "0.72rem", fontWeight: 700, fontFamily: "var(--font-ui)", letterSpacing: "0.1em", textTransform: "uppercase" }}>
+            <Link href="/faq" style={{ padding: "15px 32px", background: "linear-gradient(135deg, #C9A84C, #F5D98B)", color: "#000", textDecoration: "none", borderRadius: "4px", fontSize: "0.85rem", fontWeight: 700, fontFamily: "var(--font-ui)", letterSpacing: "0.1em", textTransform: "uppercase" }}>
               Visit FAQ
             </Link>
-            <a href="mailto:contact@seniormankp.com" style={{ padding: "13px 28px", border: "1px solid rgba(201,168,76,0.3)", color: "var(--gold)", textDecoration: "none", borderRadius: "4px", fontSize: "0.72rem", fontWeight: 700, fontFamily: "var(--font-ui)", letterSpacing: "0.1em", textTransform: "uppercase" }}>
+            <a href="mailto:contact@seniormankp.com" style={{ padding: "15px 32px", border: "1px solid rgba(201,168,76,0.3)", color: "var(--gold)", textDecoration: "none", borderRadius: "4px", fontSize: "0.85rem", fontWeight: 700, fontFamily: "var(--font-ui)", letterSpacing: "0.1em", textTransform: "uppercase" }}>
               Contact Producer
             </a>
           </div>
@@ -404,16 +432,16 @@ export default function LicensingPage() {
 
       {/* License Modal */}
       {modalLicense && (
-        <div style={{ position: "fixed", inset: 0, zIndex: 100, backgroundColor: "rgba(0,0,0,0.9)", backdropFilter: "blur(8px)", display: "flex", alignItems: "center", justifyContent: "center", padding: "24px" }}>
-          <div style={{ backgroundColor: "var(--bg-card)", border: "1px solid rgba(201,168,76,0.25)", borderRadius: "12px", width: "100%", maxWidth: "680px", maxHeight: "80vh", overflow: "hidden", display: "flex", flexDirection: "column" }}>
-            <div style={{ padding: "20px 28px", borderBottom: "1px solid var(--border-subtle)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              <h2 style={{ color: "var(--text-primary)", fontSize: "0.9rem", fontWeight: 700, fontFamily: "var(--font-ui)" }}>
+        <div style={{ position: "fixed", inset: 0, zIndex: 100, backgroundColor: "rgba(0,0,0,0.92)", backdropFilter: "blur(8px)", display: "flex", alignItems: "center", justifyContent: "center", padding: "24px" }}>
+          <div style={{ backgroundColor: "var(--bg-card)", border: "1px solid rgba(201,168,76,0.25)", borderRadius: "12px", width: "100%", maxWidth: "720px", maxHeight: "82vh", overflow: "hidden", display: "flex", flexDirection: "column" }}>
+            <div style={{ padding: "24px 32px", borderBottom: "1px solid var(--border-subtle)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <h3 style={{ color: "var(--text-primary)", fontFamily: "var(--font-ui)" }}>
                 {licenses.find((l) => l.type === modalLicense)?.name} Agreement
-              </h2>
-              <button onClick={() => setModalLicense(null)} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: "1.1rem" }}>✕</button>
+              </h3>
+              <button onClick={() => setModalLicense(null)} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: "1.3rem", lineHeight: 1 }}>✕</button>
             </div>
-            <div style={{ padding: "24px 28px", overflowY: "auto", flex: 1 }}>
-              <pre style={{ whiteSpace: "pre-wrap", wordBreak: "break-word", color: "var(--text-secondary)", fontSize: "0.78rem", lineHeight: 1.8, fontFamily: "var(--font-ui)" }}>
+            <div style={{ padding: "28px 32px", overflowY: "auto", flex: 1 }}>
+              <pre style={{ whiteSpace: "pre-wrap", wordBreak: "break-word", color: "var(--text-secondary)", fontSize: "0.9rem", lineHeight: 1.9, fontFamily: "var(--font-ui)" }}>
                 {licenseTexts[modalLicense]}
               </pre>
             </div>
