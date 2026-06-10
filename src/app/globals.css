@@ -41,8 +41,8 @@
 }
 
 html {
-  font-size: 20px;
   scroll-behavior: smooth;
+  font-size: 18px;
 }
 
 body {
@@ -84,11 +84,6 @@ h3 {
 p {
   font-size: 1rem;
   line-height: 1.75;
-}
-
-/* ── Hard minimums ── */
-span, p, a, li, td, th, label, input, select, button {
-  font-size: max(0.78rem, 14px);
 }
 
 /* ── Scrollbar ── */
@@ -209,7 +204,7 @@ span, p, a, li, td, th, label, input, select, button {
 
 /* ── Responsive ── */
 @media (max-width: 768px) {
-  html { font-size: 17px; }
+  html { font-size: 16px; }
 
   .desktop-nav {
     display: none !important;
@@ -417,4 +412,3 @@ span, p, a, li, td, th, label, input, select, button {
     display: none !important;
   }
 }
-
