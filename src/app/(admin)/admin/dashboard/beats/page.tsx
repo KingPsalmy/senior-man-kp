@@ -68,18 +68,45 @@ export default function AdminBeatsPage() {
     setLoadingBeats(false)
   }
 
+  async function getAuthToken() {
+    const { data } = await supabase.auth.getSession()
+    return data.session?.access_token
+  }
+
   async function togglePublish(beat: Beat) {
-    await supabase.from("beats").update({ is_published: !beat.is_published }).eq("id", beat.id)
+    const token = await getAuthToken()
+    await fetch("/api/admin/beats", {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ id: beat.id, is_published: !beat.is_published }),
+    })
     fetchBeats()
   }
 
   async function toggleFeatured(beat: Beat) {
-    await supabase.from("beats").update({ is_featured: !beat.is_featured }).eq("id", beat.id)
+    const token = await getAuthToken()
+    await fetch("/api/admin/beats", {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ id: beat.id, is_featured: !beat.is_featured }),
+    })
     fetchBeats()
   }
 
   async function deleteBeat(id: string) {
-    await supabase.from("beats").delete().eq("id", id)
+    const token = await getAuthToken()
+    await fetch(`/api/admin/beats?id=${id}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
     setDeleteId(null)
     fetchBeats()
   }
@@ -121,27 +148,37 @@ export default function AdminBeatsPage() {
       if (files.preview) preview_url = await uploadFile(files.preview, "previews", `${slug}-${timestamp}`)
       if (files.stems) stems_url = await uploadFile(files.stems, "stems", `${slug}-${timestamp}`)
 
-      const { error: dbError } = await supabase.from("beats").insert({
-        title: form.title,
-        slug,
-        genre: form.genre,
-        mood: form.mood,
-        bpm: parseInt(form.bpm),
-        key: form.key,
-        description: form.description,
-        duration: form.duration || null,
-        basic_price: parseFloat(form.basic_price),
-        premium_price: parseFloat(form.premium_price),
-        unlimited_price: parseFloat(form.unlimited_price),
-        exclusive_price: parseFloat(form.exclusive_price),
-        cover_url,
-        preview_url,
-        stems_url,
-        is_published: form.is_published,
-        is_featured: form.is_featured,
+      const token = await getAuthToken()
+
+      const res = await fetch("/api/admin/beats", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          title: form.title,
+          slug,
+          genre: form.genre,
+          mood: form.mood,
+          bpm: parseInt(form.bpm),
+          key: form.key,
+          description: form.description,
+          duration: form.duration || null,
+          basic_price: parseFloat(form.basic_price),
+          premium_price: parseFloat(form.premium_price),
+          unlimited_price: parseFloat(form.unlimited_price),
+          exclusive_price: parseFloat(form.exclusive_price),
+          cover_url,
+          preview_url,
+          stems_url,
+          is_published: form.is_published,
+          is_featured: form.is_featured,
+        }),
       })
 
-      if (dbError) throw dbError
+      const result = await res.json()
+      if (!res.ok) throw new Error(result.error || "Upload failed")
 
       setSuccess(true)
       setForm({

@@ -31,33 +31,27 @@ export async function GET(req: NextRequest) {
     )
   }
 
-  // Determine file paths based on license type
-  const filePaths: { path: string; label: string }[] = []
+  // Determine beat file paths based on license type
+  const beatFilePaths: { path: string; label: string }[] = []
 
   if (["basic", "premium", "unlimited", "exclusive"].includes(purchase.license_type)) {
-    filePaths.push({
+    beatFilePaths.push({
       path: `beats/${purchase.beat_id}/wav`,
       label: "WAV File",
     })
   }
 
   if (["premium", "unlimited", "exclusive"].includes(purchase.license_type)) {
-    filePaths.push({
+    beatFilePaths.push({
       path: `beats/${purchase.beat_id}/stems`,
       label: "Stems (ZIP)",
     })
   }
 
-  // Add license agreement PDF
-  filePaths.push({
-    path: `licenses/${purchase.license_type}-license.pdf`,
-    label: "License Agreement (PDF)",
-  })
-
-  // Generate fresh 1-hour signed URLs
   const signedUrls: { label: string; url: string }[] = []
 
-  for (const file of filePaths) {
+  // Generate signed URLs for beat files from beat-files bucket
+  for (const file of beatFilePaths) {
     const { data: signed, error: signError } = await supabase.storage
       .from("beat-files")
       .createSignedUrl(file.path, 60 * 60)
@@ -68,6 +62,20 @@ export async function GET(req: NextRequest) {
     }
 
     signedUrls.push({ label: file.label, url: signed.signedUrl })
+  }
+
+  // Generate signed URL for license PDF from licenses bucket
+  const { data: pdfSigned, error: pdfError } = await supabase.storage
+    .from("licenses")
+    .createSignedUrl(`${purchase.license_type}-license.pdf`, 60 * 60)
+
+  if (pdfError) {
+    console.error(`Failed to sign PDF URL:`, pdfError)
+  } else if (pdfSigned) {
+    signedUrls.push({
+      label: "License Agreement (PDF)",
+      url: pdfSigned.signedUrl,
+    })
   }
 
   if (signedUrls.length === 0) {
