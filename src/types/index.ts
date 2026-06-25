@@ -1,4 +1,5 @@
-export type LicenseType = "basic" | "premium" | "exclusive"
+export type LicenseType = "basic" | "premium" | "Unlimited" | "exclusive"
+
 
 export type Beat = {
   id: string

@@ -113,7 +113,7 @@ export default function HomePage() {
         {/* Hero content */}
         <div className="hero-content" style={{ position: "relative", zIndex: 10, paddingLeft: "clamp(24px, 8vw, 140px)", paddingRight: "24px", maxWidth: "600px", width: "100%" }}>
 
-          <h1 style={{ fontSize: "clamp(2.5rem, 3.8vw, 4.2rem)", lineHeight: 1.08, fontWeight: 800, letterSpacing: "-0.02em", marginBottom: "20px", fontFamily: "var(--font-ui)" }}>
+          <h1 style={{ fontSize: "clamp(2.7rem, 3.6vw, 4.4rem)", lineHeight: 1.08, fontWeight: 800, letterSpacing: "-0.02em", marginBottom: "20px", fontFamily: "var(--font-ui)" }}>
             <span style={{ color: "var(--text-primary)", display: "block" }}>Find Your Sound.</span>
             <span style={{ color: "var(--text-primary)", display: "block" }}>Own It.</span>
             <span style={{ display: "block", fontStyle: "italic", background: "linear-gradient(135deg, #C9A84C, #F5D98B)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
@@ -285,7 +285,9 @@ export default function HomePage() {
                       zIndex: 2, cursor: "pointer",
                     }}>···</div>
 
-                  <button style={{
+                  <button 
+                   onClick={() => { setQueue(featuredBeats); play(beat) }}
+                  style={{
                     position: "absolute", bottom: "12px", right: "12px",
                     width: "36px", height: "36px", borderRadius: "50%",
                     backgroundColor: "var(--gold)", border: "none",
@@ -311,9 +313,12 @@ export default function HomePage() {
                     <Link href={`/beat/${beat.slug}`} style={{ color: "var(--text-primary)", fontSize: "0.82rem", fontWeight: 700, fontFamily: "var(--font-ui)", textDecoration: "none" }}>
                       from ₦{beat.basic_price.toLocaleString()}
                     </Link>
-                    <button style={{ width: "30px", height: "30px", borderRadius: "50%", backgroundColor: "var(--gold)", border: "none", cursor: "pointer", fontSize: "0.7rem" }}>
-                      🛒
-                    </button>
+                    <button style={{ width: "30px", height: "30px", borderRadius: "50%", backgroundColor: "var(--gold)", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="8" cy="21" r="1" /><circle cx="19" cy="21" r="1" />
+                 <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" />
+                 </svg>
+              </button>
                   </div>
                 </div>
               </div>

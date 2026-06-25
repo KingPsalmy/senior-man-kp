@@ -5,10 +5,17 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { supabase } from "@/lib/supabase/client"
 
-const genres = ["Afrobeat", "Afro Fusion", "Trap", "R&B", "Amapiano", "Drill", "Afropop"]
-const moods = ["Dark", "Euphoric", "Melancholic", "Energetic", "Romantic", "Chill"]
-const keys = ["A Minor", "B Minor", "C Minor", "D Minor", "E Minor", "F Minor", "G Minor", "A Major", "B Major", "C Major", "D Major", "E Major", "F Major", "G Major", "F# Minor", "C# Minor"]
+const genres = ["Afrobeat", "Afro Fusion", "Afro-Soul", "Afropop", "Amapiano", "Trap", "Drill", "R&B", "Hip-Hop", "Dancehall", "Reggae", "Highlife", "Fuji", "Gospel", "Alternative", "Pop", "Soul", "Lo-Fi", "House", "EDM", "Jersey Club", "UK Afroswing", "Afro House", "Piano Fusion", "Neo Soul"]
 
+const moods = ["Dark", "Euphoric", "Melancholic", "Energetic", "Romantic", "Chill", "Soulful", "Emotional", "Happy", "Uplifting", "Inspirational", "Reflective", "Dreamy", "Smooth", "Groovy", "Luxury", "Sexy", "Confident", "Aggressive", "Epic", "Cinematic", "Party", "Rave", "Spiritual", "Hopeful", "Nostalgic", "Motivational", "Passionate", "Intimate", "Triumphant"]
+
+const keys = [
+  "A Major", "Bb Major", "B Major", "C Major", "C# Major", "D Major",
+  "Eb Major", "E Major", "F Major", "F# Major", "G Major", "Ab Major",
+
+  "A Minor", "Bb Minor", "B Minor", "C Minor", "C# Minor", "D Minor",
+  "Eb Minor", "E Minor", "F Minor", "F# Minor", "G Minor", "Ab Minor"
+]
 type Beat = {
   id: string
   title: string
@@ -33,6 +40,7 @@ export default function AdminBeatsPage() {
   const [beats, setBeats] = useState<Beat[]>([])
   const [loadingBeats, setLoadingBeats] = useState(true)
   const [loading, setLoading] = useState(false)
+  const [uploadStatus, setUploadStatus] = useState("")
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState("")
   const [deleteId, setDeleteId] = useState<string | null>(null)
@@ -45,8 +53,8 @@ export default function AdminBeatsPage() {
   })
 
   const [files, setFiles] = useState<{
-    cover: File | null; preview: File | null; stems: File | null
-  }>({ cover: null, preview: null, stems: null })
+    cover: File | null; preview: File | null; wav: File | null; stems: File | null
+  }>({ cover: null, preview: null, wav: null, stems: null })
 
   useEffect(() => {
     checkAuth()
@@ -77,10 +85,7 @@ export default function AdminBeatsPage() {
     const token = await getAuthToken()
     await fetch("/api/admin/beats", {
       method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
       body: JSON.stringify({ id: beat.id, is_published: !beat.is_published }),
     })
     fetchBeats()
@@ -90,10 +95,7 @@ export default function AdminBeatsPage() {
     const token = await getAuthToken()
     await fetch("/api/admin/beats", {
       method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
       body: JSON.stringify({ id: beat.id, is_featured: !beat.is_featured }),
     })
     fetchBeats()
@@ -103,9 +105,7 @@ export default function AdminBeatsPage() {
     const token = await getAuthToken()
     await fetch(`/api/admin/beats?id=${id}`, {
       method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { Authorization: `Bearer ${token}` },
     })
     setDeleteId(null)
     fetchBeats()
@@ -119,7 +119,7 @@ export default function AdminBeatsPage() {
     }))
   }
 
-  function handleFile(e: React.ChangeEvent<HTMLInputElement>, key: "cover" | "preview" | "stems") {
+  function handleFile(e: React.ChangeEvent<HTMLInputElement>, key: "cover" | "preview" | "wav" | "stems") {
     setFiles((prev) => ({ ...prev, [key]: e.target.files?.[0] || null }))
   }
 
@@ -130,11 +130,31 @@ export default function AdminBeatsPage() {
     return data.publicUrl
   }
 
+  async function uploadToR2(file: File, path: string) {
+    const token = await getAuthToken()
+    const presignRes = await fetch("/api/admin/upload-stems", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ path, contentType: file.type || "application/octet-stream" }),
+    })
+    const presignData = await presignRes.json()
+    if (!presignRes.ok) throw new Error(presignData.error || "Failed to get R2 upload URL")
+
+    const uploadRes = await fetch(presignData.signedUrl, {
+      method: "PUT",
+      headers: { "Content-Type": file.type || "application/octet-stream" },
+      body: file,
+    })
+    if (!uploadRes.ok) throw new Error("Failed to upload file to R2")
+    return presignData.fileUrl
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setLoading(true)
     setError("")
     setSuccess(false)
+    setUploadStatus("")
 
     try {
       const slug = form.title.toLowerCase().replace(/[^\w\s-]/g, "").replace(/[\s_-]+/g, "-").replace(/^-+|-+$/g, "")
@@ -142,38 +162,42 @@ export default function AdminBeatsPage() {
 
       let cover_url = null
       let preview_url = null
+      let wav_url = null
       let stems_url = null
 
-      if (files.cover) cover_url = await uploadFile(files.cover, "covers", `${slug}-${timestamp}`)
-      if (files.preview) preview_url = await uploadFile(files.preview, "previews", `${slug}-${timestamp}`)
-      if (files.stems) stems_url = await uploadFile(files.stems, "stems", `${slug}-${timestamp}`)
+      if (files.cover) {
+        setUploadStatus("Uploading cover art...")
+        cover_url = await uploadFile(files.cover, "covers", `${slug}-${timestamp}`)
+      }
+      if (files.preview) {
+        setUploadStatus("Uploading preview...")
+        preview_url = await uploadFile(files.preview, "previews", `${slug}-${timestamp}`)
+      }
+      if (files.wav) {
+        setUploadStatus("Uploading WAV to R2 (this may take a moment)...")
+        wav_url = await uploadToR2(files.wav, `wavs/${slug}-${timestamp}-${files.wav.name}`)
+      }
+      if (files.stems) {
+        setUploadStatus("Uploading stems to R2 (this may take a while)...")
+        stems_url = await uploadToR2(files.stems, `stems/${slug}-${timestamp}-${files.stems.name}`)
+      }
+      setUploadStatus("Saving beat details...")
 
       const token = await getAuthToken()
-
       const res = await fetch("/api/admin/beats", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({
-          title: form.title,
-          slug,
-          genre: form.genre,
-          mood: form.mood,
-          bpm: parseInt(form.bpm),
-          key: form.key,
-          description: form.description,
-          duration: form.duration || null,
+          title: form.title, slug,
+          genre: form.genre, mood: form.mood,
+          bpm: parseInt(form.bpm), key: form.key,
+          description: form.description, duration: form.duration || null,
           basic_price: parseFloat(form.basic_price),
           premium_price: parseFloat(form.premium_price),
           unlimited_price: parseFloat(form.unlimited_price),
           exclusive_price: parseFloat(form.exclusive_price),
-          cover_url,
-          preview_url,
-          stems_url,
-          is_published: form.is_published,
-          is_featured: form.is_featured,
+          cover_url, preview_url, wav_url, stems_url,
+          is_published: form.is_published, is_featured: form.is_featured,
         }),
       })
 
@@ -187,7 +211,7 @@ export default function AdminBeatsPage() {
         basic_price: "", premium_price: "", unlimited_price: "", exclusive_price: "",
         is_published: false, is_featured: false,
       })
-      setFiles({ cover: null, preview: null, stems: null })
+      setFiles({ cover: null, preview: null, wav: null, stems: null })
       fetchBeats()
       setTimeout(() => setTab("list"), 1500)
 
@@ -195,6 +219,7 @@ export default function AdminBeatsPage() {
       setError(err.message || "Something went wrong")
     } finally {
       setLoading(false)
+      setUploadStatus("")
     }
   }
 
@@ -265,7 +290,7 @@ export default function AdminBeatsPage() {
           <h1 style={{ color: "var(--text-primary)", fontSize: "1.5rem", fontWeight: 800, fontFamily: "var(--font-ui)" }}>
             Beats
           </h1>
-          <div style={{ display: "flex", gap: "10px" }}>
+          <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
             <Link href="/admin/dashboard" style={{ color: "var(--text-muted)", fontSize: "0.75rem", fontFamily: "var(--font-ui)", textDecoration: "none", padding: "9px 16px", border: "1px solid var(--border-dim)", borderRadius: "4px" }}>
               ← Dashboard
             </Link>
@@ -314,25 +339,35 @@ export default function AdminBeatsPage() {
               </div>
             ) : (
               <div style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-subtle)", borderRadius: "8px", overflow: "hidden" }}>
-                {/* Table header */}
-                <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr 80px 80px 120px", padding: "12px 20px", borderBottom: "1px solid var(--border-subtle)", gap: "12px" }}>
+
+                {/* Table header — hidden on mobile via .beats-table-header */}
+                <div className="beats-table-header" style={{
+                  display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr 80px 80px 120px",
+                  padding: "12px 20px", borderBottom: "1px solid var(--border-subtle)", gap: "12px",
+                }}>
                   {["Beat", "Genre", "BPM", "Price", "Published", "Featured", "Actions"].map((h) => (
                     <span key={h} style={{ color: "var(--text-muted)", fontSize: "0.6rem", fontFamily: "var(--font-mono)", letterSpacing: "0.15em", textTransform: "uppercase" }}>{h}</span>
                   ))}
                 </div>
 
                 {beats.map((beat, i) => (
-                  <div key={beat.id} style={{
-                    display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr 80px 80px 120px",
-                    padding: "14px 20px", gap: "12px", alignItems: "center",
-                    borderBottom: i < beats.length - 1 ? "1px solid var(--border-subtle)" : "none",
-                  }}>
+                  <div
+                    key={beat.id}
+                    className="beats-table-row"
+                    style={{
+                      display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr 80px 80px 120px",
+                      padding: "14px 20px", gap: "12px", alignItems: "center",
+                      borderBottom: i < beats.length - 1 ? "1px solid var(--border-subtle)" : "none",
+                    }}
+                  >
                     {/* Beat title + cover */}
-                    <div style={{ display: "flex", alignItems: "center", gap: "10px", minWidth: 0 }}>
+                    <div className="beat-title-cell" style={{ display: "flex", alignItems: "center", gap: "10px", minWidth: 0 }}>
+                      <span className="beat-mobile-info" style={{ display: "none", color: "var(--text-muted)", fontSize: "0.65rem", fontFamily: "var(--font-mono)" }}>
+                      {beat.genre} · {beat.bpm} BPM · ₦{beat.basic_price?.toLocaleString()}
+                      </span>
                       <div style={{
                         width: "36px", height: "36px", borderRadius: "4px", flexShrink: 0,
-                        backgroundColor: "var(--bg-elevated)",
-                        overflow: "hidden",
+                        backgroundColor: "var(--bg-elevated)", overflow: "hidden",
                       }}>
                         {beat.cover_url ? (
                           <img src={beat.cover_url} alt={beat.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
@@ -376,7 +411,7 @@ export default function AdminBeatsPage() {
                     </button>
 
                     {/* Actions */}
-                    <div style={{ display: "flex", gap: "6px" }}>
+                    <div className="beat-actions-cell" style={{ display: "flex", gap: "6px" }}>
                       <Link href={`/beat/${beat.id}`} target="_blank" style={{
                         padding: "5px 10px", borderRadius: "3px",
                         backgroundColor: "var(--bg-elevated)",
@@ -422,7 +457,7 @@ export default function AdminBeatsPage() {
 
             <div className="upload-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px" }}>
 
-              {/* Left */}
+              {/* Left column */}
               <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
 
                 {/* Beat Info */}
@@ -485,15 +520,19 @@ export default function AdminBeatsPage() {
                     ].map((field) => (
                       <div key={field.name}>
                         <label style={labelStyle}>{field.label} *</label>
-                        <input name={field.name} value={form[field.name as keyof typeof form] as string}
-                          onChange={handleChange} required type="number" placeholder={field.placeholder} style={inputStyle} />
+                        <input
+                          name={field.name}
+                          value={form[field.name as keyof typeof form] as string}
+                          onChange={handleChange} required type="number"
+                          placeholder={field.placeholder} style={inputStyle}
+                        />
                       </div>
                     ))}
                   </div>
                 </div>
               </div>
 
-              {/* Right */}
+              {/* Right column */}
               <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
 
                 {/* Files */}
@@ -502,7 +541,8 @@ export default function AdminBeatsPage() {
                   {[
                     { key: "cover" as const, label: "Cover Art", accept: "image/*", hint: "JPG, PNG — Square recommended" },
                     { key: "preview" as const, label: "Preview Audio", accept: "audio/*", hint: "MP3 — Watermarked version" },
-                    { key: "stems" as const, label: "Stems ZIP (Private)", accept: ".zip,.rar", hint: "ZIP — For Premium license buyers" },
+                    { key: "wav" as const, label: "WAV File (Private)", accept: "audio/wav,.wav", hint: "WAV — Uploaded to R2, delivered on purchase" },
+                    { key: "stems" as const, label: "Stems ZIP (Private)", accept: ".zip,.rar", hint: "ZIP — Uploaded to R2, for Premium/Unlimited/Exclusive buyers" },
                   ].map((f) => (
                     <div key={f.key} style={{ marginBottom: "16px" }}>
                       <label style={labelStyle}>{f.label}</label>
@@ -525,7 +565,7 @@ export default function AdminBeatsPage() {
                   ))}
                 </div>
 
-                {/* Publish settings */}
+                {/* Settings */}
                 <div style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-subtle)", borderRadius: "8px", padding: "24px" }}>
                   <h2 style={{ color: "var(--text-primary)", fontSize: "0.82rem", fontWeight: 700, fontFamily: "var(--font-ui)", marginBottom: "20px" }}>Settings</h2>
 
@@ -556,7 +596,7 @@ export default function AdminBeatsPage() {
                     fontFamily: "var(--font-ui)", letterSpacing: "0.12em",
                     textTransform: "uppercase", cursor: loading ? "not-allowed" : "pointer",
                   }}>
-                    {loading ? "Uploading..." : "Upload Beat"}
+                    {loading ? (uploadStatus || "Uploading...") : "Upload Beat"}
                   </button>
                 </div>
               </div>
