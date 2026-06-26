@@ -252,11 +252,29 @@ body {
   .beat-detail-top {
     flex-direction: column !important;
   }
-  .beat-detail-cover {
+   .beat-detail-cover {
     width: 100% !important;
-    height: 220px !important;
+    height: auto !important;
+    position: relative !important;
+    z-index: 1 !important;
+  }
+  .beat-detail-info {
+    padding-top: 24px !important;
+    position: relative !important;
+    z-index: 2 !important;
+    background-color: var(--bg-void) !important;
+  }
+   .cart-page-wrap {
+    padding: 80px 16px 0 !important;
+  }
+  .cart-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .cart-summary {
+    position: static !important;
   }
 }
+
 
 /* Admin Dashboard Mobile */
 @media (max-width: 768px) {

@@ -86,7 +86,7 @@ export default function CartPage() {
               </Link>
             </div>
           ) : (
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 340px", gap: "32px", alignItems: "start" }}>
+            <div className="cart-grid" style={{ display: "grid", gridTemplateColumns: "1fr 340px", gap: "32px", alignItems: "start" }}>
 
               {/* Cart Items */}
               <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
@@ -181,12 +181,12 @@ export default function CartPage() {
               </div>
 
               {/* Order Summary */}
-              <div style={{
-                backgroundColor: "var(--bg-card)",
-                border: "1px solid var(--border-subtle)",
-                borderRadius: "10px", padding: "28px",
-                position: "sticky", top: "88px",
-              }}>
+               <div className="cart-summary" style={{
+                  backgroundColor: "var(--bg-card)",
+                  border: "1px solid var(--border-subtle)",
+                  borderRadius: "10px", padding: "28px",
+                  position: "sticky", top: "88px",
+                }}> 
                 <h3 style={{ color: "var(--text-primary)", fontSize: "0.9rem", fontWeight: 700, fontFamily: "var(--font-ui)", marginBottom: "24px" }}>
                   Order Summary
                 </h3>

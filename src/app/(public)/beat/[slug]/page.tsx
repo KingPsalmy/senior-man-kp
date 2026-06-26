@@ -10,6 +10,7 @@ import { useFavorite } from "@/hooks/useFavorites"
 import SimilarBeats from "@/components/ui/SimilarBeats"
 import BeatStatusBadge from "@/components/ui/BeatStatusBadge"
 import { getBeatStatus } from "@/lib/beatLifecycle"
+import { usePlayerStore } from "@/store/playerStore"
 
 const LICENSE_OPTIONS = [
   {
@@ -24,17 +25,16 @@ const LICENSE_OPTIONS = [
     price: 70000,
     features: ["MP3, WAV & Track Stems", "Non-exclusive rights", "Unlimited streams", "Unlimited Music Videos", "Radio Broadcasting Rights", "Commercial use"],
   },
-
-  { value:"unlimited",
+  {
+    value: "unlimited",
     label: "Unlimited License",
     price: 120000,
     features: ["MP3, WAV & Track Stems", "Non-exclusive rights", "Unlimited Streams", "Unlimited Music Videos", "Radio Broadcasting Rights", "Commercial use"],
   },
-  
   {
     value: "exclusive",
     label: "Exclusive License",
-    price: 150000,
+    price: 180000,
     features: ["MP3, WAV & Track Stems", "100% Exclusive rights", "Unlimited everything", "Direct producer access", "Beat customization", "Removed from store"],
   },
 ]
@@ -56,6 +56,7 @@ export default function BeatDetailPage() {
   const [addedToCart, setAddedToCart] = useState(false)
   const [status, setStatus] = useState<"AVAILABLE" | "LOCKED" | "SOLD_EXCLUSIVE">("AVAILABLE")
   const { favorited, toggle: toggleFavorite } = useFavorite(beat?.id ?? "")
+  const { setQueue, play } = usePlayerStore()
 
   useEffect(() => {
     async function fetchBeat() {
@@ -159,21 +160,25 @@ export default function BeatDetailPage() {
 
               {/* Play button */}
               {!isUnavailable && (
-                <button style={{
-                  width: "100%", marginTop: "16px", padding: "14px",
-                  background: "linear-gradient(135deg, #C9A84C, #F5D98B)",
-                  border: "none", borderRadius: "4px", cursor: "pointer",
-                  display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",
-                  color: "#000", fontSize: "0.75rem", fontWeight: 700,
-                  fontFamily: "var(--font-ui)", letterSpacing: "0.1em", textTransform: "uppercase",
-                }}>
+                <button
+                  onClick={() => { setQueue([beat]); play(beat) }}
+                  style={{
+                    width: "100%", marginTop: "16px", padding: "14px",
+                    background: "linear-gradient(135deg, #C9A84C, #F5D98B)",
+                    border: "none", borderRadius: "4px", cursor: "pointer",
+                    display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",
+                    color: "#000", fontSize: "0.75rem", fontWeight: 700,
+                    fontFamily: "var(--font-ui)", letterSpacing: "0.1em", textTransform: "uppercase",
+                    WebkitAppearance: "none", appearance: "none", outline: "none",
+                  }}
+                >
                   <span>▶</span> Play Preview
                 </button>
               )}
             </div>
 
             {/* Info + Licensing */}
-            <div style={{ flex: 1, minWidth: 0 }}>
+            <div className="beat-detail-info" style={{ flex: 1, minWidth: 0 }}>
 
               {/* Title + meta */}
               <div style={{ marginBottom: "28px" }}>
