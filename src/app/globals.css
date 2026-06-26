@@ -395,3 +395,12 @@ body {
     display: none !important;
   }
 }
+
+@keyframes wave-bar {
+  0%, 100% { transform: scaleY(0.4); }
+  50% { transform: scaleY(1); }
+}
+.wave-bar-1 { animation: wave-bar 0.8s ease-in-out infinite; animation-delay: 0s; }
+.wave-bar-2 { animation: wave-bar 0.8s ease-in-out infinite; animation-delay: 0.15s; }
+.wave-bar-3 { animation: wave-bar 0.8s ease-in-out infinite; animation-delay: 0.3s; }
+.wave-bar-4 { animation: wave-bar 0.8s ease-in-out infinite; animation-delay: 0.45s; }

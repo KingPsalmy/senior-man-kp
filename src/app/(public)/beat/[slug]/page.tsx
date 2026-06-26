@@ -11,6 +11,7 @@ import SimilarBeats from "@/components/ui/SimilarBeats"
 import BeatStatusBadge from "@/components/ui/BeatStatusBadge"
 import { getBeatStatus } from "@/lib/beatLifecycle"
 import { usePlayerStore } from "@/store/playerStore"
+const { setQueue, play, pause, currentBeat, isPlaying } = usePlayerStore()
 
 const LICENSE_OPTIONS = [
   {
@@ -56,7 +57,7 @@ export default function BeatDetailPage() {
   const [addedToCart, setAddedToCart] = useState(false)
   const [status, setStatus] = useState<"AVAILABLE" | "LOCKED" | "SOLD_EXCLUSIVE">("AVAILABLE")
   const { favorited, toggle: toggleFavorite } = useFavorite(beat?.id ?? "")
-  const { setQueue, play } = usePlayerStore()
+  const { setQueue, play, currentBeat, isPlaying, pause } = usePlayerStore()
 
   useEffect(() => {
     async function fetchBeat() {
@@ -160,21 +161,39 @@ export default function BeatDetailPage() {
 
               {/* Play button */}
               {!isUnavailable && (
-                <button
-                  onClick={() => { setQueue([beat]); play(beat) }}
-                  style={{
-                    width: "100%", marginTop: "16px", padding: "14px",
-                    background: "linear-gradient(135deg, #C9A84C, #F5D98B)",
-                    border: "none", borderRadius: "4px", cursor: "pointer",
-                    display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",
-                    color: "#000", fontSize: "0.75rem", fontWeight: 700,
-                    fontFamily: "var(--font-ui)", letterSpacing: "0.1em", textTransform: "uppercase",
-                    WebkitAppearance: "none", appearance: "none", outline: "none",
-                  }}
-                >
-                  <span>▶</span> Play Preview
-                </button>
-              )}
+  <button
+    onClick={() => {
+      if (currentBeat?.id != null && String(currentBeat.id) === beat.id && isPlaying) {
+        pause()
+      } else {
+        setQueue([beat])
+        play(beat)
+      }
+    }}
+    style={{
+      width: "100%", marginTop: "16px", padding: "14px",
+      background: "linear-gradient(135deg, #C9A84C, #F5D98B)",
+      border: "none", borderRadius: "4px", cursor: "pointer",
+      display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",
+      color: "#000", fontSize: "0.75rem", fontWeight: 700,
+      fontFamily: "var(--font-ui)", letterSpacing: "0.1em", textTransform: "uppercase",
+      WebkitAppearance: "none", appearance: "none", outline: "none",
+      WebkitTapHighlightColor: "transparent",
+    }}
+  >
+    {currentBeat?.id != null && String(currentBeat.id) === beat.id && isPlaying ? (
+      <>
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="#000">
+          <rect x="1" y="0" width="4" height="12" rx="1" />
+          <rect x="7" y="0" width="4" height="12" rx="1" />
+        </svg>
+        Pause Preview
+      </>
+    ) : (
+      <><span>▶</span> Play Preview</>
+    )}
+  </button>
+)}
             </div>
 
             {/* Info + Licensing */}

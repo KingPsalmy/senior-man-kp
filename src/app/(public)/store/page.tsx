@@ -200,7 +200,7 @@ export default function StorePage() {
                   }}
                 >
                   {/* Cover Art */}
-                  <div
+                 <div
                     onClick={() => router.push(`/beat/${beat.slug}`)}
                     style={{
                       position: "relative", aspectRatio: "1",
@@ -246,15 +246,16 @@ export default function StorePage() {
                     }}>···</div>
 
                     {/* Playing waveform indicator */}
-                    {isThisBeatPlaying && (
+                   {isThisBeatPlaying && (
                       <div style={{
                         position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center",
                         backgroundColor: "rgba(0,0,0,0.4)", zIndex: 3, pointerEvents: "none",
                       }}>
-                        <div style={{ display: "flex", alignItems: "flex-end", gap: "3px", height: "24px" }}>
-                          {[14, 20, 10, 18].map((h, i) => (
-                            <div key={i} style={{
-                              width: "3px", backgroundColor: "var(--gold)", borderRadius: "2px", height: `${h}px`,
+                        <div style={{ display: "flex", alignItems: "center", gap: "3px", height: "24px" }}>
+                          {[0,1,2,3].map((i) => (
+                            <div key={i} className={`wave-bar-${i+1}`} style={{
+                              width: "3px", backgroundColor: "var(--gold)", borderRadius: "2px",
+                              height: "20px", transformOrigin: "bottom",
                             }} />
                           ))}
                         </div>
