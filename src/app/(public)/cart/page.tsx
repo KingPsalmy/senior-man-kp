@@ -53,7 +53,7 @@ export default function CartPage() {
     <main style={{ backgroundColor: "var(--bg-void)", minHeight: "100vh", paddingBottom: "120px" }}>
       <Navbar />
 
-      <div style={{ padding: "100px 48px 0" }}>
+      <div className="beat-detail-page-wrap" style={{ padding: "100px 48px 0" }}>
         <div style={{ maxWidth: "1000px", margin: "0 auto" }}>
 
           {/* Header */}
@@ -181,12 +181,12 @@ export default function CartPage() {
               </div>
 
               {/* Order Summary */}
-               <div className="cart-summary" style={{
-                  backgroundColor: "var(--bg-card)",
-                  border: "1px solid var(--border-subtle)",
-                  borderRadius: "10px", padding: "28px",
-                  position: "sticky", top: "88px",
-                }}> 
+              <div className="cart-summary" style={{
+                backgroundColor: "var(--bg-card)",
+                border: "1px solid var(--border-subtle)",
+                borderRadius: "10px", padding: "28px",
+                position: "sticky", top: "88px",
+              }}>
                 <h3 style={{ color: "var(--text-primary)", fontSize: "0.9rem", fontWeight: 700, fontFamily: "var(--font-ui)", marginBottom: "24px" }}>
                   Order Summary
                 </h3>
@@ -224,17 +224,50 @@ export default function CartPage() {
                   </div>
                 </div>
 
+                {/* Bundle deal saved banner */}
                 {discount > 0 && (
                   <div style={{
                     padding: "10px 14px", backgroundColor: "rgba(201,168,76,0.08)",
                     border: "1px solid rgba(201,168,76,0.2)", borderRadius: "6px",
-                    marginBottom: "20px",
+                    marginBottom: "12px",
                   }}>
                     <span style={{ color: "var(--gold)", fontSize: "0.7rem", fontFamily: "var(--font-ui)" }}>
                       🎉 You saved ₦{discount.toLocaleString()} with a bundle deal!
                     </span>
                   </div>
                 )}
+
+                {/* Bundle deal progress indicator */}
+                {(() => {
+                  const licenses: string[] = ["basic", "premium", "unlimited", "exclusive"]
+                  const messages: string[] = []
+                  for (const license of licenses) {
+                    const count = items.filter(i => i.license_type === license).length
+                    const needed = 3 - (count % 3)
+                    if (count > 0 && needed < 3) {
+                      const label = license.charAt(0).toUpperCase() + license.slice(1)
+                      messages.push(`Add ${needed} more ${label} license${needed > 1 ? "s" : ""} to get 1 free`)
+                    }
+                  }
+                  if (messages.length === 0) return null
+                  return (
+                    <div style={{
+                      padding: "10px 14px",
+                      backgroundColor: "rgba(201,168,76,0.06)",
+                      border: "1px solid rgba(201,168,76,0.2)",
+                      borderRadius: "6px", marginBottom: "12px",
+                    }}>
+                      <div style={{ color: "var(--gold)", fontSize: "0.68rem", fontFamily: "var(--font-ui)", fontWeight: 700, marginBottom: "4px" }}>
+                        🎁 Bundle Deal
+                      </div>
+                      {messages.map((msg, i) => (
+                        <div key={i} style={{ color: "var(--text-muted)", fontSize: "0.65rem", fontFamily: "var(--font-ui)" }}>
+                          {msg}
+                        </div>
+                      ))}
+                    </div>
+                  )
+                })()}
 
                 <Link href="/checkout" style={{
                   display: "block", width: "100%", padding: "14px",

@@ -11,7 +11,7 @@ export type DiscountResult = {
   subtotal: number
   discount: number
   total: number
-  freeItems: { beat_id: string; free_license: LicenseType }[]
+  freeItems: string[]
 }
 
 const PRICES: Record<LicenseType, number> = {
@@ -22,54 +22,26 @@ const PRICES: Record<LicenseType, number> = {
 }
 
 export function calculateDiscount(items: CartItem[]): DiscountResult {
-  const byLicense = {
-    basic: items.filter((i) => i.license_type === "basic"),
-    premium: items.filter((i) => i.license_type === "premium"),
-    unlimited: items.filter((i) => i.license_type === "unlimited"),
-    exclusive: items.filter((i) => i.license_type === "exclusive"),
-  }
-
-  const freeItems: { beat_id: string; free_license: LicenseType }[] = []
-
-  // Basic: Buy 2 get 1 Basic free
-  const basicFreeCount = Math.floor(byLicense.basic.length / 2)
-  for (let i = 0; i < basicFreeCount; i++) {
-    freeItems.push({
-      beat_id: byLicense.basic[byLicense.basic.length - 1 - i].beat_id,
-      free_license: "basic",
-    })
-  }
-
-  // Premium: Buy 2 get 1 Basic free
-  const premiumFreeCount = Math.floor(byLicense.premium.length / 2)
-  for (let i = 0; i < premiumFreeCount; i++) {
-    freeItems.push({
-      beat_id: byLicense.premium[byLicense.premium.length - 1 - i].beat_id,
-      free_license: "basic",
-    })
-  }
-
-  // Unlimited: Buy 2 get 1 Premium free
-  const unlimitedFreeCount = Math.floor(byLicense.unlimited.length / 2)
-  for (let i = 0; i < unlimitedFreeCount; i++) {
-    freeItems.push({
-      beat_id: byLicense.unlimited[byLicense.unlimited.length - 1 - i].beat_id,
-      free_license: "premium",
-    })
-  }
-
-  // Exclusive: Buy 1 get 1 Exclusive free
-  const exclusiveFreeCount = Math.floor(byLicense.exclusive.length / 2)
-  for (let i = 0; i < exclusiveFreeCount; i++) {
-    freeItems.push({
-      beat_id: byLicense.exclusive[byLicense.exclusive.length - 1 - i].beat_id,
-      free_license: "exclusive",
-    })
-  }
-
   const subtotal = items.reduce((sum, item) => sum + PRICES[item.license_type], 0)
 
-  const discount = freeItems.reduce((sum, f) => sum + PRICES[f.free_license], 0)
+  const freeItems: string[] = []
+
+  // For each license tier: buy 2 get 1 free (every 3rd item is free)
+  const licenses: LicenseType[] = ["basic", "premium", "unlimited", "exclusive"]
+
+  for (const license of licenses) {
+    const group = items.filter((i) => i.license_type === license)
+    const freeCount = Math.floor(group.length / 3)
+    for (let i = 0; i < freeCount; i++) {
+      // The cheapest items in the group get marked free (last ones added)
+      freeItems.push(group[group.length - 1 - i].beat_id)
+    }
+  }
+
+  const discount = freeItems.reduce((sum, beatId) => {
+    const item = items.find((i) => i.beat_id === beatId)
+    return sum + (item ? PRICES[item.license_type] : 0)
+  }, 0)
 
   return {
     items,

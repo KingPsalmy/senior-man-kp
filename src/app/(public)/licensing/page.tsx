@@ -25,7 +25,7 @@ const licenses = [
       "No Content ID registration",
       "No exclusivity",
     ],
-    bulkDeal: "Buy 2 Beats, Get 1 FREE" as string | null,
+    bulkDeal: "Buy 3 Beats, Get 1 FREE" as string | null,
     ctaStyle: "outline",
   },
   {
@@ -48,7 +48,7 @@ const licenses = [
       "No Content ID registration",
       "No exclusivity",
     ],
-    bulkDeal: "Buy 2 Beats, Get 1 Basic Beat FREE" as string | null,
+    bulkDeal: "Buy 3 Beats, Get 1 Basic Beat FREE" as string | null,
     ctaStyle: "filled",
   },
   {
@@ -72,7 +72,7 @@ const licenses = [
       "No Content ID registration",
       "No ownership of instrumental",
     ],
-    bulkDeal: "Buy 2 Beats, Get 1 Premium Beat FREE" as string | null,
+    bulkDeal: "Buy 3 Beats, Get 1 Unlimited Beat FREE" as string | null,
     ctaStyle: "outline",
   },
   {
@@ -94,7 +94,7 @@ const licenses = [
     restrictions: [
       "Prior licenses remain valid",
     ],
-    bulkDeal: "Buy 2 Exclusives, Get 1 Exclusive FREE" as string | null,
+    bulkDeal: "Buy 3 Exclusives, Get 1 Exclusive FREE" as string | null,
     ctaStyle: "gold",
   },
 ]

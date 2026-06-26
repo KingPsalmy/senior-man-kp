@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useState, useEffect } from "react"
+import { getCartCount } from "@/lib/cart"
 
 const links = [
   { href: "/store", label: "Store" },
@@ -14,6 +15,15 @@ const links = [
 export default function Navbar() {
   const pathname = usePathname()
   const [menuOpen, setMenuOpen] = useState(false)
+  const [cartCount, setCartCount] = useState(0)
+
+  useEffect(() => {
+    async function loadCount() {
+      const count = await getCartCount()
+      setCartCount(count)
+    }
+    loadCount()
+  }, [pathname])
 
   useEffect(() => {
     const handleResize = () => {
@@ -22,6 +32,8 @@ export default function Navbar() {
     window.addEventListener("resize", handleResize)
     return () => window.removeEventListener("resize", handleResize)
   }, [])
+
+  const cartLabel = cartCount === 0 ? "0 Items" : `${cartCount} Item${cartCount !== 1 ? "s" : ""}`
 
   return (
     <>
@@ -99,7 +111,7 @@ export default function Navbar() {
                 <circle cx="19" cy="21" r="1" />
                 <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" />
               </svg>
-              0 Items
+              {cartLabel}
             </Link>
           </div>
 
@@ -190,7 +202,7 @@ export default function Navbar() {
               <circle cx="19" cy="21" r="1" />
               <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" />
             </svg>
-            0 Items
+            {cartLabel}
           </Link>
         </div>
       )}
