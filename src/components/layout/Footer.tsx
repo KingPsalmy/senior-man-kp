@@ -25,41 +25,44 @@ export default function Footer() {
   return (
     <footer style={{
       backgroundColor: "var(--bg-deep)",
-      borderTop: "1px solid var(--border-subtle)",
-      padding: "60px 48px 40px",
+      borderTop: "1px solid rgba(255,255,255,0.06)",
+      padding: "80px 48px 48px",
     }}>
 
-      {/* Main grid — Brand / Nav / Legal / Contact */}
-            <div className="footer-grid" style={{
+      <div className="footer-grid" style={{
         maxWidth: "1200px",
-        marginTop: "0",
-        marginRight: "auto",
-        marginBottom: "48px",
-        marginLeft: "auto",
+        margin: "0 auto 64px",
         display: "grid",
-        gridTemplateColumns: "1fr 1fr 1fr 1fr",
-        gap: "40px",
-        }}>
+        gridTemplateColumns: "1.6fr 1fr 1fr 1fr",
+        gap: "56px",
+      }}>
 
         {/* Brand */}
         <div>
           <img
             src="/logo-white.png"
             alt="Senior Man KP"
-            style={{ height: "48px", width: "auto", objectFit: "contain", marginBottom: "16px" }}
+            style={{ height: "60px", width: "auto", objectFit: "contain", marginBottom: "22px" }}
           />
-          <p style={{ color: "var(--text-muted)", fontSize: "0.75rem", fontFamily: "var(--font-ui)", lineHeight: 1.8, maxWidth: "200px" }}>
+          <p style={{
+            color: "rgba(245,240,232,0.5)",
+            fontSize: "0.95rem",
+            fontFamily: "var(--font-ui)",
+            lineHeight: 1.9,
+            maxWidth: "240px",
+          }}>
             Premium Afro-fusion instrumentals crafted for artists who want to stand out.
           </p>
-          <div style={{ display: "flex", gap: "12px", marginTop: "20px" }}>
+          <div style={{ display: "flex", gap: "12px", marginTop: "28px" }}>
             {socials.map((s) => (
               <a key={s.label} href={s.href} target="_blank" rel="noopener noreferrer" title={s.label}
                 style={{
-                  width: "36px", height: "36px", borderRadius: "50%",
-                  backgroundColor: "var(--bg-elevated)",
-                  border: "1px solid var(--border-dim)",
+                  width: "44px", height: "44px", borderRadius: "50%",
+                  backgroundColor: "rgba(255,255,255,0.04)",
+                  border: "1px solid rgba(255,255,255,0.1)",
                   display: "flex", alignItems: "center", justifyContent: "center",
-                  color: "var(--text-muted)", fontSize: "0.75rem", textDecoration: "none",
+                  color: "rgba(245,240,232,0.5)", fontSize: "0.9rem", textDecoration: "none",
+                  transition: "border-color 0.2s, color 0.2s",
                 }}>
                 {s.icon}
               </a>
@@ -69,13 +72,22 @@ export default function Footer() {
 
         {/* Navigation */}
         <div>
-          <h4 style={{ color: "var(--text-primary)", fontSize: "0.7rem", fontWeight: 700, fontFamily: "var(--font-mono)", letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: "20px" }}>
+          <h4 style={{
+            color: "var(--text-primary)", fontSize: "0.7rem", fontWeight: 700,
+            fontFamily: "var(--font-mono)", letterSpacing: "0.25em",
+            textTransform: "uppercase", marginBottom: "28px",
+          }}>
             Navigation
           </h4>
-          <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "18px" }}>
             {navLinks.map((l) => (
-              <Link key={l.label} href={l.href}
-                style={{ color: "var(--text-muted)", fontSize: "0.78rem", fontFamily: "var(--font-ui)", textDecoration: "none" }}>
+              <Link key={l.label} href={l.href} style={{
+                color: "rgba(245,240,232,0.5)",
+                fontSize: "1rem",
+                fontFamily: "var(--font-ui)",
+                textDecoration: "none",
+                transition: "color 0.2s",
+              }}>
                 {l.label}
               </Link>
             ))}
@@ -84,19 +96,23 @@ export default function Footer() {
 
         {/* Legal */}
         <div>
-          <h4 style={{ color: "var(--text-primary)", fontSize: "0.7rem", fontWeight: 700, fontFamily: "var(--font-mono)", letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: "20px" }}>
+          <h4 style={{
+            color: "var(--text-primary)", fontSize: "0.7rem", fontWeight: 700,
+            fontFamily: "var(--font-mono)", letterSpacing: "0.25em",
+            textTransform: "uppercase", marginBottom: "28px",
+          }}>
             Legal
           </h4>
-          <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "18px" }}>
             {legalLinks.map((l) => (
               l.external ? (
                 <a key={l.label} href={l.href} target="_blank" rel="noopener noreferrer"
-                  style={{ color: "var(--text-muted)", fontSize: "0.78rem", fontFamily: "var(--font-ui)", textDecoration: "none" }}>
+                  style={{ color: "rgba(245,240,232,0.5)", fontSize: "1rem", fontFamily: "var(--font-ui)", textDecoration: "none" }}>
                   {l.label}
                 </a>
               ) : (
                 <Link key={l.label} href={l.href}
-                  style={{ color: "var(--text-muted)", fontSize: "0.78rem", fontFamily: "var(--font-ui)", textDecoration: "none" }}>
+                  style={{ color: "rgba(245,240,232,0.5)", fontSize: "1rem", fontFamily: "var(--font-ui)", textDecoration: "none" }}>
                   {l.label}
                 </Link>
               )
@@ -106,43 +122,40 @@ export default function Footer() {
 
         {/* Contact */}
         <div>
-          <h4 style={{ color: "var(--text-primary)", fontSize: "0.7rem", fontWeight: 700, fontFamily: "var(--font-mono)", letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: "20px" }}>
+          <h4 style={{
+            color: "var(--text-primary)", fontSize: "0.7rem", fontWeight: 700,
+            fontFamily: "var(--font-mono)", letterSpacing: "0.25em",
+            textTransform: "uppercase", marginBottom: "28px",
+          }}>
             Contact
           </h4>
-          <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "18px" }}>
             <a href="mailto:kingpsalmyofficial@gmail.com"
-              style={{ color: "var(--text-muted)", fontSize: "0.78rem", fontFamily: "var(--font-ui)", textDecoration: "none" }}>
+              style={{ color: "rgba(245,240,232,0.5)", fontSize: "1rem", fontFamily: "var(--font-ui)", textDecoration: "none" }}>
               kingpsalmyofficial@gmail.com
             </a>
             <a href="https://instagram.com/kingpsalmy_" target="_blank" rel="noopener noreferrer"
-              style={{ color: "var(--text-muted)", fontSize: "0.78rem", fontFamily: "var(--font-ui)", textDecoration: "none" }}>
+              style={{ color: "rgba(245,240,232,0.5)", fontSize: "1rem", fontFamily: "var(--font-ui)", textDecoration: "none" }}>
               @kingpsalmy_
             </a>
           </div>
         </div>
-
       </div>
 
       {/* Bottom bar */}
       <div style={{
-        maxWidth: "1200px",
-        margin: "0 auto",
-        paddingTop: "24px",
-        borderTop: "1px solid var(--border-subtle)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        flexWrap: "wrap",
-        gap: "12px",
+        maxWidth: "1200px", margin: "0 auto",
+        paddingTop: "28px", borderTop: "1px solid rgba(255,255,255,0.06)",
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        flexWrap: "wrap", gap: "12px",
       }}>
-        <span style={{ color: "var(--text-muted)", fontSize: "0.7rem", fontFamily: "var(--font-mono)" }}>
-          © 2024 Senior Man KP. All rights reserved.
+        <span style={{ color: "rgba(245,240,232,0.3)", fontSize: "0.85rem", fontFamily: "var(--font-mono)" }}>
+          © 2025 Senior Man KP. All rights reserved.
         </span>
-        <span style={{ color: "var(--text-muted)", fontSize: "0.7rem", fontFamily: "var(--font-mono)" }}>
+        <span style={{ color: "rgba(245,240,232,0.3)", fontSize: "0.85rem", fontFamily: "var(--font-mono)" }}>
           Built for artists who move culture forward.
         </span>
       </div>
-
     </footer>
   )
 }
