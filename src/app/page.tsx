@@ -261,27 +261,27 @@ export default function HomePage() {
 
                 {/* Info */}
                <div style={{ padding: "18px" }}>
-                  <h3 style={{ color: "var(--text-primary)", fontSize: "1.1rem", fontWeight: 700, fontFamily: "var(--font-ui)", marginBottom: "6px", lineHeight: 1.3 }}>
-                    {beat.title}
-                  </h3>
-                  <div style={{ color: "var(--gold)", fontSize: "0.85rem", fontFamily: "var(--font-ui)", fontWeight: 600, marginBottom: "10px" }}>{beat.genre}</div>
-                  <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "16px" }}>
-                    <span style={{ color: "var(--text-muted)", fontSize: "0.8rem", fontFamily: "var(--font-mono)" }}>{beat.bpm} BPM</span>
-                    <span style={{ color: "var(--border-dim)" }}>•</span>
-                    <span style={{ color: "var(--text-muted)", fontSize: "0.8rem", fontFamily: "var(--font-mono)" }}>{beat.key}</span>
-                  </div>
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                    <Link href={`/beat/${beat.slug}`} style={{ color: "var(--text-primary)", fontSize: "1rem", fontWeight: 700, fontFamily: "var(--font-ui)", textDecoration: "none" }}>
-                      from ₦{beat.basic_price.toLocaleString()}
-                    </Link>
-                    <button style={{ width: "34px", height: "34px", borderRadius: "50%", backgroundColor: "var(--gold)", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", outline: "none", WebkitAppearance: "none" as any }}>
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                        <circle cx="8" cy="21" r="1" /><circle cx="19" cy="21" r="1" />
-                        <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" />
-                      </svg>
-                    </button>
-                  </div>
+                <h3 style={{ color: "var(--text-primary)", fontSize: "1.1rem", fontWeight: 700, fontFamily: "var(--font-ui)", marginBottom: "6px", lineHeight: 1.3 }}>
+                  {beat.title}
+                </h3>
+                <div style={{ color: "var(--gold)", fontSize: "0.85rem", fontFamily: "var(--font-ui)", fontWeight: 600, marginBottom: "10px" }}>{beat.genre}</div>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "16px" }}>
+                  <span style={{ color: "var(--text-muted)", fontSize: "0.8rem", fontFamily: "var(--font-mono)" }}>{beat.bpm} BPM</span>
+                  <span style={{ color: "var(--border-dim)" }}>•</span>
+                  <span style={{ color: "var(--text-muted)", fontSize: "0.8rem", fontFamily: "var(--font-mono)" }}>{beat.key}</span>
                 </div>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                  <Link href={`/beat/${beat.slug}`} style={{ color: "var(--text-primary)", fontSize: "1rem", fontWeight: 700, fontFamily: "var(--font-ui)", textDecoration: "none" }}>
+                    from ₦{beat.basic_price.toLocaleString()}
+                  </Link>
+                  <button style={{ width: "34px", height: "34px", borderRadius: "50%", backgroundColor: "var(--gold)", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", outline: "none", WebkitAppearance: "none" as any }}>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="8" cy="21" r="1" /><circle cx="19" cy="21" r="1" />
+                      <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
               </div>
             ))}
           </div>
@@ -320,7 +320,6 @@ export default function HomePage() {
           <div className="learn-more-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "24px" }}>
             {[
               {
-                icon: "📄",
                 title: "Licensing Info",
                 desc: "Understand what you get with each license tier — Basic, Premium, Unlimited, and Exclusive. Know your rights before you buy.",
                 link: "/licensing",
@@ -328,7 +327,6 @@ export default function HomePage() {
                 external: false,
               },
               {
-                icon: "💬",
                 title: "Frequently Asked Questions",
                 desc: "All the frequently asked questions for both licenses and how to work with Senior Man KP. Get answers fast.",
                 link: "/faq",
@@ -336,7 +334,6 @@ export default function HomePage() {
                 external: false,
               },
               {
-                icon: "✉️",
                 title: "Contact Producer",
                 desc: "Have a custom project in mind? Reach out directly to discuss collaboration, custom beats, or exclusive arrangements.",
                 link: "mailto:contact@seniormankp.com",
@@ -348,7 +345,7 @@ export default function HomePage() {
                 backgroundColor: "var(--bg-card)",
                 border: "1px solid rgba(255,255,255,0.07)",
                 borderRadius: "16px",
-                padding: "40px 36px",
+                padding: "48px 36px",
                 display: "flex", flexDirection: "column",
                 position: "relative", overflow: "hidden",
               }}>
@@ -358,17 +355,6 @@ export default function HomePage() {
                   height: "1px",
                   background: "linear-gradient(90deg, transparent, rgba(201,168,76,0.4), transparent)",
                 }} />
-
-                {/* Icon */}
-                <div style={{
-                  width: "52px", height: "52px", borderRadius: "14px",
-                  backgroundColor: "rgba(201,168,76,0.08)",
-                  border: "1px solid rgba(201,168,76,0.15)",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  fontSize: "1.4rem", marginBottom: "24px", flexShrink: 0,
-                }}>
-                  {item.icon}
-                </div>
 
                 {/* Title */}
                 <h3 style={{
@@ -415,7 +401,6 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-
 
       {/* ── Share Modal ── */}
       {shareBeat && (
