@@ -1,3 +1,7 @@
+"use client"
+
+import { useState } from "react"
+import Link from "next/link"
 import Navbar from "@/components/layout/Navbar"
 
 const faqs = [
@@ -43,97 +47,153 @@ const faqs = [
   },
   {
     q: "Are there any bulk deals?",
-    a: "Yes. Basic: Buy 2, get 1 free. Premium: Buy 2, get 1 Basic free. Unlimited: Buy 2, get 1 Premium free. Exclusive: Buy 1, get 1 Exclusive free.",
+    a: "Yes. Basic: Buy 3, get 1 free. Premium: Buy 3, get 1 Basic free. Unlimited: Buy 3, get 1 Unlimited free. Exclusive: Buy 3, get 1 Exclusive free.",
   },
 ]
 
 export default function FAQPage() {
+  const [open, setOpen] = useState<number | null>(null)
+
   return (
-    <main style={{ backgroundColor: "var(--bg-void)", minHeight: "100vh", paddingBottom: "100px" }}>
+    <main style={{ backgroundColor: "var(--bg-void)", minHeight: "100vh" }}>
       <Navbar />
 
-      <section style={{
-        padding: "120px 48px 80px",
-        textAlign: "center",
-        borderBottom: "1px solid var(--border-subtle)",
-      }}>
+      {/* Hero */}
+      <section style={{ padding: "160px 48px 120px", textAlign: "center", borderBottom: "1px solid var(--border-subtle)" }}>
         <span style={{
-          color: "var(--gold)", fontSize: "0.65rem",
-          fontFamily: "var(--font-mono)", letterSpacing: "0.3em",
-          textTransform: "uppercase",
+          display: "inline-block",
+          color: "var(--gold)", fontSize: "0.85rem", fontFamily: "var(--font-mono)",
+          letterSpacing: "0.32em", textTransform: "uppercase",
+          marginBottom: "20px", padding: "8px 20px",
+          border: "1px solid rgba(201,168,76,0.3)",
+          borderRadius: "24px", backgroundColor: "rgba(201,168,76,0.06)",
         }}>
           FAQ
         </span>
         <h1 style={{
-          color: "var(--text-primary)",
-          fontSize: "clamp(2rem, 5vw, 3.5rem)",
-          fontWeight: 800, fontFamily: "var(--font-ui)",
-          letterSpacing: "-0.03em", marginTop: "10px", marginBottom: "16px",
+          color: "var(--text-primary)", marginTop: "0", marginBottom: "24px",
+          fontSize: "clamp(2.6rem, 5vw, 4.5rem)", fontWeight: 800,
+          fontFamily: "var(--font-ui)", letterSpacing: "-0.03em", lineHeight: 1.08,
         }}>
-          Frequently Asked Questions
+          Frequently Asked
+          <br />
+          <span style={{ background: "linear-gradient(135deg, #C9A84C, #F5D98B)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+            Questions
+          </span>
         </h1>
         <p style={{
-          color: "var(--text-muted)", fontSize: "0.9rem", lineHeight: 1.8,
-          maxWidth: "520px", margin: "0 auto", fontFamily: "var(--font-ui)",
+          color: "rgba(245,240,232,0.65)", fontSize: "1.2rem", lineHeight: 1.8,
+          maxWidth: "600px", margin: "0 auto",
+          fontFamily: "var(--font-ui)",
         }}>
           Everything you need to know about licensing, payments, and working with Senior Man KP.
         </p>
       </section>
 
-      <section style={{ padding: "80px 48px" }}>
-        <div style={{
-          maxWidth: "760px", margin: "0 auto",
-          display: "flex", flexDirection: "column", gap: "2px",
-        }}>
+      {/* FAQ Items */}
+      <section style={{ padding: "100px 48px" }}>
+        <div style={{ maxWidth: "860px", margin: "0 auto" }}>
           {faqs.map((faq, i) => (
-            <div key={i} style={{
-              backgroundColor: "var(--bg-card)",
-              border: "1px solid var(--border-subtle)",
-              borderRadius: i === 0 ? "8px 8px 0 0" : i === faqs.length - 1 ? "0 0 8px 8px" : "0",
-              padding: "24px 28px",
-            }}>
-              <h3 style={{
-                color: "var(--text-primary)", fontSize: "0.9rem",
-                fontWeight: 700, fontFamily: "var(--font-ui)", marginBottom: "10px",
-              }}>
-                {faq.q}
-              </h3>
-              <p style={{
-                color: "var(--text-muted)", fontSize: "0.82rem",
-                fontFamily: "var(--font-ui)", lineHeight: 1.8,
-              }}>
-                {faq.a}
-              </p>
+            <div
+              key={i}
+              style={{
+                borderBottom: "1px solid rgba(255,255,255,0.07)",
+                padding: "32px 0",
+              }}
+            >
+              <button
+                onClick={() => setOpen(open === i ? null : i)}
+                style={{
+                  width: "100%", background: "none", border: "none",
+                  cursor: "pointer", textAlign: "left", padding: 0,
+                  display: "flex", justifyContent: "space-between", alignItems: "center", gap: "20px",
+                }}
+              >
+                <span style={{
+                  color: open === i ? "var(--gold)" : "var(--text-primary)",
+                  fontSize: "1.15rem", fontWeight: 700,
+                  fontFamily: "var(--font-ui)", lineHeight: 1.4,
+                  transition: "color 0.2s ease",
+                }}>
+                  {faq.q}
+                </span>
+                <span style={{
+                  color: open === i ? "var(--gold)" : "var(--text-muted)",
+                  fontSize: "1.5rem", flexShrink: 0, lineHeight: 1,
+                  transition: "transform 0.25s ease, color 0.2s ease",
+                  transform: open === i ? "rotate(45deg)" : "rotate(0deg)",
+                  display: "inline-block",
+                }}>+</span>
+              </button>
+
+              {open === i && (
+                <p style={{
+                  color: "rgba(245,240,232,0.72)", fontSize: "1.05rem",
+                  lineHeight: 1.9, fontFamily: "var(--font-ui)",
+                  marginTop: "20px", maxWidth: "720px",
+                }}>
+                  {faq.a}
+                </p>
+              )}
             </div>
           ))}
         </div>
       </section>
 
+      {/* CTA */}
       <section style={{
-        padding: "60px 48px",
+        padding: "140px 48px",
+        borderTop: "1px solid rgba(255,255,255,0.06)",
         backgroundColor: "var(--bg-deep)",
-        borderTop: "1px solid var(--border-subtle)",
         textAlign: "center",
       }}>
-        <p style={{
-          color: "var(--text-muted)", fontSize: "0.88rem",
-          fontFamily: "var(--font-ui)", marginBottom: "20px",
-        }}>
-          Still have questions?
-        </p>
-        <a
-          href="mailto:contact@seniormankp.com"
-          style={{
-            padding: "13px 28px",
-            background: "linear-gradient(135deg, #C9A84C, #F5D98B)",
-            color: "#000", textDecoration: "none", borderRadius: "4px",
-            fontSize: "0.72rem", fontWeight: 700, fontFamily: "var(--font-ui)",
-            letterSpacing: "0.1em", textTransform: "uppercase",
-          }}
+        <div style={{ maxWidth: "700px", margin: "0 auto" }}>
+          <span style={{
+            display: "inline-block",
+            color: "var(--gold)", fontSize: "0.85rem", fontFamily: "var(--font-mono)",
+            letterSpacing: "0.28em", textTransform: "uppercase",
+            marginBottom: "20px", padding: "8px 20px",
+            border: "1px solid rgba(201,168,76,0.3)",
+            borderRadius: "24px", backgroundColor: "rgba(201,168,76,0.06)",
+          }}>
+            Still have questions?
+          </span>
+          <h2 style={{
+            color: "var(--text-primary)", marginTop: "0", marginBottom: "24px",
+            fontSize: "clamp(2.2rem, 4vw, 3.4rem)", fontWeight: 800,
+            fontFamily: "var(--font-ui)", letterSpacing: "-0.02em", lineHeight: 1.1,
+          }}>
+            Get in Touch Directly
+          </h2>
+          <p style={{
+            color: "rgba(245,240,232,0.65)", fontSize: "1.15rem",
+            lineHeight: 1.85, fontFamily: "var(--font-ui)",
+            marginBottom: "44px", maxWidth: "540px", margin: "0 auto 44px",
+          }}>
+            Can't find your answer here? Reach out directly for custom licensing, collaborations, or any other enquiries.
+          </p>
+          <a
+            href="mailto:contact@seniormankp.com"
+            style={{
+              display: "inline-block", padding: "17px 44px",
+              background: "linear-gradient(135deg, #C9A84C, #F5D98B)",
+              color: "#000", textDecoration: "none", borderRadius: "8px",
+              fontSize: "0.95rem", fontWeight: 700,
+              fontFamily: "var(--font-ui)", letterSpacing: "0.12em",
+              textTransform: "uppercase",
+            }}
           >
-          Contact Producer
-        </a>
+            Contact Producer
+          </a>
+        </div>
       </section>
+
+      <style>{`
+        @media (max-width: 768px) {
+          section { padding-left: 20px !important; padding-right: 20px !important; }
+          section:first-of-type { padding-top: 120px !important; padding-bottom: 70px !important; }
+        }
+      `}</style>
     </main>
   )
 }

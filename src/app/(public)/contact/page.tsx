@@ -1,117 +1,174 @@
+"use client"
+
 import Navbar from "@/components/layout/Navbar"
+import Link from "next/link"
+
+const contacts = [
+  {
+    icon: "✉",
+    label: "Email",
+    value: "kingpsalmyofficial@gmail.com",
+    cta: "Send Email",
+    href: "mailto:kingpsalmyofficial@gmail.com",
+  },
+  {
+    icon: "◉",
+    label: "Instagram",
+    value: "@kingpsalmy_",
+    cta: "Follow",
+    href: "https://instagram.com/kingpsalmy_",
+  },
+  {
+    icon: "▶",
+    label: "YouTube",
+    value: "@kingpsalmy_",
+    cta: "Subscribe",
+    href: "https://youtube.com/@kingpsalmy_",
+  },
+  {
+    icon: "✕",
+    label: "X (Twitter)",
+    value: "@kingpsalmy_",
+    cta: "Follow",
+    href: "https://x.com/kingpsalmy_",
+  },
+  {
+    icon: "♪",
+    label: "TikTok",
+    value: "@kingpsalmy_",
+    cta: "Follow",
+    href: "https://tiktok.com/@kingpsalmy_",
+  },
+  {
+    icon: "🎮",
+    label: "Discord",
+    value: "@kingpsalmy_",
+    cta: "Join",
+    href: "https://discord.gg/kingpsalmy",
+  },
+]
 
 export default function ContactPage() {
   return (
-    <main style={{ backgroundColor: "var(--bg-void)", minHeight: "100vh", paddingBottom: "100px" }}>
+    <main style={{ backgroundColor: "var(--bg-void)", minHeight: "100vh" }}>
       <Navbar />
 
-      <section style={{ padding: "120px 48px 80px", textAlign: "center", borderBottom: "1px solid var(--border-subtle)" }}>
-        <span style={{ color: "var(--gold)", fontSize: "0.65rem", fontFamily: "var(--font-mono)", letterSpacing: "0.3em", textTransform: "uppercase" }}>
-          Get In Touch
+      {/* Hero */}
+      <section style={{ padding: "160px 48px 120px", textAlign: "center", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+        <span style={{
+          display: "inline-block",
+          color: "var(--gold)", fontSize: "0.85rem", fontFamily: "var(--font-mono)",
+          letterSpacing: "0.32em", textTransform: "uppercase",
+          marginBottom: "20px", padding: "8px 20px",
+          border: "1px solid rgba(201,168,76,0.3)",
+          borderRadius: "24px", backgroundColor: "rgba(201,168,76,0.06)",
+        }}>
+          Get in Touch
         </span>
-        <h1 style={{ color: "var(--text-primary)", fontSize: "clamp(2rem, 5vw, 3.5rem)", fontWeight: 800, fontFamily: "var(--font-ui)", letterSpacing: "-0.03em", marginTop: "10px", marginBottom: "16px" }}>
-          Contact Producer
+        <h1 style={{
+          color: "var(--text-primary)", marginTop: "0", marginBottom: "24px",
+          fontSize: "clamp(2.6rem, 5vw, 4.5rem)", fontWeight: 800,
+          fontFamily: "var(--font-ui)", letterSpacing: "-0.03em", lineHeight: 1.08,
+        }}>
+          Contact{" "}
+          <span style={{ background: "linear-gradient(135deg, #C9A84C, #F5D98B)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+            Producer
+          </span>
         </h1>
-        <p style={{ color: "var(--text-muted)", fontSize: "0.9rem", lineHeight: 1.8, maxWidth: "520px", margin: "0 auto", fontFamily: "var(--font-ui)" }}>
+        <p style={{
+          color: "rgba(245,240,232,0.65)", fontSize: "1.2rem", lineHeight: 1.8,
+          maxWidth: "600px", margin: "0 auto",
+          fontFamily: "var(--font-ui)",
+        }}>
           For custom beats, exclusive negotiations, collaborations, or any questions — reach out directly.
         </p>
       </section>
 
-      <section style={{ padding: "80px 48px" }}>
-        <div style={{ maxWidth: "680px", margin: "0 auto" }}>
+      {/* Contact Cards */}
+      <section style={{ padding: "100px 48px" }}>
+        <div style={{ maxWidth: "960px", margin: "0 auto" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "24px", marginBottom: "32px" }}>
+            {contacts.map((c) => (
+              <a
+                key={c.label}
+                href={c.href}
+                target={c.href.startsWith("mailto") ? undefined : "_blank"}
+                rel="noopener noreferrer"
+                style={{ textDecoration: "none" }}
+              >
+                <div style={{
+                  backgroundColor: "var(--bg-card)",
+                  border: "1px solid rgba(255,255,255,0.07)",
+                  borderRadius: "16px", padding: "40px",
+                  transition: "border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease",
+                  cursor: "pointer",
+                  position: "relative", overflow: "hidden",
+                }}
+                  onMouseEnter={(e) => {
+                    const el = e.currentTarget
+                    el.style.borderColor = "rgba(201,168,76,0.4)"
+                    el.style.transform = "translateY(-4px)"
+                    el.style.boxShadow = "0 20px 48px rgba(0,0,0,0.5), 0 0 24px rgba(201,168,76,0.08)"
+                  }}
+                  onMouseLeave={(e) => {
+                    const el = e.currentTarget
+                    el.style.borderColor = "rgba(255,255,255,0.07)"
+                    el.style.transform = "translateY(0)"
+                    el.style.boxShadow = "none"
+                  }}
+                >
+                  <div style={{ position: "absolute", top: 0, left: "36px", right: "36px", height: "1px", background: "linear-gradient(90deg, transparent, rgba(201,168,76,0.3), transparent)" }} />
 
-          {/* Contact cards */}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", marginBottom: "48px" }}>
+                  <div style={{
+                    width: "52px", height: "52px", borderRadius: "14px",
+                    backgroundColor: "rgba(201,168,76,0.08)",
+                    border: "1px solid rgba(201,168,76,0.15)",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    fontSize: "1.4rem", marginBottom: "28px",
+                  }}>
+                    {c.icon}
+                  </div>
 
-            {[
-              {
-                icon: "✉️",
-                label: "Email",
-                value: "kingpsalmyofficial@gmail.com",
-                href: "mailto:contact@seniormankp.com",
-                cta: "Send Email",
-              },
-              {
-                icon: "◉",
-                label: "Instagram",
-                value: "@kingpsalmy_",
-                href: "https://instagram.com/kingpsalmy_",
-                cta: "Follow",
-              },
-              {
-                icon: "▶",
-                label: "YouTube",
-                value: "@kingpsalmy_",
-                href: "https://youtube.com/kingpsalmy_",
-                cta: "Subscribe",
-              },
-              {
-                icon: "✕",
-                label: "X (Twitter)",
-                value: "@kingpsalmy_",
-                href: "https://x.com/kingpsalmy_",
-                cta: "Follow",
-              },
-                            {
-                icon: "♪",
-                label: "Tiktok",
-                value: "@kingpsalmy_",
-                href: "https://tiktok.com/kingpsalmy_",
-                cta: "Follow",
-              },
-                            {
-               icon: (
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z" />
-               </svg>
-             ),
-  label: "Discord",
-  value: "@kingpsalmy_",
-  href: "https://discord.com/users/your-id",
-  cta: "Join",
-}
-              
-            ].map((contact) => (
-              <div key={contact.label} style={{
-                backgroundColor: "var(--bg-card)",
-                border: "1px solid var(--border-subtle)",
-                borderRadius: "10px", padding: "28px",
-              }}>
-                <div style={{ fontSize: "1.5rem", marginBottom: "12px" }}>{contact.icon}</div>
-                <div style={{ color: "var(--text-muted)", fontSize: "0.65rem", fontFamily: "var(--font-mono)", letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: "6px" }}>
-                  {contact.label}
+                  <div style={{ color: "var(--gold)", fontSize: "0.78rem", fontFamily: "var(--font-mono)", letterSpacing: "0.18em", textTransform: "uppercase", fontWeight: 600, marginBottom: "10px" }}>
+                    {c.label}
+                  </div>
+                  <div style={{ color: "var(--text-primary)", fontSize: "1.15rem", fontWeight: 700, fontFamily: "var(--font-ui)", marginBottom: "24px" }}>
+                    {c.value}
+                  </div>
+                  <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", color: "var(--gold)", fontSize: "0.92rem", fontFamily: "var(--font-ui)", fontWeight: 700, letterSpacing: "0.05em" }}>
+                    {c.cta} <span style={{ fontSize: "1.05rem" }}>→</span>
+                  </div>
                 </div>
-                <div style={{ color: "var(--text-primary)", fontSize: "0.82rem", fontWeight: 600, fontFamily: "var(--font-ui)", marginBottom: "16px", wordBreak: "break-all" }}>
-                  {contact.value}
-                </div>
-                <a href={contact.href} target={contact.href.startsWith("mailto") ? undefined : "_blank"} rel="noopener noreferrer" style={{
-                  color: "var(--gold)", fontSize: "0.72rem", fontFamily: "var(--font-ui)",
-                  fontWeight: 600, textDecoration: "none", letterSpacing: "0.05em",
-                }}>
-                  {contact.cta} →
-                </a>
-              </div>
+              </a>
             ))}
           </div>
 
-          {/* Response time note */}
+          {/* Response time notice */}
           <div style={{
+            padding: "40px 48px",
             backgroundColor: "var(--bg-card)",
-            border: "1px solid var(--border-subtle)",
-            borderRadius: "10px", padding: "28px",
-            textAlign: "center",
+            border: "1px solid rgba(255,255,255,0.07)",
+            borderRadius: "16px", textAlign: "center",
+            position: "relative", overflow: "hidden",
           }}>
-            <h3 style={{ color: "var(--text-primary)", fontSize: "0.9rem", fontWeight: 700, fontFamily: "var(--font-ui)", marginBottom: "10px" }}>
+            <div style={{ position: "absolute", top: 0, left: "80px", right: "80px", height: "1px", background: "linear-gradient(90deg, transparent, rgba(201,168,76,0.3), transparent)" }} />
+            <h3 style={{ color: "var(--text-primary)", fontSize: "1.25rem", fontWeight: 700, fontFamily: "var(--font-ui)", marginBottom: "14px" }}>
               Response Time
             </h3>
-            <p style={{ color: "var(--text-muted)", fontSize: "0.82rem", fontFamily: "var(--font-ui)", lineHeight: 1.8 }}>
-              Emails are typically answered within 24–48 hours.
-              For faster responses, DM on Instagram.
-              For exclusive license negotiations, mention your project details upfront.
+            <p style={{ color: "rgba(245,240,232,0.65)", fontSize: "1.05rem", fontFamily: "var(--font-ui)", lineHeight: 1.85, maxWidth: "620px", margin: "0 auto" }}>
+              Emails are typically answered within 24–48 hours. For faster responses, DM on Instagram. For exclusive license negotiations, mention your project details upfront.
             </p>
           </div>
         </div>
       </section>
+
+      <style>{`
+        @media (max-width: 768px) {
+          .contact-grid { grid-template-columns: 1fr !important; }
+          section { padding-left: 20px !important; padding-right: 20px !important; }
+          section:first-of-type { padding-top: 120px !important; padding-bottom: 70px !important; }
+        }
+      `}</style>
     </main>
   )
 }
