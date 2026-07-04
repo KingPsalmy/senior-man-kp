@@ -110,7 +110,7 @@ export default function StorePage() {
       <Navbar />
 
       {/* Hero */}
-      <section style={{ padding: "108px 48px 40px", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+      <section className="store-header" style={{ padding: "108px 48px 40px", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
         <div style={{ maxWidth: "1400px", margin: "0 auto" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "20px" }}>
             <Link href="/" style={{ color: "rgba(245,240,232,0.55)", fontSize: "0.92rem", fontFamily: "var(--font-ui)", textDecoration: "none", transition: "color 0.2s", fontWeight: 500 }}>Home</Link>
@@ -139,8 +139,8 @@ export default function StorePage() {
       </section>
 
       {/* Filters */}
-      <div style={{ padding: "20px 48px", borderBottom: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(8,8,8,0.6)" }}>
-        <div style={{ maxWidth: "1400px", margin: "0 auto", display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
+      <div className="store-filter-bar" style={{ padding: "20px 48px", borderBottom: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(8,8,8,0.6)" }}>
+        <div className="store-filters" style={{ maxWidth: "1400px", margin: "0 auto", display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
           {/* Search */}
           <div style={{ position: "relative", flex: 1, minWidth: "200px", maxWidth: "320px" }}>
             <span style={{ position: "absolute", left: "14px", top: "50%", transform: "translateY(-50%)", color: "var(--text-muted)" }}>
@@ -176,7 +176,7 @@ export default function StorePage() {
       </div>
 
       {/* Beat Grid */}
-      <div style={{ padding: "40px 48px 0" }}>
+      <div className="store-grid-wrap" style={{ padding: "40px 48px 0" }}>
         <div style={{ maxWidth: "1400px", margin: "0 auto" }}>
           {loading ? (
             <div style={{ color: "var(--text-muted)", fontFamily: "var(--font-ui)", fontSize: "1rem", padding: "80px 0", textAlign: "center" }}>
@@ -457,7 +457,13 @@ export default function StorePage() {
         @media (max-width: 1100px) { .beat-grid { grid-template-columns: repeat(3, 1fr) !important; } }
         @media (max-width: 768px) {
           .beat-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 12px !important; }
-          section { padding-left: 20px !important; padding-right: 20px !important; }
+          .store-filters > div:first-child {
+            max-width: 100% !important;
+            width: 100% !important;
+          }
+          .store-filters select {
+            margin-left: 0 !important;
+          }
         }
       `}</style>
     </main>

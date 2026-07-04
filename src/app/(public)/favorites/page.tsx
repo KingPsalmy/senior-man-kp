@@ -58,7 +58,7 @@ export default function FavoritesPage() {
       <Navbar />
 
       {/* Hero */}
-      <section style={{ padding: "108px 48px 40px", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+      <section className="fav-hero" style={{ padding: "108px 48px 40px", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
         <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
           <span style={{
             display: "inline-block",
@@ -80,7 +80,7 @@ export default function FavoritesPage() {
         </div>
       </section>
 
-      <div style={{ padding: "48px 48px 0" }}>
+      <div className="fav-content" style={{ padding: "48px 48px 0" }}>
         <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
 
           {loading ? (
@@ -197,11 +197,12 @@ export default function FavoritesPage() {
                           <span style={{ color: "var(--border-dim)" }}>•</span>
                           <span style={{ color: "var(--text-muted)", fontSize: "0.75rem", fontFamily: "var(--font-mono)" }}>{beat.key}</span>
                         </div>
-                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "10px" }}>
-                          <span style={{ color: "var(--text-primary)", fontSize: "0.95rem", fontWeight: 700, fontFamily: "var(--font-ui)" }}>
+                        <div className="fav-price-row" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "10px" }}>
+                          <span className="fav-price" style={{ color: "var(--text-primary)", fontSize: "0.95rem", fontWeight: 700, fontFamily: "var(--font-ui)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                             from ₦{beat.basic_price?.toLocaleString()}
                           </span>
                           <button
+                            className="fav-add-btn"
                             onClick={() => handleAddToCart(fav.beat_id)}
                             style={{
                               padding: "8px 14px", borderRadius: "6px",
@@ -209,7 +210,7 @@ export default function FavoritesPage() {
                               border: addedIds.has(fav.beat_id) ? "1px solid rgba(74,222,128,0.3)" : "none",
                               color: addedIds.has(fav.beat_id) ? "#4ade80" : "#000",
                               fontSize: "0.75rem", fontWeight: 700, fontFamily: "var(--font-ui)",
-                              cursor: "pointer", whiteSpace: "nowrap",
+                              cursor: "pointer", whiteSpace: "nowrap", flexShrink: 0,
                               WebkitAppearance: "none" as any, outline: "none",
                             }}
                           >
@@ -228,7 +229,28 @@ export default function FavoritesPage() {
 
       <style>{`
         @media (max-width: 1024px) { .fav-grid { grid-template-columns: repeat(3, 1fr) !important; } }
-        @media (max-width: 768px) { .fav-grid { grid-template-columns: repeat(2, 1fr) !important; } section { padding-left: 20px !important; padding-right: 20px !important; } }
+        @media (max-width: 768px) {
+          .fav-hero {
+            padding: 90px 20px 32px !important;
+          }
+          .fav-content {
+            padding: 32px 20px 0 !important;
+          }
+          .fav-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 12px !important;
+          }
+          .fav-price-row {
+            gap: 6px !important;
+          }
+          .fav-price {
+            font-size: 0.82rem !important;
+          }
+          .fav-add-btn {
+            padding: 7px 10px !important;
+            font-size: 0.68rem !important;
+          }
+        }
       `}</style>
     </main>
   )

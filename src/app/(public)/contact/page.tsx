@@ -54,7 +54,7 @@ export default function ContactPage() {
       <Navbar />
 
       {/* Hero */}
-      <section style={{ padding: "160px 48px 120px", textAlign: "center", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+      <section className="contact-hero" style={{ padding: "160px 48px 120px", textAlign: "center", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
         <span style={{
           display: "inline-block",
           color: "var(--gold)", fontSize: "0.85rem", fontFamily: "var(--font-mono)",
@@ -85,9 +85,9 @@ export default function ContactPage() {
       </section>
 
       {/* Contact Cards */}
-      <section style={{ padding: "100px 48px" }}>
+      <section className="contact-section" style={{ padding: "100px 48px" }}>
         <div style={{ maxWidth: "960px", margin: "0 auto" }}>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "24px", marginBottom: "32px" }}>
+          <div className="contact-grid" style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "24px", marginBottom: "32px" }}>
             {contacts.map((c) => (
               <a
                 key={c.label}
@@ -96,7 +96,7 @@ export default function ContactPage() {
                 rel="noopener noreferrer"
                 style={{ textDecoration: "none" }}
               >
-                <div style={{
+                <div className="contact-card" style={{
                   backgroundColor: "var(--bg-card)",
                   border: "1px solid rgba(255,255,255,0.07)",
                   borderRadius: "16px", padding: "40px",
@@ -144,7 +144,7 @@ export default function ContactPage() {
           </div>
 
           {/* Response time notice */}
-          <div style={{
+          <div className="contact-notice" style={{
             padding: "40px 48px",
             backgroundColor: "var(--bg-card)",
             border: "1px solid rgba(255,255,255,0.07)",
@@ -164,9 +164,22 @@ export default function ContactPage() {
 
       <style>{`
         @media (max-width: 768px) {
-          .contact-grid { grid-template-columns: 1fr !important; }
-          section { padding-left: 20px !important; padding-right: 20px !important; }
-          section:first-of-type { padding-top: 120px !important; padding-bottom: 70px !important; }
+          .contact-hero {
+            padding: 120px 20px 70px !important;
+          }
+          .contact-section {
+            padding: 60px 20px !important;
+          }
+          .contact-grid {
+            grid-template-columns: 1fr !important;
+            gap: 16px !important;
+          }
+          .contact-card {
+            padding: 28px !important;
+          }
+          .contact-notice {
+            padding: 32px 24px !important;
+          }
         }
       `}</style>
     </main>

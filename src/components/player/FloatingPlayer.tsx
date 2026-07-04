@@ -36,7 +36,6 @@ export default function FloatingPlayer() {
   const audioRef = useRef<HTMLAudioElement>(null)
   const [isSeeking, setIsSeeking] = useState(false)
 
-  // Sync play/pause with audio element
   useEffect(() => {
     const audio = audioRef.current
     if (!audio) return
@@ -47,7 +46,6 @@ export default function FloatingPlayer() {
     }
   }, [isPlaying, currentBeat])
 
-  // Seek when progress is set externally (prev/restart)
   useEffect(() => {
     const audio = audioRef.current
     if (!audio || isSeeking) return
@@ -56,7 +54,6 @@ export default function FloatingPlayer() {
     }
   }, [progress])
 
-  // Volume
   useEffect(() => {
     if (audioRef.current) audioRef.current.volume = volume
   }, [volume])
@@ -110,7 +107,7 @@ export default function FloatingPlayer() {
         />
       )}
 
-      <div style={{
+      <div className="floating-player-bar" style={{
         position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 60,
         backgroundColor: "rgba(6,6,6,0.97)",
         backdropFilter: "blur(24px)",
@@ -123,8 +120,7 @@ export default function FloatingPlayer() {
       }}>
 
         {/* Beat info */}
-        <div style={{ display: "flex", alignItems: "center", gap: "14px", minWidth: "220px", flex: "0 0 220px" }}>
-          {/* Cover */}
+        <div className="floating-player-info" style={{ display: "flex", alignItems: "center", gap: "14px", minWidth: "220px", flex: "0 0 220px" }}>
           <div style={{ width: "44px", height: "44px", borderRadius: "6px", flexShrink: 0, overflow: "hidden", backgroundColor: "var(--bg-elevated)" }}>
             {beat.cover_url
               ? <img src={beat.cover_url} alt={beat.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
@@ -132,13 +128,11 @@ export default function FloatingPlayer() {
             }
           </div>
 
-          {/* Title + genre + wave bars */}
           <div style={{ minWidth: 0 }}>
             <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
               <span style={{ color: "var(--text-primary)", fontSize: "0.88rem", fontWeight: 700, fontFamily: "var(--font-ui)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "130px" }}>
                 {beat.title}
               </span>
-              {/* Wave bars — shown when playing */}
               {isPlaying && (
                 <div style={{ display: "flex", alignItems: "flex-end", gap: "2px", height: "14px", flexShrink: 0 }}>
                   {[1, 2, 3, 4].map((b) => (
@@ -161,15 +155,12 @@ export default function FloatingPlayer() {
             </div>
           </div>
 
-          {/* Heart */}
           <HeartButton beatId={String(beat.id)} />
         </div>
 
         {/* Controls + progress */}
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: "6px" }}>
-          {/* Buttons */}
-          <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
-            {/* Prev */}
+        <div className="floating-player-middle" style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", alignItems: "center", gap: "6px" }}>
+          <div className="floating-player-buttons" style={{ display: "flex", alignItems: "center", gap: "20px" }}>
             <button onClick={prev} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text-muted)", fontSize: "0.85rem", padding: "4px", display: "flex", alignItems: "center" }}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
                 <polygon points="19,20 9,12 19,4" />
@@ -177,7 +168,6 @@ export default function FloatingPlayer() {
               </svg>
             </button>
 
-            {/* Play / Pause */}
             <button
               onClick={toggle}
               style={{
@@ -194,7 +184,6 @@ export default function FloatingPlayer() {
               }
             </button>
 
-            {/* Next */}
             <button onClick={next} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text-muted)", fontSize: "0.85rem", padding: "4px", display: "flex", alignItems: "center" }}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
                 <polygon points="5,4 15,12 5,20" />
@@ -203,8 +192,7 @@ export default function FloatingPlayer() {
             </button>
           </div>
 
-          {/* Progress bar */}
-          <div style={{ display: "flex", alignItems: "center", gap: "8px", width: "100%", maxWidth: "480px" }}>
+          <div className="floating-player-progress" style={{ display: "flex", alignItems: "center", gap: "8px", width: "100%", maxWidth: "480px" }}>
             <span style={{ color: "var(--text-muted)", fontSize: "0.65rem", fontFamily: "var(--font-mono)", flexShrink: 0 }}>
               {formatTime(progress)}
             </span>
@@ -221,9 +209,8 @@ export default function FloatingPlayer() {
         </div>
 
         {/* Right — volume + license button */}
-        <div style={{ display: "flex", alignItems: "center", gap: "16px", flex: "0 0 220px", justifyContent: "flex-end" }}>
-          {/* Volume */}
-          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+        <div className="floating-player-right" style={{ display: "flex", alignItems: "center", gap: "16px", flex: "0 0 220px", justifyContent: "flex-end" }}>
+          <div className="floating-player-volume" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
               {volume > 0.5 && <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />}
@@ -236,8 +223,7 @@ export default function FloatingPlayer() {
             />
           </div>
 
-          {/* License CTA */}
-          <Link href={`/beat/${(beat as any).slug || ""}`} style={{
+          <Link href={`/beat/${(beat as any).slug || ""}`} className="floating-player-license" style={{
             padding: "9px 20px",
             background: "linear-gradient(135deg, #C9A84C, #F5D98B)",
             color: "#000", textDecoration: "none", borderRadius: "4px",

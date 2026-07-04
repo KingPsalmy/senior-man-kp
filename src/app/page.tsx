@@ -109,6 +109,17 @@ export default function HomePage() {
           transform: translateX(4px);
         }
 
+        .see-more-cta {
+          transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .see-more-cta:hover {
+          transform: translateX(2px);
+          box-shadow: 0 0 24px rgba(201, 168, 76, 0.35);
+        }
+        .see-more-cta:hover .arrow {
+          transform: translateX(3px);
+        }
+
         @media (max-width: 768px) {
           .hero-search-wrap { max-width: 100% !important; }
           .hero-filters-wrap { max-width: 100% !important; }
@@ -119,6 +130,18 @@ export default function HomePage() {
             min-width: 0 !important;
           }
           .hero-ctas a { flex: 1 !important; text-align: center !important; }
+
+          .featured-header {
+            align-items: flex-start !important;
+            gap: 14px !important;
+          }
+          .see-more-cta {
+            padding: 10px 20px !important;
+            font-size: 0.7rem !important;
+          }
+          .section-padding {
+            padding: 60px 20px !important;
+          }
         }
       `}</style>
 
@@ -238,13 +261,21 @@ export default function HomePage() {
       {/* ── Featured Beats ── */}
       <section className="section-padding" style={{ padding: "80px 48px", backgroundColor: "var(--bg-void)" }}>
         <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "32px" }}>
+          <div className="featured-header" style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", flexWrap: "wrap", gap: "20px", marginBottom: "40px" }}>
             <div>
               <span style={{ color: "var(--gold)", fontSize: "0.82rem", fontFamily: "var(--font-mono)", letterSpacing: "0.22em", textTransform: "uppercase" }}>Featured Beats</span>
-              <h2 style={{ color: "var(--text-primary)", fontSize: "2.8rem", fontWeight: 800, fontFamily: "var(--font-ui)", letterSpacing: "-0.02em", marginTop: "8px" }}>Latest Drops</h2>
+              <h2 style={{ color: "var(--text-primary)", fontSize: "clamp(2rem, 6vw, 2.8rem)", fontWeight: 800, fontFamily: "var(--font-ui)", letterSpacing: "-0.02em", marginTop: "8px", lineHeight: 1.05 }}>Latest Drops</h2>
             </div>
-            <Link href="/store" style={{ padding: "13px 30px", fontSize: "0.88rem", fontWeight: 700, background: "linear-gradient(135deg, #C9A84C, #F5D98B)", borderRadius: "6px", textDecoration: "none", color: "#000", fontFamily: "var(--font-ui)", letterSpacing: "0.1em", textTransform: "uppercase" }}>
+            <Link href="/store" className="see-more-cta" style={{
+              display: "inline-flex", alignItems: "center", gap: "10px",
+              padding: "13px 26px", fontSize: "0.82rem", fontWeight: 700,
+              background: "linear-gradient(135deg, #C9A84C, #F5D98B)",
+              borderRadius: "50px", textDecoration: "none", color: "#000",
+              fontFamily: "var(--font-ui)", letterSpacing: "0.1em", textTransform: "uppercase",
+              whiteSpace: "nowrap", flexShrink: 0,
+            }}>
               See More
+              <span className="arrow" style={{ fontSize: "1rem", display: "inline-block", transition: "transform 0.2s ease" }}>→</span>
             </Link>
           </div>
 

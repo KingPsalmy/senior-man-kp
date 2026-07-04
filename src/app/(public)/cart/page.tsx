@@ -54,7 +54,7 @@ export default function CartPage() {
       <Navbar />
 
       {/* Hero */}
-      <section style={{ padding: "108px 48px 40px", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+      <section className="cart-hero" style={{ padding: "108px 48px 40px", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
         <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
           <span style={{
             display: "inline-block",
@@ -76,7 +76,7 @@ export default function CartPage() {
         </div>
       </section>
 
-      <div style={{ padding: "40px 48px 0" }}>
+      <div className="cart-page-wrap" style={{ padding: "40px 48px 0" }}>
         <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
 
           {loading ? (
@@ -108,7 +108,7 @@ export default function CartPage() {
                   const isFree = freeItems.includes(item.beat_id)
 
                   return (
-                    <div key={item.beat_id} style={{
+                    <div key={item.beat_id} className="cart-item-row" style={{
                       display: "flex", alignItems: "center", gap: "20px",
                       padding: "24px 28px",
                       backgroundColor: "var(--bg-card)",
@@ -198,7 +198,7 @@ export default function CartPage() {
               </div>
 
               {/* Order Summary */}
-              <div style={{
+              <div className="cart-summary" style={{
                 backgroundColor: "var(--bg-card)",
                 border: "1px solid rgba(255,255,255,0.07)",
                 borderRadius: "16px", padding: "36px",
@@ -319,7 +319,16 @@ export default function CartPage() {
           }
         }
         @media (max-width: 768px) {
-          section { padding-left: 20px !important; padding-right: 20px !important; }
+          .cart-hero {
+            padding: 90px 20px 32px !important;
+          }
+          .cart-item-row {
+            padding: 18px 20px !important;
+            gap: 14px !important;
+          }
+          .cart-summary {
+            padding: 24px !important;
+          }
         }
       `}</style>
     </main>
