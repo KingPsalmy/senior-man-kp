@@ -19,8 +19,12 @@ export default function Navbar() {
 
   useEffect(() => {
     async function loadCount() {
-      const count = await getCartCount()
-      setCartCount(count)
+      try {
+        const count = await getCartCount()
+        setCartCount(count)
+      } catch {
+        setCartCount(0)
+      }
     }
     loadCount()
   }, [pathname])
@@ -72,8 +76,22 @@ export default function Navbar() {
             ))}
           </nav>
 
-          {/* Desktop Cart */}
-          <div className="desktop-nav" style={{ display: "flex", alignItems: "center" }}>
+          {/* Desktop right side — favorites + cart */}
+          <div className="desktop-nav" style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            {/* Favorites icon */}
+            <Link href="/favorites" title="Saved Beats" style={{
+              width: "44px", height: "44px", borderRadius: "50%",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              backgroundColor: pathname === "/favorites" ? "rgba(201,168,76,0.12)" : "rgba(255,255,255,0.05)",
+              border: `1px solid ${pathname === "/favorites" ? "rgba(201,168,76,0.4)" : "rgba(255,255,255,0.1)"}`,
+              color: pathname === "/favorites" ? "var(--gold)" : "rgba(245,240,232,0.6)",
+              fontSize: "1.1rem", textDecoration: "none",
+              transition: "all 0.2s ease",
+            }}>
+              ♡
+            </Link>
+
+            {/* Cart */}
             <Link href="/cart" style={{
               display: "flex", alignItems: "center", gap: "9px",
               background: "linear-gradient(135deg, #C9A84C, #F5D98B)",
@@ -113,13 +131,20 @@ export default function Navbar() {
         }}>
           {links.map((link) => (
             <Link key={link.href} href={link.href} onClick={() => setMenuOpen(false)} style={{
-              fontFamily: "var(--font-ui)", fontSize: "1.3rem", fontWeight: 700,
+              fontFamily: "var(--font-ui)", fontSize: "1.2rem", fontWeight: 700,
               textDecoration: "none", letterSpacing: "0.1em", textTransform: "uppercase",
               color: pathname === link.href ? "var(--gold)" : "var(--text-primary)",
             }}>
               {link.label}
             </Link>
           ))}
+          <Link href="/favorites" onClick={() => setMenuOpen(false)} style={{
+            fontFamily: "var(--font-ui)", fontSize: "1.2rem", fontWeight: 700,
+            textDecoration: "none", letterSpacing: "0.1em", textTransform: "uppercase",
+            color: pathname === "/favorites" ? "var(--gold)" : "var(--text-primary)",
+          }}>
+            ♡ Saved Beats
+          </Link>
           <Link href="/cart" onClick={() => setMenuOpen(false)} style={{
             display: "flex", alignItems: "center", justifyContent: "center", gap: "10px",
             background: "linear-gradient(135deg, #C9A84C, #F5D98B)",

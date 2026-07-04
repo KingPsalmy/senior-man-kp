@@ -1,28 +1,20 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { isFavorited, addFavorite, removeFavorite } from "@/lib/favorites"
+import { useEffect } from "react"
+import { useFavoritesStore } from "../store/favoritesStore"
 
 export function useFavorite(beatId: string) {
-  const [favorited, setFavorited] = useState(false)
-  const [loading, setLoading] = useState(true)
+  const { load, toggle, check } = useFavoritesStore()
 
   useEffect(() => {
-    isFavorited(beatId).then((val) => {
-      setFavorited(val)
-      setLoading(false)
-    })
-  }, [beatId])
+    load()
+  }, [])
 
-  async function toggle() {
-    if (favorited) {
-      await removeFavorite(beatId)
-      setFavorited(false)
-    } else {
-      await addFavorite(beatId)
-      setFavorited(true)
-    }
+  const favorited = check(beatId)
+
+  return {
+    favorited,
+    toggle: () => toggle(beatId),
+    loading: !useFavoritesStore.getState().loaded,
   }
-
-  return { favorited, toggle, loading }
 }
