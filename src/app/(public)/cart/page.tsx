@@ -121,7 +121,7 @@ export default function CartPage() {
                       )}
 
                       {/* Cover */}
-                      <div style={{
+                      <div className="cart-item-cover" style={{
                         width: "68px", height: "68px", borderRadius: "10px", flexShrink: 0,
                         background: beat?.cover_url ? "none" : `linear-gradient(135deg, ${genreColor(beat?.genre)}, #0a0a0a)`,
                         overflow: "hidden",
@@ -132,8 +132,8 @@ export default function CartPage() {
                       </div>
 
                       {/* Info */}
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "6px" }}>
+                      <div className="cart-item-info" style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "6px", flexWrap: "wrap" }}>
                           <span style={{ color: "var(--text-primary)", fontSize: "1.05rem", fontWeight: 700, fontFamily: "var(--font-ui)" }}>
                             {beat?.title}
                           </span>
@@ -143,6 +143,7 @@ export default function CartPage() {
                               backgroundColor: "rgba(201,168,76,0.15)",
                               color: "var(--gold)", borderRadius: "20px",
                               fontFamily: "var(--font-mono)", fontWeight: 700, letterSpacing: "0.1em",
+                              flexShrink: 0,
                             }}>
                               FREE
                             </span>
@@ -153,8 +154,18 @@ export default function CartPage() {
                         </div>
                       </div>
 
+                      {/* Remove */}
+                      <button
+                        className="cart-item-remove"
+                        onClick={() => handleRemove(item.beat_id)}
+                        style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: "1.1rem", flexShrink: 0, padding: "4px" }}
+                      >
+                        ✕
+                      </button>
+
                       {/* License selector */}
                       <select
+                        className="cart-item-select"
                         value={item.license_type}
                         onChange={(e) => handleLicenseChange(item.beat_id, e.target.value as LicenseType)}
                         style={{
@@ -176,7 +187,7 @@ export default function CartPage() {
                       </select>
 
                       {/* Price */}
-                      <div style={{
+                      <div className="cart-item-price" style={{
                         color: isFree ? "var(--text-muted)" : "var(--text-primary)",
                         fontSize: "1rem", fontWeight: 700, fontFamily: "var(--font-ui)",
                         textDecoration: isFree ? "line-through" : "none",
@@ -184,14 +195,6 @@ export default function CartPage() {
                       }}>
                         ₦{LICENSE_OPTIONS.find((o) => o.value === item.license_type)?.price.toLocaleString()}
                       </div>
-
-                      {/* Remove */}
-                      <button
-                        onClick={() => handleRemove(item.beat_id)}
-                        style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: "1.1rem", flexShrink: 0, padding: "4px" }}
-                      >
-                        ✕
-                      </button>
                     </div>
                   )
                 })}
@@ -322,9 +325,35 @@ export default function CartPage() {
           .cart-hero {
             padding: 90px 20px 32px !important;
           }
+          .cart-page-wrap {
+            padding: 32px 16px 0 !important;
+          }
           .cart-item-row {
-            padding: 18px 20px !important;
-            gap: 14px !important;
+            padding: 16px !important;
+            gap: 12px !important;
+          }
+          .cart-item-cover {
+            order: 1;
+          }
+          .cart-item-info {
+            order: 2;
+          }
+          .cart-item-remove {
+            order: 3;
+            margin-left: auto !important;
+          }
+          .cart-item-select {
+            order: 4;
+            flex: 1 1 100% !important;
+            width: 100% !important;
+            margin-top: 4px !important;
+          }
+          .cart-item-price {
+            order: 5;
+            flex: 1 1 100% !important;
+            text-align: left !important;
+            min-width: 0 !important;
+            margin-top: 2px !important;
           }
           .cart-summary {
             padding: 24px !important;

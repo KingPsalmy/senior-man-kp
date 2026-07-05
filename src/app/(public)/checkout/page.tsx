@@ -30,7 +30,7 @@ export default function CheckoutPage() {
   const [items, setItems] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedLicenses, setSelectedLicenses] = useState<Record<string, LicenseType>>({})
-  const [form, setForm] = useState({ name: "", email: "" })
+  const [form, setForm] = useState({ legalName: "", artistName: "", email: "" })
   const [paying, setPaying] = useState(false)
   const [error, setError] = useState("")
 
@@ -61,8 +61,8 @@ export default function CheckoutPage() {
   }
 
   async function handlePayment() {
-    if (!form.name.trim() || !form.email.trim()) {
-      setError("Please enter your name and email.")
+    if (!form.legalName.trim() || !form.artistName.trim() || !form.email.trim()) {
+      setError("Please fill in your legal name, artist name, and email.")
       return
     }
     setError("")
@@ -89,13 +89,14 @@ export default function CheckoutPage() {
       currency: "NGN",
       metadata: {
         custom_fields: [
-          { display_name: "Customer Name", variable_name: "customer_name", value: form.name },
+          { display_name: "Legal Name", variable_name: "legal_name", value: form.legalName },
+          { display_name: "Artist Name", variable_name: "artist_name", value: form.artistName },
           { display_name: "Items", variable_name: "items", value: JSON.stringify(orderItems) },
         ],
       },
       onSuccess: async (response: any) => {
         await clearCart()
-        router.push(`/success?reference=${response.reference}&email=${encodeURIComponent(form.email)}`)
+        router.push(`/success?reference=${response.reference}&email=${encodeURIComponent(form.email)}&artist_name=${encodeURIComponent(form.artistName)}`)
       },
       onCancel: () => {
         setPaying(false)
@@ -138,12 +139,18 @@ export default function CheckoutPage() {
     boxSizing: "border-box",
   }
 
+  const labelStyle: React.CSSProperties = {
+    display: "block", color: "rgba(245,240,232,0.55)", fontSize: "0.72rem",
+    fontFamily: "var(--font-mono)", letterSpacing: "0.15em", textTransform: "uppercase",
+    marginBottom: "8px",
+  }
+
   return (
     <main style={{ backgroundColor: "var(--bg-void)", minHeight: "100vh", paddingBottom: "120px" }}>
       <Navbar />
 
       {/* Hero */}
-      <section style={{ padding: "108px 48px 40px", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+      <section className="checkout-hero" style={{ padding: "108px 48px 40px", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
         <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
           <span style={{
             display: "inline-block",
@@ -165,7 +172,7 @@ export default function CheckoutPage() {
         </div>
       </section>
 
-      <div style={{ padding: "40px 48px 0" }}>
+      <div className="checkout-content" style={{ padding: "40px 48px 0" }}>
         <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
           <div className="checkout-grid" style={{ display: "grid", gridTemplateColumns: "1fr 380px", gap: "40px", alignItems: "start" }}>
 
@@ -181,7 +188,7 @@ export default function CheckoutPage() {
                   const currentLicense = selectedLicenses[item.beat_id] || item.license_type
 
                   return (
-                    <div key={item.beat_id} style={{
+                    <div key={item.beat_id} className="checkout-item-row" style={{
                       display: "flex", alignItems: "center", gap: "18px",
                       padding: "22px 28px",
                       borderBottom: i < items.length - 1 ? "1px solid rgba(255,255,255,0.06)" : "none",
@@ -199,11 +206,11 @@ export default function CheckoutPage() {
                       </div>
 
                       {/* Info */}
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "4px" }}>
+                      <div className="checkout-item-info" style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "4px", flexWrap: "wrap" }}>
                           <span style={{ color: "var(--text-primary)", fontSize: "1rem", fontWeight: 700, fontFamily: "var(--font-ui)" }}>{beat?.title}</span>
                           {isFree && (
-                            <span style={{ fontSize: "0.62rem", padding: "3px 10px", backgroundColor: "rgba(201,168,76,0.15)", color: "var(--gold)", borderRadius: "20px", fontFamily: "var(--font-mono)", fontWeight: 700, letterSpacing: "0.1em" }}>FREE</span>
+                            <span style={{ fontSize: "0.62rem", padding: "3px 10px", backgroundColor: "rgba(201,168,76,0.15)", color: "var(--gold)", borderRadius: "20px", fontFamily: "var(--font-mono)", fontWeight: 700, letterSpacing: "0.1em", flexShrink: 0 }}>FREE</span>
                           )}
                         </div>
                         <div style={{ color: "var(--text-muted)", fontSize: "0.82rem", fontFamily: "var(--font-mono)" }}>
@@ -213,6 +220,7 @@ export default function CheckoutPage() {
 
                       {/* License selector */}
                       <select
+                        className="checkout-item-select"
                         value={currentLicense}
                         onChange={(e) => handleLicenseChange(item.beat_id, e.target.value as LicenseType)}
                         style={{
@@ -234,7 +242,7 @@ export default function CheckoutPage() {
                       </select>
 
                       {/* Price */}
-                      <div style={{
+                      <div className="checkout-item-price" style={{
                         color: isFree ? "var(--text-muted)" : "var(--text-primary)",
                         fontSize: "1rem", fontWeight: 700, fontFamily: "var(--font-ui)",
                         textDecoration: isFree ? "line-through" : "none",
@@ -248,13 +256,13 @@ export default function CheckoutPage() {
               </div>
 
               {/* Your Details */}
-              <div style={{ backgroundColor: "var(--bg-card)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: "16px", padding: "36px", position: "relative", overflow: "hidden" }}>
+              <div className="checkout-details" style={{ backgroundColor: "var(--bg-card)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: "16px", padding: "36px", position: "relative", overflow: "hidden" }}>
                 <div style={{ position: "absolute", top: 0, left: "36px", right: "36px", height: "1px", background: "linear-gradient(90deg, transparent, rgba(201,168,76,0.3), transparent)" }} />
                 <h3 style={{ color: "var(--text-primary)", fontSize: "1.15rem", fontWeight: 700, fontFamily: "var(--font-ui)", marginBottom: "8px" }}>
                   Your Details
                 </h3>
                 <p style={{ color: "rgba(245,240,232,0.55)", fontSize: "0.9rem", fontFamily: "var(--font-ui)", marginBottom: "28px", lineHeight: 1.7 }}>
-                  Your download link will be sent to this email.
+                  Your legal name is used for the license agreement. We'll address you by your artist name in emails.
                 </p>
 
                 {error && (
@@ -263,36 +271,66 @@ export default function CheckoutPage() {
                   </div>
                 )}
 
-                <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-                  <div>
-                    <label style={{ display: "block", color: "rgba(245,240,232,0.55)", fontSize: "0.72rem", fontFamily: "var(--font-mono)", letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: "8px" }}>
-                      Name
-                    </label>
-                    <input
-                      name="name" value={form.name} onChange={handleChange}
-                      placeholder="Your artist or legal name"
-                      style={inputStyle}
-                    />
+                {/* Section 1 — Legal Name */}
+                <div style={{ marginBottom: "8px" }}>
+                  <div style={{ color: "var(--gold)", fontSize: "0.68rem", fontFamily: "var(--font-mono)", letterSpacing: "0.18em", textTransform: "uppercase", fontWeight: 700, marginBottom: "16px" }}>
+                    Legal Information
                   </div>
-                  <div>
-                    <label style={{ display: "block", color: "rgba(245,240,232,0.55)", fontSize: "0.72rem", fontFamily: "var(--font-mono)", letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: "8px" }}>
-                      Email
-                    </label>
-                    <input
-                      name="email" value={form.email} onChange={handleChange}
-                      placeholder="you@example.com" type="email"
-                      style={inputStyle}
-                    />
-                    <p style={{ color: "rgba(245,240,232,0.4)", fontSize: "0.8rem", fontFamily: "var(--font-ui)", marginTop: "8px" }}>
-                      Your download links will be sent here immediately after payment.
-                    </p>
+                  <label style={labelStyle}>
+                    Full Name (Legal)
+                  </label>
+                  <input
+                    name="legalName" value={form.legalName} onChange={handleChange}
+                    placeholder="Your full legal name"
+                    style={inputStyle}
+                  />
+                  <p style={{ color: "rgba(245,240,232,0.4)", fontSize: "0.8rem", fontFamily: "var(--font-ui)", marginTop: "8px" }}>
+                    Used for your official license agreement.
+                  </p>
+                </div>
+
+                {/* Divider */}
+                <div style={{ height: "1px", backgroundColor: "rgba(255,255,255,0.07)", margin: "28px 0" }} />
+
+                {/* Section 2 — Artist Name + Email */}
+                <div>
+                  <div style={{ color: "var(--gold)", fontSize: "0.68rem", fontFamily: "var(--font-mono)", letterSpacing: "0.18em", textTransform: "uppercase", fontWeight: 700, marginBottom: "16px" }}>
+                    Artist Information
+                  </div>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                    <div>
+                      <label style={labelStyle}>
+                        Artist Name
+                      </label>
+                      <input
+                        name="artistName" value={form.artistName} onChange={handleChange}
+                        placeholder="How you're known publicly"
+                        style={inputStyle}
+                      />
+                      <p style={{ color: "rgba(245,240,232,0.4)", fontSize: "0.8rem", fontFamily: "var(--font-ui)", marginTop: "8px" }}>
+                        We'll address you by this name in your confirmation email.
+                      </p>
+                    </div>
+                    <div>
+                      <label style={labelStyle}>
+                        Email
+                      </label>
+                      <input
+                        name="email" value={form.email} onChange={handleChange}
+                        placeholder="you@example.com" type="email"
+                        style={inputStyle}
+                      />
+                      <p style={{ color: "rgba(245,240,232,0.4)", fontSize: "0.8rem", fontFamily: "var(--font-ui)", marginTop: "8px" }}>
+                        Your download links will be sent here immediately after payment.
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Right — Order Summary */}
-            <div style={{
+            <div className="checkout-summary" style={{
               backgroundColor: "var(--bg-card)",
               border: "1px solid rgba(255,255,255,0.07)",
               borderRadius: "16px", padding: "36px",
@@ -379,7 +417,37 @@ export default function CheckoutPage() {
           .checkout-grid { grid-template-columns: 1fr !important; }
         }
         @media (max-width: 768px) {
-          section { padding-left: 20px !important; padding-right: 20px !important; }
+          .checkout-hero {
+            padding: 90px 20px 32px !important;
+          }
+          .checkout-content {
+            padding: 32px 16px 0 !important;
+          }
+          .checkout-item-row {
+            padding: 16px !important;
+            gap: 12px !important;
+          }
+          .checkout-item-select {
+            order: 3;
+            flex: 1 1 100% !important;
+            width: 100% !important;
+            margin-top: 6px !important;
+            font-size: 0.85rem !important;
+          }
+          .checkout-item-price {
+            order: 4;
+            flex: 1 1 100% !important;
+            text-align: left !important;
+            min-width: 0 !important;
+            margin-top: 2px !important;
+          }
+          .checkout-details {
+            padding: 24px !important;
+          }
+          .checkout-summary {
+            padding: 24px !important;
+            position: static !important;
+          }
         }
       `}</style>
     </main>
