@@ -4,9 +4,11 @@ import { useState, useEffect } from "react"
 import HeroParticles from "@/components/ui/HeroParticles"
 import Link from "next/link"
 import Navbar from "@/components/layout/Navbar"
+import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase"
 import { usePlayerStore } from "@/store/playerStore"
 import { useFavorite } from "@/hooks/useFavorites"
+import { addToCart } from "@/lib/cart"
 
 function HeartButton({ beatId }: { beatId: string }) {
   const { favorited, toggle } = useFavorite(beatId)
@@ -36,6 +38,7 @@ const genreColor: Record<string, string> = {
 }
 
 export default function HomePage() {
+  const router = useRouter()
   const [heroLeft, setHeroLeft] = useState(1)
   const [featuredBeats, setFeaturedBeats] = useState<any[]>([])
   const [shareBeat, setShareBeat] = useState<any | null>(null)
@@ -118,6 +121,13 @@ export default function HomePage() {
         }
         .see-more-cta:hover .arrow {
           transform: translateX(3px);
+        }
+
+        .beat-tag-link {
+          transition: color 0.15s ease;
+        }
+        .beat-tag-link:hover {
+          color: var(--gold) !important;
         }
 
         @media (max-width: 768px) {
@@ -246,7 +256,7 @@ export default function HomePage() {
             </div>
             <div className="genre-tags" style={{ display: "flex", gap: "8px", flexWrap: "nowrap" }}>
               {["Afrobeat", "Afro Fusion", "Trap", "R&B", "Amapiano", "Drill"].map((genre) => (
-                <Link key={genre} href={`/store?genre=${genre.toLowerCase()}`} style={{
+                <Link key={genre} href={`/store?genre=${encodeURIComponent(genre)}`} style={{
                   padding: "9px 16px", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "6px",
                   color: "rgba(245,240,232,0.65)", fontSize: "0.75rem", textDecoration: "none",
                   backgroundColor: "rgba(16,16,16,0.8)", whiteSpace: "nowrap",
@@ -285,7 +295,10 @@ export default function HomePage() {
               return (
                 <div key={beat.id} className="beat-card" style={{ backgroundColor: "var(--bg-card)", border: `1px solid ${isThisPlaying ? "rgba(201,168,76,0.4)" : "var(--border-subtle)"}`, borderRadius: "10px", overflow: "hidden", transition: "transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease" }}>
                   {/* Cover */}
-                  <div style={{ position: "relative", aspectRatio: "1", background: beat.cover_url ? "none" : `linear-gradient(135deg, ${genreColor[beat.genre] ?? "#111"} 0%, #0a0a0a 100%)`, backgroundColor: "#0a0a0a" }}>
+                  <div
+                    onClick={() => router.push(`/beat/${beat.slug}`)}
+                    style={{ position: "relative", aspectRatio: "1", background: beat.cover_url ? "none" : `linear-gradient(135deg, ${genreColor[beat.genre] ?? "#111"} 0%, #0a0a0a 100%)`, backgroundColor: "#0a0a0a", cursor: "pointer" }}
+                  >
                     {beat.cover_url
                       ? <img src={beat.cover_url} alt={beat.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                       : <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}><span style={{ color: "rgba(255,255,255,0.06)", fontSize: "1.4rem", fontWeight: 900, fontFamily: "var(--font-ui)", textAlign: "center", padding: "0 12px" }}>{beat.title.toUpperCase()}</span></div>
@@ -303,14 +316,14 @@ export default function HomePage() {
                     )}
 
                     {/* Share trigger */}
-                    <div onClick={() => setShareBeat(beat)} style={{ position: "absolute", top: "10px", right: "12px", color: "var(--text-muted)", fontSize: "1rem", zIndex: 2, cursor: "pointer" }}>···</div>
+                    <div onClick={(e) => { e.stopPropagation(); setShareBeat(beat) }} style={{ position: "absolute", top: "10px", right: "12px", color: "var(--text-muted)", fontSize: "1rem", zIndex: 2, cursor: "pointer" }}>···</div>
 
                     {/* Heart / favorite */}
                     <HeartButton beatId={String(beat.id)} />
 
                     {/* Play / pause */}
                     <button
-                      onClick={() => { if (isThisPlaying) { pause() } else { setQueue(featuredBeats); play(beat) } }}
+                      onClick={(e) => { e.stopPropagation(); if (isThisPlaying) { pause() } else { setQueue(featuredBeats); play(beat) } }}
                       style={{ position: "absolute", bottom: "12px", right: "12px", width: "38px", height: "38px", borderRadius: "50%", backgroundColor: "var(--gold)", border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", outline: "none", WebkitAppearance: "none" as any, zIndex: 2 }}>
                       {isThisPlaying
                         ? <svg width="12" height="12" viewBox="0 0 12 12" fill="#000"><rect x="1" y="0" width="4" height="12" rx="1" /><rect x="7" y="0" width="4" height="12" rx="1" /></svg>
@@ -320,19 +333,46 @@ export default function HomePage() {
                   </div>
 
                   {/* Info */}
-                  <div style={{ padding: "18px" }}>
+                  <div
+                    onClick={() => router.push(`/beat/${beat.slug}`)}
+                    style={{ padding: "18px", cursor: "pointer" }}
+                  >
                     <h3 style={{ color: "var(--text-primary)", fontSize: "1.1rem", fontWeight: 700, fontFamily: "var(--font-ui)", marginBottom: "6px", lineHeight: 1.3 }}>{beat.title}</h3>
-                    <div style={{ color: "var(--gold)", fontSize: "0.85rem", fontFamily: "var(--font-ui)", fontWeight: 600, marginBottom: "10px" }}>{beat.genre}</div>
+                    <Link
+                      href={`/store?genre=${encodeURIComponent(beat.genre)}`}
+                      onClick={(e) => e.stopPropagation()}
+                      className="beat-tag-link"
+                      style={{ color: "var(--gold)", fontSize: "0.85rem", fontFamily: "var(--font-ui)", fontWeight: 600, marginBottom: "10px", display: "inline-block", textDecoration: "none" }}
+                    >
+                      {beat.genre}
+                    </Link>
                     <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "16px" }}>
-                      <span style={{ color: "var(--text-muted)", fontSize: "0.8rem", fontFamily: "var(--font-mono)" }}>{beat.bpm} BPM</span>
+                      <Link
+                        href={`/store?bpm=${beat.bpm}`}
+                        onClick={(e) => e.stopPropagation()}
+                        className="beat-tag-link"
+                        style={{ color: "var(--text-muted)", fontSize: "0.8rem", fontFamily: "var(--font-mono)", textDecoration: "none" }}
+                      >
+                        {beat.bpm} BPM
+                      </Link>
                       <span style={{ color: "var(--border-dim)" }}>•</span>
-                      <span style={{ color: "var(--text-muted)", fontSize: "0.8rem", fontFamily: "var(--font-mono)" }}>{beat.key}</span>
+                      <Link
+                        href={`/store?key=${encodeURIComponent(beat.key)}`}
+                        onClick={(e) => e.stopPropagation()}
+                        className="beat-tag-link"
+                        style={{ color: "var(--text-muted)", fontSize: "0.8rem", fontFamily: "var(--font-mono)", textDecoration: "none" }}
+                      >
+                        {beat.key}
+                      </Link>
                     </div>
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                      <Link href={`/beat/${beat.slug}`} style={{ color: "var(--text-primary)", fontSize: "1rem", fontWeight: 700, fontFamily: "var(--font-ui)", textDecoration: "none" }}>
+                      <Link href={`/beat/${beat.slug}`} onClick={(e) => e.stopPropagation()} style={{ color: "var(--text-primary)", fontSize: "1rem", fontWeight: 700, fontFamily: "var(--font-ui)", textDecoration: "none" }}>
                         from ₦{beat.basic_price.toLocaleString()}
                       </Link>
-                      <button style={{ width: "34px", height: "34px", borderRadius: "50%", backgroundColor: "var(--gold)", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", outline: "none", WebkitAppearance: "none" as any }}>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); addToCart(beat.id, "basic") }}
+                        style={{ width: "34px", height: "34px", borderRadius: "50%", backgroundColor: "var(--gold)", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", outline: "none", WebkitAppearance: "none" as any }}
+                      >
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                           <circle cx="8" cy="21" r="1" /><circle cx="19" cy="21" r="1" />
                           <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" />

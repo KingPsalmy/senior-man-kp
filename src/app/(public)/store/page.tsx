@@ -3,11 +3,11 @@
 import { useState, useEffect } from "react"
 import Navbar from "@/components/layout/Navbar"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { supabase } from "@/lib/supabase"
 import { usePlayerStore } from "@/store/playerStore"
 import { useFavoritesStore } from "@/store/favoritesStore"
-import { addToCart } from "@/lib/cart"
+import { addToCart, LicenseType } from "@/lib/cart"
 
 type Beat = {
   id: string
@@ -54,17 +54,43 @@ const filterSelectStyle: React.CSSProperties = {
   cursor: "pointer",
 }
 
+function getLicenseOptions(beat: Beat) {
+  return [
+    { value: "basic" as LicenseType, label: "Basic", price: beat.basic_price, disabled: false },
+    { value: "premium" as LicenseType, label: "Premium", price: beat.premium_price, disabled: false },
+    { value: "unlimited" as LicenseType, label: "Unlimited", price: beat.unlimited_price, disabled: false },
+    { value: "exclusive" as LicenseType, label: "Exclusive", price: beat.exclusive_price, disabled: beat.is_exclusive_sold },
+  ]
+}
+
 export default function StorePage() {
   const [beats, setBeats] = useState<Beat[]>([])
   const [loading, setLoading] = useState(true)
   const [shareBeat, setShareBeat] = useState<Beat | null>(null)
+  const [licenseBeat, setLicenseBeat] = useState<Beat | null>(null)
+  const [selectedLicense, setSelectedLicense] = useState<LicenseType>("basic")
+  const [justAdded, setJustAdded] = useState(false)
   const [search, setSearch] = useState("")
   const [genre, setGenre] = useState("")
   const [mood, setMood] = useState("")
+  const [bpm, setBpm] = useState("")
+  const [key, setKey] = useState("")
   const [sort, setSort] = useState("newest")
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { currentBeat, isPlaying, play, pause, setQueue } = usePlayerStore()
   const { load: loadFavorites, toggle: toggleFavorite, check: isFavorited } = useFavoritesStore()
+
+  useEffect(() => {
+    const g = searchParams.get("genre")
+    const m = searchParams.get("mood")
+    const b = searchParams.get("bpm")
+    const k = searchParams.get("key")
+    if (g) setGenre(g)
+    if (m) setMood(m)
+    if (b) setBpm(b)
+    if (k) setKey(k)
+  }, [searchParams])
 
   useEffect(() => {
     loadFavorites()
@@ -88,7 +114,9 @@ export default function StorePage() {
     const matchSearch = b.title.toLowerCase().includes(search.toLowerCase())
     const matchGenre = genre ? b.genre === genre : true
     const matchMood = mood ? b.mood === mood : true
-    return matchSearch && matchGenre && matchMood
+    const matchBpm = bpm ? Math.abs(b.bpm - Number(bpm)) <= 5 : true
+    const matchKey = key ? b.key === key : true
+    return matchSearch && matchGenre && matchMood && matchBpm && matchKey
   })
 
   async function handlePlay(beat: Beat) {
@@ -104,6 +132,36 @@ export default function StorePage() {
       body: JSON.stringify({ beat_id: beat.id }),
     })
   }
+
+  function openLicensePicker(beat: Beat) {
+    setSelectedLicense(beat.is_exclusive_sold ? "basic" : "basic")
+    setJustAdded(false)
+    setLicenseBeat(beat)
+  }
+
+  async function handleConfirmAddToCart() {
+    if (!licenseBeat) return
+    await addToCart(licenseBeat.id, selectedLicense)
+    setJustAdded(true)
+    setTimeout(() => {
+      setLicenseBeat(null)
+      setJustAdded(false)
+    }, 900)
+  }
+
+  function clearFilter(type: "genre" | "mood" | "bpm" | "key") {
+    if (type === "genre") setGenre("")
+    if (type === "mood") setMood("")
+    if (type === "bpm") setBpm("")
+    if (type === "key") setKey("")
+  }
+
+  const activeFilters = [
+    genre && { type: "genre" as const, label: genre },
+    mood && { type: "mood" as const, label: mood },
+    bpm && { type: "bpm" as const, label: `${Number(bpm) - 5}–${Number(bpm) + 5} BPM` },
+    key && { type: "key" as const, label: key },
+  ].filter(Boolean) as { type: "genre" | "mood" | "bpm" | "key"; label: string }[]
 
   return (
     <main style={{ backgroundColor: "var(--bg-void)", minHeight: "100vh", paddingBottom: "120px" }}>
@@ -173,6 +231,27 @@ export default function StorePage() {
             <option value="price_high">Sort: Price High</option>
           </select>
         </div>
+
+        {/* Active filter chips */}
+        {activeFilters.length > 0 && (
+          <div style={{ maxWidth: "1400px", margin: "12px auto 0", display: "flex", gap: "8px", flexWrap: "wrap" }}>
+            {activeFilters.map((f) => (
+              <button
+                key={f.type}
+                onClick={() => clearFilter(f.type)}
+                style={{
+                  display: "inline-flex", alignItems: "center", gap: "6px",
+                  padding: "6px 12px", borderRadius: "20px",
+                  backgroundColor: "rgba(201,168,76,0.1)", border: "1px solid rgba(201,168,76,0.25)",
+                  color: "var(--gold)", fontSize: "0.78rem", fontFamily: "var(--font-ui)", fontWeight: 600,
+                  cursor: "pointer", WebkitAppearance: "none" as any, outline: "none",
+                }}
+              >
+                {f.label} <span style={{ fontSize: "0.85rem" }}>✕</span>
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Beat Grid */}
@@ -281,11 +360,11 @@ export default function StorePage() {
                     </div>
 
                     {/* Info */}
-                    <div
-                      onClick={() => router.push(`/beat/${beat.slug}`)}
-                      style={{ padding: "16px", cursor: "pointer" }}
-                    >
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "6px", gap: "8px" }}>
+                    <div style={{ padding: "16px" }}>
+                      <div
+                        onClick={() => router.push(`/beat/${beat.slug}`)}
+                        style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "6px", gap: "8px", cursor: "pointer" }}
+                      >
                         <h3 style={{ color: "var(--text-primary)", fontSize: "1.05rem", fontWeight: 700, fontFamily: "var(--font-ui)", lineHeight: 1.3, flex: 1, margin: 0 }}>
                           {beat.title}
                         </h3>
@@ -304,14 +383,21 @@ export default function StorePage() {
                         </button>
                       </div>
 
-                      <div style={{ color: "var(--gold)", fontSize: "0.82rem", fontFamily: "var(--font-ui)", fontWeight: 600, marginBottom: "8px" }}>
+                      <Link
+                        href={`/store?genre=${encodeURIComponent(beat.genre)}`}
+                        style={{ color: "var(--gold)", fontSize: "0.82rem", fontFamily: "var(--font-ui)", fontWeight: 600, marginBottom: "8px", display: "inline-block", textDecoration: "none" }}
+                      >
                         {beat.genre}
-                      </div>
+                      </Link>
 
                       <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "14px", flexWrap: "wrap" }}>
-                        <span style={{ color: "var(--text-muted)", fontSize: "0.78rem", fontFamily: "var(--font-mono)" }}>{beat.bpm} BPM</span>
+                        <Link href={`/store?bpm=${beat.bpm}`} style={{ color: "var(--text-muted)", fontSize: "0.78rem", fontFamily: "var(--font-mono)", textDecoration: "none" }}>
+                          {beat.bpm} BPM
+                        </Link>
                         <span style={{ color: "var(--border-dim)" }}>•</span>
-                        <span style={{ color: "var(--text-muted)", fontSize: "0.78rem", fontFamily: "var(--font-mono)" }}>{beat.key}</span>
+                        <Link href={`/store?key=${encodeURIComponent(beat.key)}`} style={{ color: "var(--text-muted)", fontSize: "0.78rem", fontFamily: "var(--font-mono)", textDecoration: "none" }}>
+                          {beat.key}
+                        </Link>
                         {beat.duration && (
                           <>
                             <span style={{ color: "var(--border-dim)" }}>•</span>
@@ -325,7 +411,7 @@ export default function StorePage() {
                           from ₦{beat.basic_price.toLocaleString()}
                         </span>
                         <button
-                          onClick={(e) => { e.stopPropagation(); addToCart(beat.id, "basic") }}
+                          onClick={(e) => { e.stopPropagation(); openLicensePicker(beat) }}
                           style={{
                             width: "34px", height: "34px", borderRadius: "50%",
                             backgroundColor: "var(--gold)", border: "none",
@@ -347,6 +433,110 @@ export default function StorePage() {
           )}
         </div>
       </div>
+
+      {/* License Picker Modal */}
+      {licenseBeat && (
+        <div
+          onClick={() => setLicenseBeat(null)}
+          style={{
+            position: "fixed", inset: 0, zIndex: 100,
+            backgroundColor: "rgba(0,0,0,0.88)", backdropFilter: "blur(12px)",
+            display: "flex", alignItems: "center", justifyContent: "center", padding: "24px",
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              backgroundColor: "var(--bg-card)",
+              border: "1px solid rgba(201,168,76,0.25)",
+              borderRadius: "16px", width: "100%", maxWidth: "440px",
+              padding: "32px", position: "relative", overflow: "hidden",
+            }}
+          >
+            <div style={{ position: "absolute", top: 0, left: "32px", right: "32px", height: "1px", background: "linear-gradient(90deg, transparent, rgba(201,168,76,0.4), transparent)" }} />
+
+            {/* Header */}
+            <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: "8px" }}>
+              <div>
+                <div style={{ color: "var(--text-primary)", fontSize: "1.1rem", fontWeight: 700, fontFamily: "var(--font-ui)" }}>
+                  {licenseBeat.title}
+                </div>
+                <div style={{ color: "var(--gold)", fontSize: "0.8rem", fontFamily: "var(--font-ui)", marginTop: "2px" }}>
+                  {licenseBeat.genre} · {licenseBeat.bpm} BPM · {licenseBeat.key}
+                </div>
+              </div>
+              <button
+                onClick={() => setLicenseBeat(null)}
+                style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: "1.3rem", lineHeight: 1, WebkitAppearance: "none" as any, outline: "none" }}
+              >✕</button>
+            </div>
+
+            <p style={{ color: "rgba(245,240,232,0.55)", fontSize: "0.85rem", fontFamily: "var(--font-ui)", marginBottom: "24px" }}>
+              Choose a license type
+            </p>
+
+            {/* License options */}
+            <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginBottom: "24px" }}>
+              {getLicenseOptions(licenseBeat).map((opt) => {
+                const isSelected = selectedLicense === opt.value
+                return (
+                  <button
+                    key={opt.value}
+                    onClick={() => !opt.disabled && setSelectedLicense(opt.value)}
+                    disabled={opt.disabled}
+                    style={{
+                      display: "flex", alignItems: "center", justifyContent: "space-between",
+                      padding: "14px 18px",
+                      backgroundColor: isSelected ? "rgba(201,168,76,0.1)" : "var(--bg-elevated)",
+                      border: `1px solid ${isSelected ? "rgba(201,168,76,0.5)" : "rgba(255,255,255,0.08)"}`,
+                      borderRadius: "10px",
+                      cursor: opt.disabled ? "not-allowed" : "pointer",
+                      opacity: opt.disabled ? 0.4 : 1,
+                      textAlign: "left", width: "100%",
+                      WebkitAppearance: "none" as any, outline: "none",
+                    }}
+                  >
+                    <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                      <div style={{
+                        width: "16px", height: "16px", borderRadius: "50%",
+                        border: `2px solid ${isSelected ? "var(--gold)" : "rgba(255,255,255,0.25)"}`,
+                        display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+                      }}>
+                        {isSelected && <div style={{ width: "8px", height: "8px", borderRadius: "50%", backgroundColor: "var(--gold)" }} />}
+                      </div>
+                      <span style={{ color: "var(--text-primary)", fontSize: "0.92rem", fontWeight: 600, fontFamily: "var(--font-ui)" }}>
+                        {opt.label}
+                        {opt.disabled && <span style={{ color: "#ff6b6b", fontSize: "0.72rem", marginLeft: "8px", fontWeight: 700 }}>SOLD</span>}
+                      </span>
+                    </div>
+                    <span style={{ color: isSelected ? "var(--gold)" : "var(--text-secondary)", fontSize: "0.92rem", fontWeight: 700, fontFamily: "var(--font-ui)" }}>
+                      ₦{opt.price.toLocaleString()}
+                    </span>
+                  </button>
+                )
+              })}
+            </div>
+
+            <button
+              onClick={handleConfirmAddToCart}
+              disabled={justAdded}
+              style={{
+                width: "100%", padding: "15px",
+                background: justAdded ? "rgba(74,222,128,0.15)" : "linear-gradient(135deg, #C9A84C, #F5D98B)",
+                border: justAdded ? "1px solid rgba(74,222,128,0.3)" : "none",
+                borderRadius: "8px",
+                color: justAdded ? "#4ade80" : "#000",
+                fontSize: "0.9rem", fontWeight: 700, fontFamily: "var(--font-ui)",
+                letterSpacing: "0.08em", textTransform: "uppercase",
+                cursor: justAdded ? "default" : "pointer",
+                WebkitAppearance: "none" as any, outline: "none",
+              }}
+            >
+              {justAdded ? "✓ Added to Cart" : "Add to Cart"}
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Share Modal */}
       {shareBeat && (
