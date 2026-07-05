@@ -134,7 +134,7 @@ export default function StorePage() {
   }
 
   function openLicensePicker(beat: Beat) {
-    setSelectedLicense(beat.is_exclusive_sold ? "basic" : "basic")
+    setSelectedLicense("basic")
     setJustAdded(false)
     setLicenseBeat(beat)
   }
@@ -391,6 +391,14 @@ export default function StorePage() {
                       </Link>
 
                       <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "14px", flexWrap: "wrap" }}>
+                        {beat.mood && (
+                          <>
+                            <Link href={`/store?mood=${encodeURIComponent(beat.mood)}`} style={{ color: "var(--text-muted)", fontSize: "0.78rem", fontFamily: "var(--font-mono)", textDecoration: "none" }}>
+                              {beat.mood}
+                            </Link>
+                            <span style={{ color: "var(--border-dim)" }}>•</span>
+                          </>
+                        )}
                         <Link href={`/store?bpm=${beat.bpm}`} style={{ color: "var(--text-muted)", fontSize: "0.78rem", fontFamily: "var(--font-mono)", textDecoration: "none" }}>
                           {beat.bpm} BPM
                         </Link>
@@ -623,7 +631,10 @@ export default function StorePage() {
                 { label: "TikTok", icon: "♪", url: "https://tiktok.com" },
               ].map((s) => (
                 <a
-                  key={s.label} href={s.url} target="_blank" rel="noopener noreferrer"
+                  key={s.label}
+                  href={s.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   style={{
                     display: "flex", alignItems: "center", gap: "10px",
                     padding: "13px 16px",

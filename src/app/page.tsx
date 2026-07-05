@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase"
 import { usePlayerStore } from "@/store/playerStore"
 import { useFavorite } from "@/hooks/useFavorites"
-import { addToCart } from "@/lib/cart"
+import { addToCart, LicenseType } from "@/lib/cart"
 
 function HeartButton({ beatId }: { beatId: string }) {
   const { favorited, toggle } = useFavorite(beatId)
@@ -37,11 +37,23 @@ const genreColor: Record<string, string> = {
   "R&B": "#0a2e1a", "Amapiano": "#2e1a0a", "Drill": "#1a1a2e",
 }
 
+function getLicenseOptions(beat: any) {
+  return [
+    { value: "basic" as LicenseType, label: "Basic", price: beat.basic_price, disabled: false },
+    { value: "premium" as LicenseType, label: "Premium", price: beat.premium_price, disabled: false },
+    { value: "unlimited" as LicenseType, label: "Unlimited", price: beat.unlimited_price, disabled: false },
+    { value: "exclusive" as LicenseType, label: "Exclusive", price: beat.exclusive_price, disabled: beat.is_exclusive_sold },
+  ]
+}
+
 export default function HomePage() {
   const router = useRouter()
   const [heroLeft, setHeroLeft] = useState(1)
   const [featuredBeats, setFeaturedBeats] = useState<any[]>([])
   const [shareBeat, setShareBeat] = useState<any | null>(null)
+  const [licenseBeat, setLicenseBeat] = useState<any | null>(null)
+  const [selectedLicense, setSelectedLicense] = useState<LicenseType>("basic")
+  const [justAdded, setJustAdded] = useState(false)
   const [subtitleVisible, setSubtitleVisible] = useState(false)
   const { setQueue, play, pause, currentBeat, isPlaying } = usePlayerStore()
 
@@ -72,6 +84,22 @@ export default function HomePage() {
     outline: "none",
     cursor: "pointer",
     backdropFilter: "blur(10px)",
+  }
+
+  function openLicensePicker(beat: any) {
+    setSelectedLicense("basic")
+    setJustAdded(false)
+    setLicenseBeat(beat)
+  }
+
+  async function handleConfirmAddToCart() {
+    if (!licenseBeat) return
+    await addToCart(licenseBeat.id, selectedLicense)
+    setJustAdded(true)
+    setTimeout(() => {
+      setLicenseBeat(null)
+      setJustAdded(false)
+    }, 900)
   }
 
   return (
@@ -346,7 +374,20 @@ export default function HomePage() {
                     >
                       {beat.genre}
                     </Link>
-                    <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "16px" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "16px", flexWrap: "wrap" }}>
+                      {beat.mood && (
+                        <>
+                          <Link
+                            href={`/store?mood=${encodeURIComponent(beat.mood)}`}
+                            onClick={(e) => e.stopPropagation()}
+                            className="beat-tag-link"
+                            style={{ color: "var(--text-muted)", fontSize: "0.8rem", fontFamily: "var(--font-mono)", textDecoration: "none" }}
+                          >
+                            {beat.mood}
+                          </Link>
+                          <span style={{ color: "var(--border-dim)" }}>•</span>
+                        </>
+                      )}
                       <Link
                         href={`/store?bpm=${beat.bpm}`}
                         onClick={(e) => e.stopPropagation()}
@@ -370,7 +411,7 @@ export default function HomePage() {
                         from ₦{beat.basic_price.toLocaleString()}
                       </Link>
                       <button
-                        onClick={(e) => { e.stopPropagation(); addToCart(beat.id, "basic") }}
+                        onClick={(e) => { e.stopPropagation(); openLicensePicker(beat) }}
                         style={{ width: "34px", height: "34px", borderRadius: "50%", backgroundColor: "var(--gold)", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", outline: "none", WebkitAppearance: "none" as any }}
                       >
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -427,6 +468,99 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* ── License Picker Modal ── */}
+      {licenseBeat && (
+        <div
+          onClick={() => setLicenseBeat(null)}
+          style={{ position: "fixed", inset: 0, zIndex: 100, backgroundColor: "rgba(0,0,0,0.88)", backdropFilter: "blur(12px)", display: "flex", alignItems: "center", justifyContent: "center", padding: "24px" }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{ backgroundColor: "var(--bg-card)", border: "1px solid rgba(201,168,76,0.25)", borderRadius: "16px", width: "100%", maxWidth: "440px", padding: "32px", position: "relative", overflow: "hidden" }}
+          >
+            <div style={{ position: "absolute", top: 0, left: "32px", right: "32px", height: "1px", background: "linear-gradient(90deg, transparent, rgba(201,168,76,0.4), transparent)" }} />
+
+            <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: "8px" }}>
+              <div>
+                <div style={{ color: "var(--text-primary)", fontSize: "1.1rem", fontWeight: 700, fontFamily: "var(--font-ui)" }}>
+                  {licenseBeat.title}
+                </div>
+                <div style={{ color: "var(--gold)", fontSize: "0.8rem", fontFamily: "var(--font-ui)", marginTop: "2px" }}>
+                  {licenseBeat.genre} · {licenseBeat.bpm} BPM · {licenseBeat.key}
+                </div>
+              </div>
+              <button
+                onClick={() => setLicenseBeat(null)}
+                style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: "1.3rem", lineHeight: 1, WebkitAppearance: "none" as any, outline: "none" }}
+              >✕</button>
+            </div>
+
+            <p style={{ color: "rgba(245,240,232,0.55)", fontSize: "0.85rem", fontFamily: "var(--font-ui)", marginBottom: "24px" }}>
+              Choose a license type
+            </p>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginBottom: "24px" }}>
+              {getLicenseOptions(licenseBeat).map((opt) => {
+                const isSelected = selectedLicense === opt.value
+                return (
+                  <button
+                    key={opt.value}
+                    onClick={() => !opt.disabled && setSelectedLicense(opt.value)}
+                    disabled={opt.disabled}
+                    style={{
+                      display: "flex", alignItems: "center", justifyContent: "space-between",
+                      padding: "14px 18px",
+                      backgroundColor: isSelected ? "rgba(201,168,76,0.1)" : "var(--bg-elevated)",
+                      border: `1px solid ${isSelected ? "rgba(201,168,76,0.5)" : "rgba(255,255,255,0.08)"}`,
+                      borderRadius: "10px",
+                      cursor: opt.disabled ? "not-allowed" : "pointer",
+                      opacity: opt.disabled ? 0.4 : 1,
+                      textAlign: "left", width: "100%",
+                      WebkitAppearance: "none" as any, outline: "none",
+                    }}
+                  >
+                    <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                      <div style={{
+                        width: "16px", height: "16px", borderRadius: "50%",
+                        border: `2px solid ${isSelected ? "var(--gold)" : "rgba(255,255,255,0.25)"}`,
+                        display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+                      }}>
+                        {isSelected && <div style={{ width: "8px", height: "8px", borderRadius: "50%", backgroundColor: "var(--gold)" }} />}
+                      </div>
+                      <span style={{ color: "var(--text-primary)", fontSize: "0.92rem", fontWeight: 600, fontFamily: "var(--font-ui)" }}>
+                        {opt.label}
+                        {opt.disabled && <span style={{ color: "#ff6b6b", fontSize: "0.72rem", marginLeft: "8px", fontWeight: 700 }}>SOLD</span>}
+                      </span>
+                    </div>
+                    <span style={{ color: isSelected ? "var(--gold)" : "var(--text-secondary)", fontSize: "0.92rem", fontWeight: 700, fontFamily: "var(--font-ui)" }}>
+                      ₦{opt.price.toLocaleString()}
+                    </span>
+                  </button>
+                )
+              })}
+            </div>
+
+            <button
+              onClick={handleConfirmAddToCart}
+              disabled={justAdded}
+              style={{
+                width: "100%", padding: "15px",
+                background: justAdded ? "rgba(74,222,128,0.15)" : "linear-gradient(135deg, #C9A84C, #F5D98B)",
+                border: justAdded ? "1px solid rgba(74,222,128,0.3)" : "none",
+                borderRadius: "8px",
+                color: justAdded ? "#4ade80" : "#000",
+                fontSize: "0.9rem", fontWeight: 700, fontFamily: "var(--font-ui)",
+                letterSpacing: "0.08em", textTransform: "uppercase",
+                cursor: justAdded ? "default" : "pointer",
+                WebkitAppearance: "none" as any, outline: "none",
+              }}
+            >
+              {justAdded ? "✓ Added to Cart" : "Add to Cart"}
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* ── Share Modal ── */}
       {shareBeat && (

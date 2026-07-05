@@ -114,7 +114,30 @@ export default function BeatDetailPage() {
     <main style={{ backgroundColor: "var(--bg-void)", minHeight: "100vh", paddingBottom: "120px" }}>
       <Navbar />
 
-      <div style={{ padding: "100px 48px 0" }}>
+      <style>{`
+        .beat-tag-link {
+          text-decoration: none;
+          transition: color 0.15s ease;
+        }
+        .beat-tag-link:hover {
+          color: var(--gold) !important;
+        }
+
+        @media (max-width: 768px) {
+          .beat-detail-wrap {
+            padding: 90px 20px 0 !important;
+          }
+          .beat-detail-license-option {
+            padding: 14px 16px !important;
+          }
+          .beat-detail-actions button,
+          .beat-detail-actions a {
+            flex: 1 1 100% !important;
+          }
+        }
+      `}</style>
+
+      <div className="beat-detail-wrap" style={{ padding: "100px 48px 0" }}>
         <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
 
           {/* Breadcrumb */}
@@ -215,10 +238,20 @@ export default function BeatDetailPage() {
                 </div>
 
                 <div style={{ display: "flex", alignItems: "center", gap: "16px", flexWrap: "wrap" }}>
-                  <span style={{ color: "var(--gold)", fontSize: "0.78rem", fontFamily: "var(--font-ui)", fontWeight: 600 }}>{beat.genre}</span>
-                  <span style={{ color: "var(--text-muted)", fontSize: "0.72rem", fontFamily: "var(--font-mono)" }}>{beat.bpm} BPM</span>
-                  <span style={{ color: "var(--text-muted)", fontSize: "0.72rem", fontFamily: "var(--font-mono)" }}>{beat.key}</span>
-                  {beat.mood && <span style={{ color: "var(--text-muted)", fontSize: "0.72rem", fontFamily: "var(--font-mono)" }}>{beat.mood}</span>}
+                  <Link href={`/store?genre=${encodeURIComponent(beat.genre)}`} className="beat-tag-link" style={{ color: "var(--gold)", fontSize: "0.78rem", fontFamily: "var(--font-ui)", fontWeight: 600 }}>
+                    {beat.genre}
+                  </Link>
+                  <Link href={`/store?bpm=${beat.bpm}`} className="beat-tag-link" style={{ color: "var(--text-muted)", fontSize: "0.72rem", fontFamily: "var(--font-mono)" }}>
+                    {beat.bpm} BPM
+                  </Link>
+                  <Link href={`/store?key=${encodeURIComponent(beat.key)}`} className="beat-tag-link" style={{ color: "var(--text-muted)", fontSize: "0.72rem", fontFamily: "var(--font-mono)" }}>
+                    {beat.key}
+                  </Link>
+                  {beat.mood && (
+                    <Link href={`/store?mood=${encodeURIComponent(beat.mood)}`} className="beat-tag-link" style={{ color: "var(--text-muted)", fontSize: "0.72rem", fontFamily: "var(--font-mono)" }}>
+                      {beat.mood}
+                    </Link>
+                  )}
                   {beat.duration && <span style={{ color: "var(--text-muted)", fontSize: "0.72rem", fontFamily: "var(--font-mono)" }}>{beat.duration}</span>}
                 </div>
 
@@ -255,6 +288,7 @@ export default function BeatDetailPage() {
                     {LICENSE_OPTIONS.map((option) => (
                       <div
                         key={option.value}
+                        className="beat-detail-license-option"
                         onClick={() => setSelectedLicense(option.value)}
                         style={{
                           padding: "16px 20px",
@@ -296,7 +330,7 @@ export default function BeatDetailPage() {
 
               {/* Actions */}
               {!isUnavailable ? (
-                <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
+                <div className="beat-detail-actions" style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
                   <button
                     onClick={handleAddToCart}
                     style={{
