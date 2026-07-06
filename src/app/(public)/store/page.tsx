@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, Suspense } from "react"
 import Navbar from "@/components/layout/Navbar"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
@@ -63,7 +63,7 @@ function getLicenseOptions(beat: Beat) {
   ]
 }
 
-export default function StorePage() {
+function StorePageInner() {
   const [beats, setBeats] = useState<Beat[]>([])
   const [loading, setLoading] = useState(true)
   const [shareBeat, setShareBeat] = useState<Beat | null>(null)
@@ -631,10 +631,7 @@ export default function StorePage() {
                 { label: "TikTok", icon: "♪", url: "https://tiktok.com" },
               ].map((s) => (
                 <a
-                  key={s.label}
-                  href={s.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  key={s.label} href={s.url} target="_blank" rel="noopener noreferrer"
                   style={{
                     display: "flex", alignItems: "center", gap: "10px",
                     padding: "13px 16px",
@@ -668,5 +665,20 @@ export default function StorePage() {
         }
       `}</style>
     </main>
+  )
+}
+
+export default function StorePage() {
+  return (
+    <Suspense fallback={
+      <main style={{ backgroundColor: "var(--bg-void)", minHeight: "100vh" }}>
+        <Navbar />
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "60vh", color: "var(--text-muted)", fontFamily: "var(--font-ui)" }}>
+          Loading...
+        </div>
+      </main>
+    }>
+      <StorePageInner />
+    </Suspense>
   )
 }
