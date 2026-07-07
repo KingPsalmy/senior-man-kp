@@ -10,6 +10,8 @@ import { usePlayerStore } from "@/store/playerStore"
 import { useFavorite } from "@/hooks/useFavorites"
 import { addToCart, LicenseType } from "@/lib/cart"
 
+const LAST_PLAYED_COUNT = 6 // change to 1 if you'd rather show only the very last beat
+
 function HeartButton({ beatId }: { beatId: string }) {
   const { favorited, toggle } = useFavorite(beatId)
   return (
@@ -274,6 +276,14 @@ export default function HomePage() {
           color: var(--gold) !important;
         }
 
+        .last-played-scroll {
+          scroll-snap-type: x mandatory;
+          -webkit-overflow-scrolling: touch;
+        }
+        .last-played-card {
+          scroll-snap-align: start;
+        }
+
         @media (max-width: 768px) {
           .hero-search-wrap { max-width: 100% !important; }
           .hero-filters-wrap { max-width: 100% !important; }
@@ -295,6 +305,16 @@ export default function HomePage() {
           }
           .section-padding {
             padding: 60px 20px !important;
+          }
+
+          .last-played-section {
+            padding: 40px 20px 0 !important;
+          }
+          .last-played-card {
+            width: 160px !important;
+          }
+          .last-played-scroll {
+            gap: 12px !important;
           }
         }
       `}</style>
@@ -414,15 +434,15 @@ export default function HomePage() {
 
       {/* ── Last Played ── */}
       {lastPlayed.length > 0 && (
-        <section className="section-padding" style={{ padding: "60px 48px 0", backgroundColor: "var(--bg-void)" }}>
+        <section className="last-played-section section-padding" style={{ padding: "60px 48px 0", backgroundColor: "var(--bg-void)" }}>
           <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
             <div style={{ marginBottom: "24px" }}>
               <span style={{ color: "var(--gold)", fontSize: "0.82rem", fontFamily: "var(--font-mono)", letterSpacing: "0.22em", textTransform: "uppercase" }}>Pick Up Where You Left Off</span>
               <h2 style={{ color: "var(--text-primary)", fontSize: "clamp(1.6rem, 4vw, 2.2rem)", fontWeight: 800, fontFamily: "var(--font-ui)", letterSpacing: "-0.02em", marginTop: "8px" }}>Last Played</h2>
             </div>
-            <div style={{ display: "flex", gap: "16px", overflowX: "auto", paddingBottom: "8px" }}>
-              {lastPlayed.slice(0, 6).map((beat: any) => (
-                <div key={beat.id} style={{ width: "230px", flexShrink: 0 }}>
+            <div className="last-played-scroll" style={{ display: "flex", gap: "16px", overflowX: "auto", paddingBottom: "8px" }}>
+              {lastPlayed.slice(0, LAST_PLAYED_COUNT).map((beat: any) => (
+                <div key={beat.id} className="last-played-card" style={{ width: "230px", flexShrink: 0 }}>
                   {renderBeatCard(beat)}
                 </div>
               ))}
