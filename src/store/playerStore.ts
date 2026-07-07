@@ -47,6 +47,7 @@ type PlayerStore = {
   duration: number
   lastBeatId: number | null        // track previous beat for double-prev
   lastPlayed: PlayerBeat[]         // persisted play history, most recent first
+  hasHydratedHistory: boolean      // guards against re-hydrating after mount
   setQueue: (beats: PlayerBeat[]) => void
   play: (beat: PlayerBeat) => void
   pause: () => void
@@ -58,6 +59,7 @@ type PlayerStore = {
   setProgress: (p: number) => void
   setDuration: (d: number) => void
   clearHistory: () => void
+  hydrateHistory: () => void
 }
 
 export const usePlayerStore = create<PlayerStore>((set, get) => ({
@@ -69,7 +71,8 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
   progress: 0,
   duration: 0,
   lastBeatId: null,
-  lastPlayed: loadHistory(),
+  lastPlayed: [],
+  hasHydratedHistory: false,
 
   setQueue: (beats) => {
     const shuffled = [...beats].sort(() => Math.random() - 0.5)
@@ -161,5 +164,10 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
   clearHistory: () => {
     saveHistory([])
     set({ lastPlayed: [] })
+  },
+
+  hydrateHistory: () => {
+    if (get().hasHydratedHistory) return
+    set({ lastPlayed: loadHistory(), hasHydratedHistory: true })
   },
 }))

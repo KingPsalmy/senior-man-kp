@@ -55,9 +55,10 @@ export default function HomePage() {
   const [selectedLicense, setSelectedLicense] = useState<LicenseType>("basic")
   const [justAdded, setJustAdded] = useState(false)
   const [subtitleVisible, setSubtitleVisible] = useState(false)
-  const { setQueue, play, pause, currentBeat, isPlaying, lastPlayed } = usePlayerStore()
+  const { setQueue, play, pause, currentBeat, isPlaying, lastPlayed, hydrateHistory } = usePlayerStore()
 
   useEffect(() => {
+    hydrateHistory()
     async function fetchFeatured() {
       const { data } = await supabase
         .from("beats").select("*")

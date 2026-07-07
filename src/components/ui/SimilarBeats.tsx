@@ -27,13 +27,32 @@ export default function SimilarBeats({ beatId, title }: Props) {
 
   return (
     <div style={{ marginTop: "48px" }}>
+      <style>{`
+        .similar-beats-grid {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 12px;
+        }
+        @media (max-width: 1100px) {
+          .similar-beats-grid {
+            grid-template-columns: repeat(3, 1fr);
+          }
+        }
+        @media (max-width: 768px) {
+          .similar-beats-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 10px !important;
+          }
+        }
+      `}</style>
+
       <div style={{ marginBottom: "20px" }}>
         <span style={{ color: "var(--gold)", fontSize: "0.65rem", fontFamily: "var(--font-mono)", letterSpacing: "0.2em", textTransform: "uppercase" }}>
           {title ?? "Similar Beats"}
         </span>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "12px" }}>
+      <div className="similar-beats-grid">
         {beats.map((beat) => (
           <Link key={beat.id} href={`/beat/${beat.slug}`} style={{ textDecoration: "none" }}>
             <div style={{
