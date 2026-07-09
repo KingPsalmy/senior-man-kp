@@ -44,6 +44,14 @@ const emptyForm = {
   is_published: false, is_featured: false,
 }
 
+const navItems = [
+  { icon: "⊞", label: "Dashboard", href: "/admin/dashboard" },
+  { icon: "♪", label: "Beats", href: "/admin/dashboard/beats", active: true },
+  { icon: "💳", label: "Purchases", href: "/admin/dashboard/purchases" },
+  { icon: "👤", label: "Customers", href: "/admin/dashboard/customers" },
+  { icon: "⚙", label: "Settings", href: "/admin/dashboard/settings" },
+]
+
 export default function AdminBeatsPage() {
   const router = useRouter()
   const [tab, setTab] = useState<"list" | "upload">("list")
@@ -277,22 +285,27 @@ export default function AdminBeatsPage() {
     }
   }
 
+  async function handleLogout() {
+    await supabase.auth.signOut()
+    router.push("/admin/login")
+  }
+
   const inputStyle = {
-    width: "100%", padding: "10px 14px",
+    width: "100%", padding: "11px 14px",
     backgroundColor: "var(--bg-elevated)", border: "1px solid var(--border-dim)",
     borderRadius: "4px", color: "var(--text-primary)",
-    fontSize: "0.82rem", fontFamily: "var(--font-ui)", outline: "none",
+    fontSize: "0.92rem", fontFamily: "var(--font-ui)", outline: "none",
   }
 
   const labelStyle = {
     display: "block", color: "var(--text-muted)",
-    fontSize: "0.6rem", fontFamily: "var(--font-mono)",
-    letterSpacing: "0.15em", textTransform: "uppercase" as const, marginBottom: "6px",
+    fontSize: "0.72rem", fontFamily: "var(--font-mono)",
+    letterSpacing: "0.12em", textTransform: "uppercase" as const, marginBottom: "7px",
   }
 
   const fileRowStyle = (hasFile: boolean) => ({
     border: `1px dashed ${hasFile ? "rgba(201,168,76,0.3)" : "var(--border-dim)"}`,
-    borderRadius: "4px", padding: "12px 16px",
+    borderRadius: "4px", padding: "13px 16px",
     backgroundColor: hasFile ? "rgba(201,168,76,0.05)" : "transparent",
     display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px",
     marginBottom: "12px",
@@ -301,28 +314,22 @@ export default function AdminBeatsPage() {
   return (
     <main style={{ minHeight: "100vh", backgroundColor: "var(--bg-void)", display: "flex" }}>
 
-      {/* Sidebar */}
+      {/* Sidebar (desktop: left rail — mobile: bottom tab bar, styled via globals.css) */}
       <aside className="admin-sidebar" style={{
         width: "220px", flexShrink: 0, backgroundColor: "var(--bg-deep)",
         borderRight: "1px solid var(--border-subtle)", display: "flex", flexDirection: "column",
         padding: "24px 0", position: "fixed", top: 0, left: 0, bottom: 0, zIndex: 40,
       }}>
         <div style={{ padding: "0 24px 24px", borderBottom: "1px solid var(--border-subtle)" }}>
-          <div style={{ color: "var(--text-muted)", fontSize: "0.5rem", letterSpacing: "0.3em", textTransform: "uppercase", fontFamily: "var(--font-mono)", marginBottom: "4px" }}>Senior Man</div>
+          <div style={{ color: "var(--text-muted)", fontSize: "0.6rem", letterSpacing: "0.3em", textTransform: "uppercase", fontFamily: "var(--font-mono)", marginBottom: "4px" }}>Senior Man</div>
           <div style={{ background: "linear-gradient(135deg, #C9A84C, #F5D98B)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", fontSize: "1.8rem", fontWeight: 800, fontFamily: "var(--font-ui)", lineHeight: 1 }}>KP</div>
         </div>
         <nav style={{ flex: 1, padding: "16px 0" }}>
-          {[
-            { icon: "⊞", label: "Dashboard", href: "/admin/dashboard" },
-            { icon: "♪", label: "Beats", href: "/admin/dashboard/beats", active: true },
-            { icon: "💳", label: "Purchases", href: "/admin/dashboard/purchases" },
-            { icon: "👤", label: "Customers", href: "/admin/dashboard/customers" },
-            { icon: "⚙", label: "Settings", href: "/admin/dashboard/settings" },
-          ].map((item) => (
+          {navItems.map((item) => (
             <Link key={item.label} href={item.href} style={{
-              display: "flex", alignItems: "center", gap: "12px", padding: "10px 24px", textDecoration: "none",
+              display: "flex", alignItems: "center", gap: "12px", padding: "11px 24px", textDecoration: "none",
               color: (item as any).active ? "var(--gold)" : "var(--text-secondary)",
-              fontSize: "0.78rem", fontFamily: "var(--font-ui)", fontWeight: 500,
+              fontSize: "0.9rem", fontFamily: "var(--font-ui)", fontWeight: 500,
               backgroundColor: (item as any).active ? "rgba(201,168,76,0.06)" : "transparent",
               borderRight: (item as any).active ? "2px solid var(--gold)" : "2px solid transparent",
             }}>
@@ -330,8 +337,8 @@ export default function AdminBeatsPage() {
             </Link>
           ))}
           <button
-            onClick={async () => { await supabase.auth.signOut(); router.push("/admin/login") }}
-            style={{ width: "100%", display: "flex", alignItems: "center", gap: "12px", padding: "10px 24px", background: "none", border: "none", color: "var(--text-muted)", fontSize: "0.78rem", fontFamily: "var(--font-ui)", cursor: "pointer" }}
+            onClick={handleLogout}
+            style={{ width: "100%", display: "flex", alignItems: "center", gap: "12px", padding: "11px 24px", background: "none", border: "none", color: "var(--text-muted)", fontSize: "0.9rem", fontFamily: "var(--font-ui)", cursor: "pointer" }}
           >
             <span>→</span> Logout
           </button>
@@ -339,23 +346,24 @@ export default function AdminBeatsPage() {
       </aside>
 
       {/* Main */}
-      <div className="admin-main" style={{ marginLeft: "220px", flex: 1, padding: "32px" }}>
+      <div className="admin-main" style={{ marginLeft: "220px", flex: 1, padding: "32px", minWidth: 0 }}>
 
         {/* Header */}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "28px", flexWrap: "wrap", gap: "12px" }}>
-          <h1 style={{ color: "var(--text-primary)", fontSize: "1.5rem", fontWeight: 800, fontFamily: "var(--font-ui)" }}>Beats</h1>
+        <div className="admin-header-row" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "28px", flexWrap: "wrap", gap: "12px" }}>
+          <h1 className="admin-page-title" style={{ color: "var(--text-primary)", fontSize: "1.9rem", fontWeight: 800, fontFamily: "var(--font-ui)" }}>Beats</h1>
           <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-            <Link href="/admin/dashboard" style={{ color: "var(--text-muted)", fontSize: "0.75rem", fontFamily: "var(--font-ui)", textDecoration: "none", padding: "9px 16px", border: "1px solid var(--border-dim)", borderRadius: "4px" }}>
+            <Link href="/admin/dashboard" className="admin-dashboard-link" style={{ color: "var(--text-muted)", fontSize: "0.85rem", fontFamily: "var(--font-ui)", textDecoration: "none", padding: "10px 18px", border: "1px solid var(--border-dim)", borderRadius: "4px" }}>
               ← Dashboard
             </Link>
             <button
               onClick={() => setTab(tab === "list" ? "upload" : "list")}
+              className="admin-upload-toggle"
               style={{
-                padding: "9px 20px", fontSize: "0.72rem", fontWeight: 700,
+                padding: "10px 22px", fontSize: "0.8rem", fontWeight: 700,
                 background: tab === "upload" ? "var(--bg-elevated)" : "linear-gradient(135deg, #C9A84C, #F5D98B)",
                 border: "none", borderRadius: "4px", cursor: "pointer",
                 color: tab === "upload" ? "var(--text-secondary)" : "#000",
-                fontFamily: "var(--font-ui)", letterSpacing: "0.1em", textTransform: "uppercase",
+                fontFamily: "var(--font-ui)", letterSpacing: "0.08em", textTransform: "uppercase",
               }}
             >
               {tab === "upload" ? "← Beat List" : "+ Upload Beat"}
@@ -367,89 +375,163 @@ export default function AdminBeatsPage() {
         {tab === "list" && (
           <div>
             {loadingBeats ? (
-              <div style={{ textAlign: "center", padding: "60px 0", color: "var(--text-muted)", fontFamily: "var(--font-mono)", fontSize: "0.8rem" }}>Loading beats...</div>
+              <div style={{ textAlign: "center", padding: "60px 0", color: "var(--text-muted)", fontFamily: "var(--font-mono)", fontSize: "0.9rem" }}>Loading beats...</div>
             ) : beats.length === 0 ? (
               <div style={{ textAlign: "center", padding: "80px 0", backgroundColor: "var(--bg-card)", border: "1px solid var(--border-subtle)", borderRadius: "8px" }}>
                 <div style={{ fontSize: "3rem", marginBottom: "16px" }}>♪</div>
-                <h2 style={{ color: "var(--text-primary)", fontSize: "1.1rem", fontWeight: 700, fontFamily: "var(--font-ui)", marginBottom: "8px" }}>No beats yet</h2>
-                <button onClick={() => setTab("upload")} style={{ padding: "10px 24px", fontSize: "0.72rem", fontWeight: 700, background: "linear-gradient(135deg, #C9A84C, #F5D98B)", border: "none", borderRadius: "4px", cursor: "pointer", color: "#000", fontFamily: "var(--font-ui)" }}>
+                <h2 style={{ color: "var(--text-primary)", fontSize: "1.25rem", fontWeight: 700, fontFamily: "var(--font-ui)", marginBottom: "8px" }}>No beats yet</h2>
+                <button onClick={() => setTab("upload")} style={{ padding: "11px 26px", fontSize: "0.8rem", fontWeight: 700, background: "linear-gradient(135deg, #C9A84C, #F5D98B)", border: "none", borderRadius: "4px", cursor: "pointer", color: "#000", fontFamily: "var(--font-ui)" }}>
                   + Upload First Beat
                 </button>
               </div>
             ) : (
               <div style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-subtle)", borderRadius: "8px", overflow: "hidden" }}>
-                <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr 80px 80px 150px", padding: "12px 20px", borderBottom: "1px solid var(--border-subtle)", gap: "12px" }}>
-                  {["Beat", "Genre", "BPM", "Price", "Published", "Featured", "Actions"].map((h) => (
-                    <span key={h} style={{ color: "var(--text-muted)", fontSize: "0.6rem", fontFamily: "var(--font-mono)", letterSpacing: "0.15em", textTransform: "uppercase" }}>{h}</span>
+
+                {/* Desktop table */}
+                <div className="admin-beats-desktop">
+                  <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr 90px 90px 160px", padding: "12px 20px", borderBottom: "1px solid var(--border-subtle)", gap: "12px" }}>
+                    {["Beat", "Genre", "BPM", "Price", "Published", "Featured", "Actions"].map((h) => (
+                      <span key={h} style={{ color: "var(--text-muted)", fontSize: "0.72rem", fontFamily: "var(--font-mono)", letterSpacing: "0.1em", textTransform: "uppercase" }}>{h}</span>
+                    ))}
+                  </div>
+
+                  {beats.map((beat, i) => (
+                    <div key={beat.id} style={{
+                      display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr 90px 90px 160px",
+                      padding: "16px 20px", gap: "12px", alignItems: "center",
+                      borderBottom: i < beats.length - 1 ? "1px solid var(--border-subtle)" : "none",
+                    }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "10px", minWidth: 0 }}>
+                        <div style={{ width: "40px", height: "40px", borderRadius: "4px", flexShrink: 0, backgroundColor: "var(--bg-elevated)", overflow: "hidden" }}>
+                          {beat.cover_url
+                            ? <img src={beat.cover_url} alt={beat.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                            : <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--text-muted)", fontSize: "0.7rem" }}>♪</div>
+                          }
+                        </div>
+                        <span style={{ color: "var(--text-primary)", fontSize: "0.92rem", fontWeight: 600, fontFamily: "var(--font-ui)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{beat.title}</span>
+                      </div>
+
+                      <span style={{ color: "var(--gold)", fontSize: "0.85rem", fontFamily: "var(--font-ui)" }}>{beat.genre}</span>
+                      <span style={{ color: "var(--text-secondary)", fontSize: "0.85rem", fontFamily: "var(--font-mono)" }}>{beat.bpm} BPM</span>
+                      <span style={{ color: "var(--text-secondary)", fontSize: "0.85rem", fontFamily: "var(--font-ui)" }}>₦{beat.basic_price?.toLocaleString()}</span>
+
+                      <button onClick={() => togglePublish(beat)} style={{
+                        padding: "5px 12px", borderRadius: "20px", border: "none", cursor: "pointer",
+                        backgroundColor: beat.is_published ? "rgba(74,222,128,0.12)" : "var(--bg-elevated)",
+                        color: beat.is_published ? "#4ade80" : "var(--text-muted)",
+                        fontSize: "0.72rem", fontFamily: "var(--font-mono)", fontWeight: 700,
+                      }}>
+                        {beat.is_published ? "Live" : "Draft"}
+                      </button>
+
+                      <button onClick={() => toggleFeatured(beat)} style={{
+                        padding: "5px 12px", borderRadius: "20px", border: "none", cursor: "pointer",
+                        backgroundColor: beat.is_featured ? "rgba(201,168,76,0.12)" : "var(--bg-elevated)",
+                        color: beat.is_featured ? "var(--gold)" : "var(--text-muted)",
+                        fontSize: "0.72rem", fontFamily: "var(--font-mono)", fontWeight: 700,
+                      }}>
+                        {beat.is_featured ? "★ Featured" : "Feature"}
+                      </button>
+
+                      <div style={{ display: "flex", gap: "6px" }}>
+                        <button
+                          onClick={() => openEdit(beat)}
+                          style={{
+                            padding: "6px 12px", borderRadius: "3px",
+                            backgroundColor: "rgba(201,168,76,0.08)",
+                            border: "1px solid rgba(201,168,76,0.2)",
+                            color: "var(--gold)", fontSize: "0.72rem",
+                            fontFamily: "var(--font-mono)", cursor: "pointer",
+                          }}
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => setDeleteId(beat.id)}
+                          style={{
+                            padding: "6px 12px", borderRadius: "3px",
+                            backgroundColor: "rgba(255,100,100,0.08)",
+                            border: "1px solid rgba(255,100,100,0.2)",
+                            color: "#ff6b6b", fontSize: "0.72rem",
+                            fontFamily: "var(--font-mono)", cursor: "pointer",
+                          }}
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </div>
                   ))}
                 </div>
 
-                {beats.map((beat, i) => (
-                  <div key={beat.id} style={{
-                    display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr 80px 80px 150px",
-                    padding: "14px 20px", gap: "12px", alignItems: "center",
-                    borderBottom: i < beats.length - 1 ? "1px solid var(--border-subtle)" : "none",
-                  }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "10px", minWidth: 0 }}>
-                      <div style={{ width: "36px", height: "36px", borderRadius: "4px", flexShrink: 0, backgroundColor: "var(--bg-elevated)", overflow: "hidden" }}>
-                        {beat.cover_url
-                          ? <img src={beat.cover_url} alt={beat.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                          : <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--text-muted)", fontSize: "0.6rem" }}>♪</div>
-                        }
+                {/* Mobile cards */}
+                <div className="admin-beats-mobile" style={{ display: "none", flexDirection: "column" }}>
+                  {beats.map((beat, i) => (
+                    <div key={beat.id} className="admin-beat-card" style={{
+                      padding: "18px 20px",
+                      borderBottom: i < beats.length - 1 ? "1px solid var(--border-subtle)" : "none",
+                    }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "12px" }}>
+                        <div className="admin-beat-cover" style={{ width: "56px", height: "56px", borderRadius: "6px", flexShrink: 0, backgroundColor: "var(--bg-elevated)", overflow: "hidden" }}>
+                          {beat.cover_url
+                            ? <img src={beat.cover_url} alt={beat.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                            : <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--text-muted)", fontSize: "0.8rem" }}>♪</div>
+                          }
+                        </div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div className="admin-beat-title" style={{ color: "var(--text-primary)", fontSize: "1rem", fontWeight: 700, fontFamily: "var(--font-ui)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{beat.title}</div>
+                          <div className="admin-beat-meta" style={{ color: "var(--gold)", fontSize: "0.8rem", fontFamily: "var(--font-ui)", marginTop: "2px" }}>{beat.genre} · {beat.bpm} BPM</div>
+                        </div>
+                        <span className="admin-beat-price" style={{ color: "var(--text-secondary)", fontSize: "0.92rem", fontFamily: "var(--font-ui)", fontWeight: 700, flexShrink: 0 }}>₦{beat.basic_price?.toLocaleString()}</span>
                       </div>
-                      <span style={{ color: "var(--text-primary)", fontSize: "0.82rem", fontWeight: 600, fontFamily: "var(--font-ui)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{beat.title}</span>
+
+                      <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                        <button onClick={() => togglePublish(beat)} className="admin-beat-badge" style={{
+                          padding: "6px 14px", borderRadius: "20px", border: "none", cursor: "pointer",
+                          backgroundColor: beat.is_published ? "rgba(74,222,128,0.12)" : "var(--bg-elevated)",
+                          color: beat.is_published ? "#4ade80" : "var(--text-muted)",
+                          fontSize: "0.72rem", fontFamily: "var(--font-mono)", fontWeight: 700,
+                        }}>
+                          {beat.is_published ? "Live" : "Draft"}
+                        </button>
+                        <button onClick={() => toggleFeatured(beat)} className="admin-beat-badge" style={{
+                          padding: "6px 14px", borderRadius: "20px", border: "none", cursor: "pointer",
+                          backgroundColor: beat.is_featured ? "rgba(201,168,76,0.12)" : "var(--bg-elevated)",
+                          color: beat.is_featured ? "var(--gold)" : "var(--text-muted)",
+                          fontSize: "0.72rem", fontFamily: "var(--font-mono)", fontWeight: 700,
+                        }}>
+                          {beat.is_featured ? "★ Featured" : "Feature"}
+                        </button>
+                        <div style={{ flex: 1 }} />
+                        <button
+                          onClick={() => openEdit(beat)}
+                          className="admin-beat-action"
+                          style={{
+                            padding: "6px 14px", borderRadius: "4px",
+                            backgroundColor: "rgba(201,168,76,0.08)",
+                            border: "1px solid rgba(201,168,76,0.2)",
+                            color: "var(--gold)", fontSize: "0.72rem",
+                            fontFamily: "var(--font-mono)", cursor: "pointer",
+                          }}
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => setDeleteId(beat.id)}
+                          className="admin-beat-action"
+                          style={{
+                            padding: "6px 14px", borderRadius: "4px",
+                            backgroundColor: "rgba(255,100,100,0.08)",
+                            border: "1px solid rgba(255,100,100,0.2)",
+                            color: "#ff6b6b", fontSize: "0.72rem",
+                            fontFamily: "var(--font-mono)", cursor: "pointer",
+                          }}
+                        >
+                          Delete
+                        </button>
+                      </div>
                     </div>
-
-                    <span style={{ color: "var(--gold)", fontSize: "0.72rem", fontFamily: "var(--font-ui)" }}>{beat.genre}</span>
-                    <span style={{ color: "var(--text-secondary)", fontSize: "0.72rem", fontFamily: "var(--font-mono)" }}>{beat.bpm} BPM</span>
-                    <span style={{ color: "var(--text-secondary)", fontSize: "0.72rem", fontFamily: "var(--font-ui)" }}>₦{beat.basic_price?.toLocaleString()}</span>
-
-                    <button onClick={() => togglePublish(beat)} style={{
-                      padding: "4px 10px", borderRadius: "20px", border: "none", cursor: "pointer",
-                      backgroundColor: beat.is_published ? "rgba(74,222,128,0.12)" : "var(--bg-elevated)",
-                      color: beat.is_published ? "#4ade80" : "var(--text-muted)",
-                      fontSize: "0.6rem", fontFamily: "var(--font-mono)", fontWeight: 700,
-                    }}>
-                      {beat.is_published ? "Live" : "Draft"}
-                    </button>
-
-                    <button onClick={() => toggleFeatured(beat)} style={{
-                      padding: "4px 10px", borderRadius: "20px", border: "none", cursor: "pointer",
-                      backgroundColor: beat.is_featured ? "rgba(201,168,76,0.12)" : "var(--bg-elevated)",
-                      color: beat.is_featured ? "var(--gold)" : "var(--text-muted)",
-                      fontSize: "0.6rem", fontFamily: "var(--font-mono)", fontWeight: 700,
-                    }}>
-                      {beat.is_featured ? "★ Featured" : "Feature"}
-                    </button>
-
-                    <div style={{ display: "flex", gap: "6px" }}>
-                      <button
-                        onClick={() => openEdit(beat)}
-                        style={{
-                          padding: "5px 10px", borderRadius: "3px",
-                          backgroundColor: "rgba(201,168,76,0.08)",
-                          border: "1px solid rgba(201,168,76,0.2)",
-                          color: "var(--gold)", fontSize: "0.6rem",
-                          fontFamily: "var(--font-mono)", cursor: "pointer",
-                        }}
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => setDeleteId(beat.id)}
-                        style={{
-                          padding: "5px 10px", borderRadius: "3px",
-                          backgroundColor: "rgba(255,100,100,0.08)",
-                          border: "1px solid rgba(255,100,100,0.2)",
-                          color: "#ff6b6b", fontSize: "0.6rem",
-                          fontFamily: "var(--font-mono)", cursor: "pointer",
-                        }}
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             )}
           </div>
@@ -459,12 +541,12 @@ export default function AdminBeatsPage() {
         {tab === "upload" && (
           <form onSubmit={handleSubmit}>
             {success && (
-              <div style={{ backgroundColor: "rgba(74,222,128,0.08)", border: "1px solid rgba(74,222,128,0.2)", borderRadius: "6px", padding: "14px 18px", marginBottom: "24px", color: "#4ade80", fontSize: "0.82rem", fontFamily: "var(--font-ui)" }}>
+              <div style={{ backgroundColor: "rgba(74,222,128,0.08)", border: "1px solid rgba(74,222,128,0.2)", borderRadius: "6px", padding: "14px 18px", marginBottom: "24px", color: "#4ade80", fontSize: "0.9rem", fontFamily: "var(--font-ui)" }}>
                 ✓ Beat uploaded successfully! Redirecting to beat list...
               </div>
             )}
             {error && (
-              <div style={{ backgroundColor: "rgba(255,50,50,0.08)", border: "1px solid rgba(255,50,50,0.2)", borderRadius: "6px", padding: "14px 18px", marginBottom: "24px", color: "#ff6b6b", fontSize: "0.82rem", fontFamily: "var(--font-ui)" }}>
+              <div style={{ backgroundColor: "rgba(255,50,50,0.08)", border: "1px solid rgba(255,50,50,0.2)", borderRadius: "6px", padding: "14px 18px", marginBottom: "24px", color: "#ff6b6b", fontSize: "0.9rem", fontFamily: "var(--font-ui)" }}>
                 {error}
               </div>
             )}
@@ -472,7 +554,7 @@ export default function AdminBeatsPage() {
             <div className="upload-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px" }}>
               <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
                 <div style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-subtle)", borderRadius: "8px", padding: "24px" }}>
-                  <h2 style={{ color: "var(--text-primary)", fontSize: "0.82rem", fontWeight: 700, fontFamily: "var(--font-ui)", marginBottom: "20px" }}>Beat Info</h2>
+                  <h2 style={{ color: "var(--text-primary)", fontSize: "0.95rem", fontWeight: 700, fontFamily: "var(--font-ui)", marginBottom: "20px" }}>Beat Info</h2>
                   <div style={{ marginBottom: "16px" }}>
                     <label style={labelStyle}>Title *</label>
                     <input name="title" value={form.title} onChange={handleChange} required placeholder="e.g. Midnight Drive" style={inputStyle} />
@@ -490,7 +572,7 @@ export default function AdminBeatsPage() {
                 </div>
 
                 <div style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-subtle)", borderRadius: "8px", padding: "24px" }}>
-                  <h2 style={{ color: "var(--text-primary)", fontSize: "0.82rem", fontWeight: 700, fontFamily: "var(--font-ui)", marginBottom: "20px" }}>Pricing (₦)</h2>
+                  <h2 style={{ color: "var(--text-primary)", fontSize: "0.95rem", fontWeight: 700, fontFamily: "var(--font-ui)", marginBottom: "20px" }}>Pricing (₦)</h2>
                   <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
                     {[
                       { name: "basic_price", label: "Basic License", placeholder: "30000" },
@@ -509,7 +591,7 @@ export default function AdminBeatsPage() {
 
               <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
                 <div style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-subtle)", borderRadius: "8px", padding: "24px" }}>
-                  <h2 style={{ color: "var(--text-primary)", fontSize: "0.82rem", fontWeight: 700, fontFamily: "var(--font-ui)", marginBottom: "20px" }}>Files</h2>
+                  <h2 style={{ color: "var(--text-primary)", fontSize: "0.95rem", fontWeight: 700, fontFamily: "var(--font-ui)", marginBottom: "20px" }}>Files</h2>
                   {([
                     { key: "cover" as const, label: "Cover Art", accept: "image/*", hint: "JPG, PNG — Square recommended" },
                     { key: "preview" as const, label: "Preview Audio", accept: "audio/*", hint: "MP3 — Watermarked version" },
@@ -521,10 +603,10 @@ export default function AdminBeatsPage() {
                       <div style={{ border: `1px dashed ${files[f.key] ? "rgba(201,168,76,0.3)" : "var(--border-dim)"}`, borderRadius: "4px", padding: "16px", textAlign: "center", backgroundColor: files[f.key] ? "rgba(201,168,76,0.05)" : "transparent" }}>
                         <input type="file" accept={f.accept} onChange={(e) => handleFile(e, f.key)} style={{ display: "none" }} id={`file-${f.key}`} />
                         <label htmlFor={`file-${f.key}`} style={{ cursor: "pointer" }}>
-                          <div style={{ color: files[f.key] ? "var(--gold)" : "var(--text-muted)", fontSize: "0.78rem", fontFamily: "var(--font-ui)", marginBottom: "4px" }}>
+                          <div style={{ color: files[f.key] ? "var(--gold)" : "var(--text-muted)", fontSize: "0.88rem", fontFamily: "var(--font-ui)", marginBottom: "4px" }}>
                             {files[f.key] ? `✓ ${files[f.key]!.name}` : `Click to upload ${f.label}`}
                           </div>
-                          <div style={{ color: "var(--text-muted)", fontSize: "0.62rem", fontFamily: "var(--font-mono)" }}>{f.hint}</div>
+                          <div style={{ color: "var(--text-muted)", fontSize: "0.72rem", fontFamily: "var(--font-mono)" }}>{f.hint}</div>
                         </label>
                       </div>
                     </div>
@@ -532,27 +614,27 @@ export default function AdminBeatsPage() {
                 </div>
 
                 <div style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-subtle)", borderRadius: "8px", padding: "24px" }}>
-                  <h2 style={{ color: "var(--text-primary)", fontSize: "0.82rem", fontWeight: 700, fontFamily: "var(--font-ui)", marginBottom: "20px" }}>Settings</h2>
+                  <h2 style={{ color: "var(--text-primary)", fontSize: "0.95rem", fontWeight: 700, fontFamily: "var(--font-ui)", marginBottom: "20px" }}>Settings</h2>
                   <label style={{ display: "flex", alignItems: "center", gap: "12px", cursor: "pointer", marginBottom: "16px" }}>
                     <input type="checkbox" name="is_published" checked={form.is_published} onChange={handleChange} style={{ width: "16px", height: "16px", accentColor: "var(--gold)" }} />
                     <div>
-                      <div style={{ color: "var(--text-secondary)", fontSize: "0.82rem", fontFamily: "var(--font-ui)", fontWeight: 600 }}>Publish immediately</div>
-                      <div style={{ color: "var(--text-muted)", fontSize: "0.68rem", fontFamily: "var(--font-ui)" }}>Beat will appear in the store</div>
+                      <div style={{ color: "var(--text-secondary)", fontSize: "0.92rem", fontFamily: "var(--font-ui)", fontWeight: 600 }}>Publish immediately</div>
+                      <div style={{ color: "var(--text-muted)", fontSize: "0.78rem", fontFamily: "var(--font-ui)" }}>Beat will appear in the store</div>
                     </div>
                   </label>
                   <label style={{ display: "flex", alignItems: "center", gap: "12px", cursor: "pointer", marginBottom: "24px" }}>
                     <input type="checkbox" name="is_featured" checked={form.is_featured} onChange={handleChange} style={{ width: "16px", height: "16px", accentColor: "var(--gold)" }} />
                     <div>
-                      <div style={{ color: "var(--text-secondary)", fontSize: "0.82rem", fontFamily: "var(--font-ui)", fontWeight: 600 }}>Feature on Homepage</div>
-                      <div style={{ color: "var(--text-muted)", fontSize: "0.68rem", fontFamily: "var(--font-ui)" }}>Shows in "Latest Drops" section</div>
+                      <div style={{ color: "var(--text-secondary)", fontSize: "0.92rem", fontFamily: "var(--font-ui)", fontWeight: 600 }}>Feature on Homepage</div>
+                      <div style={{ color: "var(--text-muted)", fontSize: "0.78rem", fontFamily: "var(--font-ui)" }}>Shows in "Latest Drops" section</div>
                     </div>
                   </label>
                   <button type="submit" disabled={loading} style={{
-                    width: "100%", padding: "13px",
+                    width: "100%", padding: "14px",
                     background: loading ? "var(--bg-elevated)" : "linear-gradient(135deg, #C9A84C, #F5D98B)",
                     border: "none", borderRadius: "4px", color: loading ? "var(--text-muted)" : "#000",
-                    fontSize: "0.75rem", fontWeight: 800, fontFamily: "var(--font-ui)",
-                    letterSpacing: "0.12em", textTransform: "uppercase", cursor: loading ? "not-allowed" : "pointer",
+                    fontSize: "0.85rem", fontWeight: 800, fontFamily: "var(--font-ui)",
+                    letterSpacing: "0.1em", textTransform: "uppercase", cursor: loading ? "not-allowed" : "pointer",
                   }}>
                     {loading ? (uploadStatus || "Uploading...") : "Upload Beat"}
                   </button>
@@ -571,34 +653,34 @@ export default function AdminBeatsPage() {
           display: "flex", alignItems: "flex-start", justifyContent: "center",
           padding: "24px", overflowY: "auto",
         }}>
-          <div style={{
+          <div className="admin-edit-modal" style={{
             backgroundColor: "var(--bg-card)", border: "1px solid var(--border-subtle)",
             borderRadius: "12px", width: "100%", maxWidth: "780px",
             padding: "32px", margin: "auto",
           }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "28px" }}>
               <div>
-                <h2 style={{ color: "var(--text-primary)", fontSize: "1.1rem", fontWeight: 800, fontFamily: "var(--font-ui)" }}>Edit Beat</h2>
-                <p style={{ color: "var(--text-muted)", fontSize: "0.72rem", fontFamily: "var(--font-ui)", marginTop: "4px" }}>
+                <h2 style={{ color: "var(--text-primary)", fontSize: "1.25rem", fontWeight: 800, fontFamily: "var(--font-ui)" }}>Edit Beat</h2>
+                <p style={{ color: "var(--text-muted)", fontSize: "0.82rem", fontFamily: "var(--font-ui)", marginTop: "4px" }}>
                   Only upload new files to replace existing ones. Leave file fields empty to keep current files.
                 </p>
               </div>
-              <button onClick={() => setEditBeat(null)} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: "1.3rem" }}>✕</button>
+              <button onClick={() => setEditBeat(null)} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: "1.4rem" }}>✕</button>
             </div>
 
             {editSuccess && (
-              <div style={{ backgroundColor: "rgba(74,222,128,0.08)", border: "1px solid rgba(74,222,128,0.2)", borderRadius: "6px", padding: "12px 16px", marginBottom: "20px", color: "#4ade80", fontSize: "0.82rem", fontFamily: "var(--font-ui)" }}>
+              <div style={{ backgroundColor: "rgba(74,222,128,0.08)", border: "1px solid rgba(74,222,128,0.2)", borderRadius: "6px", padding: "12px 16px", marginBottom: "20px", color: "#4ade80", fontSize: "0.9rem", fontFamily: "var(--font-ui)" }}>
                 ✓ Beat updated successfully!
               </div>
             )}
             {editError && (
-              <div style={{ backgroundColor: "rgba(255,50,50,0.08)", border: "1px solid rgba(255,50,50,0.2)", borderRadius: "6px", padding: "12px 16px", marginBottom: "20px", color: "#ff6b6b", fontSize: "0.82rem", fontFamily: "var(--font-ui)" }}>
+              <div style={{ backgroundColor: "rgba(255,50,50,0.08)", border: "1px solid rgba(255,50,50,0.2)", borderRadius: "6px", padding: "12px 16px", marginBottom: "20px", color: "#ff6b6b", fontSize: "0.9rem", fontFamily: "var(--font-ui)" }}>
                 {editError}
               </div>
             )}
 
             <form onSubmit={handleEditSubmit}>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px" }}>
+              <div className="admin-edit-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px" }}>
 
                 {/* Left — Beat info + pricing */}
                 <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
@@ -626,7 +708,7 @@ export default function AdminBeatsPage() {
                       { name: "exclusive_price", label: "Exclusive" },
                     ].map((f) => (
                       <div key={f.name} style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                        <span style={{ color: "var(--text-muted)", fontSize: "0.68rem", fontFamily: "var(--font-ui)", width: "70px", flexShrink: 0 }}>{f.label}</span>
+                        <span style={{ color: "var(--text-muted)", fontSize: "0.8rem", fontFamily: "var(--font-ui)", width: "76px", flexShrink: 0 }}>{f.label}</span>
                         <input name={f.name} value={editForm[f.name as keyof typeof editForm] as string} onChange={handleEditChange} type="number" style={{ ...inputStyle, flex: 1 }} />
                       </div>
                     ))}
@@ -635,11 +717,11 @@ export default function AdminBeatsPage() {
                   <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
                     <label style={{ display: "flex", alignItems: "center", gap: "10px", cursor: "pointer" }}>
                       <input type="checkbox" name="is_published" checked={editForm.is_published} onChange={handleEditChange} style={{ width: "16px", height: "16px", accentColor: "var(--gold)" }} />
-                      <span style={{ color: "var(--text-secondary)", fontSize: "0.82rem", fontFamily: "var(--font-ui)" }}>Published</span>
+                      <span style={{ color: "var(--text-secondary)", fontSize: "0.92rem", fontFamily: "var(--font-ui)" }}>Published</span>
                     </label>
                     <label style={{ display: "flex", alignItems: "center", gap: "10px", cursor: "pointer" }}>
                       <input type="checkbox" name="is_featured" checked={editForm.is_featured} onChange={handleEditChange} style={{ width: "16px", height: "16px", accentColor: "var(--gold)" }} />
-                      <span style={{ color: "var(--text-secondary)", fontSize: "0.82rem", fontFamily: "var(--font-ui)" }}>Featured on Homepage</span>
+                      <span style={{ color: "var(--text-secondary)", fontSize: "0.92rem", fontFamily: "var(--font-ui)" }}>Featured on Homepage</span>
                     </label>
                   </div>
                 </div>
@@ -656,17 +738,17 @@ export default function AdminBeatsPage() {
                     ]).map((f) => (
                       <div key={f.key} style={fileRowStyle(!!editFiles[f.key])}>
                         <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ color: "var(--text-secondary)", fontSize: "0.75rem", fontFamily: "var(--font-ui)", fontWeight: 600, marginBottom: "2px" }}>{f.label}</div>
-                          <div style={{ color: editFiles[f.key] ? "var(--gold)" : "var(--text-muted)", fontSize: "0.65rem", fontFamily: "var(--font-mono)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                          <div style={{ color: "var(--text-secondary)", fontSize: "0.85rem", fontFamily: "var(--font-ui)", fontWeight: 600, marginBottom: "2px" }}>{f.label}</div>
+                          <div style={{ color: editFiles[f.key] ? "var(--gold)" : "var(--text-muted)", fontSize: "0.75rem", fontFamily: "var(--font-mono)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                             {editFiles[f.key] ? `→ ${editFiles[f.key]!.name}` : f.current ? "✓ File exists" : "No file"}
                           </div>
                         </div>
                         <div>
                           <input type="file" accept={f.accept} onChange={(e) => handleEditFile(e, f.key)} style={{ display: "none" }} id={`edit-file-${f.key}`} />
                           <label htmlFor={`edit-file-${f.key}`} style={{
-                            padding: "6px 12px", borderRadius: "3px", cursor: "pointer",
+                            padding: "7px 14px", borderRadius: "3px", cursor: "pointer",
                             backgroundColor: "var(--bg-elevated)", border: "1px solid var(--border-dim)",
-                            color: "var(--text-secondary)", fontSize: "0.65rem", fontFamily: "var(--font-mono)",
+                            color: "var(--text-secondary)", fontSize: "0.75rem", fontFamily: "var(--font-mono)",
                             whiteSpace: "nowrap",
                           }}>
                             {editFiles[f.key] ? "Change" : "Replace"}
@@ -694,19 +776,19 @@ export default function AdminBeatsPage() {
 
               <div style={{ display: "flex", gap: "12px", marginTop: "28px" }}>
                 <button type="submit" disabled={editLoading} style={{
-                  flex: 1, padding: "13px",
+                  flex: 1, padding: "14px",
                   background: editLoading ? "var(--bg-elevated)" : "linear-gradient(135deg, #C9A84C, #F5D98B)",
                   border: "none", borderRadius: "4px", cursor: editLoading ? "not-allowed" : "pointer",
                   color: editLoading ? "var(--text-muted)" : "#000",
-                  fontSize: "0.75rem", fontWeight: 800, fontFamily: "var(--font-ui)",
-                  letterSpacing: "0.12em", textTransform: "uppercase",
+                  fontSize: "0.85rem", fontWeight: 800, fontFamily: "var(--font-ui)",
+                  letterSpacing: "0.1em", textTransform: "uppercase",
                 }}>
                   {editLoading ? (editUploadStatus || "Saving...") : "Save Changes"}
                 </button>
                 <button type="button" onClick={() => setEditBeat(null)} style={{
-                  padding: "13px 24px", background: "none",
+                  padding: "14px 26px", background: "none",
                   border: "1px solid var(--border-dim)", borderRadius: "4px", cursor: "pointer",
-                  color: "var(--text-muted)", fontSize: "0.75rem", fontFamily: "var(--font-ui)",
+                  color: "var(--text-muted)", fontSize: "0.85rem", fontFamily: "var(--font-ui)",
                 }}>
                   Cancel
                 </button>
@@ -721,21 +803,65 @@ export default function AdminBeatsPage() {
         <div style={{ position: "fixed", inset: 0, zIndex: 100, backgroundColor: "rgba(0,0,0,0.85)", backdropFilter: "blur(8px)", display: "flex", alignItems: "center", justifyContent: "center", padding: "24px" }}>
           <div style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-subtle)", borderRadius: "12px", padding: "32px", maxWidth: "400px", width: "100%", textAlign: "center" }}>
             <div style={{ fontSize: "2.5rem", marginBottom: "16px" }}>🗑️</div>
-            <h2 style={{ color: "var(--text-primary)", fontSize: "1.1rem", fontWeight: 800, fontFamily: "var(--font-ui)", marginBottom: "8px" }}>Delete this beat?</h2>
-            <p style={{ color: "var(--text-muted)", fontSize: "0.8rem", fontFamily: "var(--font-ui)", marginBottom: "24px", lineHeight: 1.6 }}>
+            <h2 style={{ color: "var(--text-primary)", fontSize: "1.25rem", fontWeight: 800, fontFamily: "var(--font-ui)", marginBottom: "8px" }}>Delete this beat?</h2>
+            <p style={{ color: "var(--text-muted)", fontSize: "0.9rem", fontFamily: "var(--font-ui)", marginBottom: "24px", lineHeight: 1.6 }}>
               This action cannot be undone. The beat and all its files will be permanently removed.
             </p>
             <div style={{ display: "flex", gap: "12px" }}>
-              <button onClick={() => deleteBeat(deleteId)} style={{ flex: 1, padding: "12px", background: "rgba(255,100,100,0.15)", border: "1px solid rgba(255,100,100,0.3)", borderRadius: "4px", color: "#ff6b6b", fontSize: "0.75rem", fontWeight: 700, fontFamily: "var(--font-ui)", cursor: "pointer" }}>
+              <button onClick={() => deleteBeat(deleteId)} style={{ flex: 1, padding: "13px", background: "rgba(255,100,100,0.15)", border: "1px solid rgba(255,100,100,0.3)", borderRadius: "4px", color: "#ff6b6b", fontSize: "0.85rem", fontWeight: 700, fontFamily: "var(--font-ui)", cursor: "pointer" }}>
                 Yes, Delete
               </button>
-              <button onClick={() => setDeleteId(null)} style={{ flex: 1, padding: "12px", background: "none", border: "1px solid var(--border-dim)", borderRadius: "4px", color: "var(--text-muted)", fontSize: "0.75rem", fontFamily: "var(--font-ui)", cursor: "pointer" }}>
+              <button onClick={() => setDeleteId(null)} style={{ flex: 1, padding: "13px", background: "none", border: "1px solid var(--border-dim)", borderRadius: "4px", color: "var(--text-muted)", fontSize: "0.85rem", fontFamily: "var(--font-ui)", cursor: "pointer" }}>
                 Cancel
               </button>
             </div>
           </div>
         </div>
       )}
+
+      <style>{`
+        @media (max-width: 768px) {
+          .admin-main { margin-left: 0 !important; padding: 20px 16px 80px !important; }
+          .admin-beats-desktop { display: none !important; }
+          .admin-beats-mobile { display: flex !important; }
+          .admin-edit-grid { grid-template-columns: 1fr !important; }
+          .admin-edit-modal { padding: 20px !important; }
+
+          .admin-page-title {
+            font-size: 1.5rem !important;
+          }
+          .admin-dashboard-link {
+            font-size: 0.9rem !important;
+            padding: 11px 18px !important;
+          }
+          .admin-upload-toggle {
+            font-size: 0.85rem !important;
+            padding: 11px 20px !important;
+          }
+
+          .admin-beat-cover {
+            width: 60px !important;
+            height: 60px !important;
+          }
+          .admin-beat-title {
+            font-size: 1.1rem !important;
+          }
+          .admin-beat-meta {
+            font-size: 0.88rem !important;
+          }
+          .admin-beat-price {
+            font-size: 1rem !important;
+          }
+          .admin-beat-badge {
+            font-size: 0.78rem !important;
+            padding: 7px 16px !important;
+          }
+          .admin-beat-action {
+            font-size: 0.78rem !important;
+            padding: 7px 16px !important;
+          }
+        }
+      `}</style>
     </main>
   )
 }

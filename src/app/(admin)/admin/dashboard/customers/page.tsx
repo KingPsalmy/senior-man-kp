@@ -28,7 +28,6 @@ export default function CustomersPage() {
   const [filtered, setFiltered] = useState<Customer[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState("")
-  const [sidebarOpen, setSidebarOpen] = useState(false)
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }: { data: any }) => {
@@ -107,7 +106,7 @@ export default function CustomersPage() {
 
   if (checking) return (
     <div style={{ minHeight: "100vh", backgroundColor: "var(--bg-void)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-      <span style={{ color: "var(--text-muted)", fontFamily: "var(--font-mono)", fontSize: "0.8rem" }}>Loading...</span>
+      <span style={{ color: "var(--text-muted)", fontFamily: "var(--font-mono)", fontSize: "0.95rem" }}>Loading...</span>
     </div>
   )
 
@@ -121,11 +120,7 @@ export default function CustomersPage() {
   return (
     <main style={{ minHeight: "100vh", backgroundColor: "var(--bg-void)", display: "flex" }}>
 
-      {sidebarOpen && (
-        <div onClick={() => setSidebarOpen(false)} style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.7)", zIndex: 39 }} />
-      )}
-
-      {/* Sidebar */}
+      {/* Sidebar (desktop: left rail — mobile: bottom tab bar, styled via globals.css) */}
       <aside className="admin-sidebar" style={{
         width: "220px", flexShrink: 0,
         backgroundColor: "var(--bg-deep)",
@@ -135,23 +130,23 @@ export default function CustomersPage() {
         position: "fixed", top: 0, left: 0, bottom: 0, zIndex: 40,
       }}>
         <div style={{ padding: "0 24px 24px", borderBottom: "1px solid var(--border-subtle)" }}>
-          <div style={{ color: "var(--text-muted)", fontSize: "0.5rem", letterSpacing: "0.3em", textTransform: "uppercase", fontFamily: "var(--font-mono)", marginBottom: "4px" }}>Senior Man</div>
+          <div style={{ color: "var(--text-muted)", fontSize: "0.6rem", letterSpacing: "0.3em", textTransform: "uppercase", fontFamily: "var(--font-mono)", marginBottom: "4px" }}>Senior Man</div>
           <div style={{ background: "linear-gradient(135deg, #C9A84C, #F5D98B)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", fontSize: "1.8rem", fontWeight: 800, fontFamily: "var(--font-ui)", lineHeight: 1 }}>KP</div>
         </div>
         <nav style={{ flex: 1, padding: "16px 0" }}>
           {navItems.map((item) => (
-            <Link key={item.label} href={item.href} onClick={() => setSidebarOpen(false)} style={{
+            <Link key={item.label} href={item.href} style={{
               display: "flex", alignItems: "center", gap: "12px",
-              padding: "10px 24px", textDecoration: "none",
+              padding: "11px 24px", textDecoration: "none",
               color: (item as any).active ? "var(--gold)" : "var(--text-secondary)",
-              fontSize: "0.78rem", fontFamily: "var(--font-ui)", fontWeight: 500,
+              fontSize: "0.9rem", fontFamily: "var(--font-ui)", fontWeight: 500,
               backgroundColor: (item as any).active ? "rgba(201,168,76,0.06)" : "transparent",
               borderRight: (item as any).active ? "2px solid var(--gold)" : "2px solid transparent",
             }}>
               <span>{item.icon}</span>{item.label}
             </Link>
           ))}
-          <button onClick={handleLogout} style={{ width: "100%", display: "flex", alignItems: "center", gap: "12px", padding: "10px 24px", background: "none", border: "none", color: "var(--text-muted)", fontSize: "0.78rem", fontFamily: "var(--font-ui)", cursor: "pointer" }}>
+          <button onClick={handleLogout} style={{ width: "100%", display: "flex", alignItems: "center", gap: "12px", padding: "11px 24px", background: "none", border: "none", color: "var(--text-muted)", fontSize: "0.9rem", fontFamily: "var(--font-ui)", cursor: "pointer" }}>
             <span>→</span> Logout
           </button>
         </nav>
@@ -162,21 +157,26 @@ export default function CustomersPage() {
 
         {/* Mobile header */}
         <div className="admin-mobile-header" style={{ display: "none", alignItems: "center", justifyContent: "space-between", marginBottom: "24px" }}>
-          <button onClick={() => setSidebarOpen(true)} style={{ background: "none", border: "none", color: "var(--text-primary)", cursor: "pointer", fontSize: "1.2rem", padding: "4px" }}>☰</button>
-          <span style={{ color: "var(--text-primary)", fontWeight: 800, fontFamily: "var(--font-ui)", fontSize: "1rem" }}>Customers</span>
+          <span className="admin-mobile-title" style={{ color: "var(--text-primary)", fontWeight: 800, fontFamily: "var(--font-ui)", fontSize: "1.3rem" }}>Customers</span>
           <div style={{ width: "32px" }} />
         </div>
 
         {/* Header */}
         <div className="admin-desktop-header" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "32px", flexWrap: "wrap", gap: "12px" }}>
           <div>
-            <Link href="/admin/dashboard" style={{ color: "var(--text-muted)", fontSize: "0.72rem", fontFamily: "var(--font-ui)", textDecoration: "none" }}>← Dashboard</Link>
-            <h1 style={{ color: "var(--text-primary)", fontSize: "1.5rem", fontWeight: 800, fontFamily: "var(--font-ui)", marginTop: "4px" }}>Customers</h1>
+            <Link href="/admin/dashboard" style={{ color: "var(--text-muted)", fontSize: "0.85rem", fontFamily: "var(--font-ui)", textDecoration: "none" }}>← Dashboard</Link>
+            <h1 style={{ color: "var(--text-primary)", fontSize: "1.9rem", fontWeight: 800, fontFamily: "var(--font-ui)", marginTop: "4px" }}>Customers</h1>
           </div>
           <div style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-subtle)", borderRadius: "8px", padding: "16px 24px", textAlign: "right" }}>
-            <div style={{ color: "var(--text-muted)", fontSize: "0.6rem", fontFamily: "var(--font-mono)", letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: "4px" }}>Total Customers</div>
-            <div style={{ color: "var(--gold)", fontSize: "1.4rem", fontWeight: 800, fontFamily: "var(--font-ui)" }}>{customers.length}</div>
+            <div style={{ color: "var(--text-muted)", fontSize: "0.72rem", fontFamily: "var(--font-mono)", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "4px" }}>Total Customers</div>
+            <div style={{ color: "var(--gold)", fontSize: "1.6rem", fontWeight: 800, fontFamily: "var(--font-ui)" }}>{customers.length}</div>
           </div>
+        </div>
+
+        {/* Mobile stat card */}
+        <div className="admin-mobile-stat" style={{ display: "none", backgroundColor: "var(--bg-card)", border: "1px solid var(--border-subtle)", borderRadius: "8px", padding: "16px 20px", marginBottom: "20px" }}>
+          <div style={{ color: "var(--text-muted)", fontSize: "0.75rem", fontFamily: "var(--font-mono)", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "6px" }}>Total Customers</div>
+          <div style={{ color: "var(--gold)", fontSize: "1.8rem", fontWeight: 800, fontFamily: "var(--font-ui)" }}>{customers.length}</div>
         </div>
 
         {/* Search */}
@@ -186,11 +186,12 @@ export default function CustomersPage() {
             placeholder="Search by email..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
+            className="admin-filter-input"
             style={{
-              width: "100%", maxWidth: "400px", padding: "10px 14px",
+              width: "100%", maxWidth: "400px", padding: "11px 14px",
               backgroundColor: "var(--bg-card)", border: "1px solid var(--border-dim)",
               borderRadius: "4px", color: "var(--text-primary)",
-              fontSize: "0.82rem", fontFamily: "var(--font-ui)", outline: "none",
+              fontSize: "0.92rem", fontFamily: "var(--font-ui)", outline: "none",
             }}
           />
         </div>
@@ -199,10 +200,10 @@ export default function CustomersPage() {
         <div style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-subtle)", borderRadius: "8px", overflow: "hidden" }}>
 
           {loading ? (
-            <div style={{ padding: "60px", textAlign: "center", color: "var(--text-muted)", fontFamily: "var(--font-mono)", fontSize: "0.8rem" }}>Loading customers...</div>
+            <div style={{ padding: "60px", textAlign: "center", color: "var(--text-muted)", fontFamily: "var(--font-mono)", fontSize: "0.9rem" }}>Loading customers...</div>
           ) : filtered.length === 0 ? (
             <div style={{ padding: "80px", textAlign: "center" }}>
-              <p style={{ color: "var(--text-muted)", fontFamily: "var(--font-ui)", fontSize: "0.85rem" }}>No customers found.</p>
+              <p style={{ color: "var(--text-muted)", fontFamily: "var(--font-ui)", fontSize: "0.95rem" }}>No customers found.</p>
             </div>
           ) : (
             <>
@@ -210,30 +211,30 @@ export default function CustomersPage() {
               <div className="admin-orders-desktop">
                 <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr 1.5fr", padding: "12px 24px", borderBottom: "1px solid var(--border-subtle)" }}>
                   {["Email", "Orders", "Total Spent", "Licenses", "Last Purchase"].map((h) => (
-                    <span key={h} style={{ color: "var(--text-muted)", fontSize: "0.6rem", fontFamily: "var(--font-mono)", letterSpacing: "0.15em", textTransform: "uppercase" }}>{h}</span>
+                    <span key={h} style={{ color: "var(--text-muted)", fontSize: "0.72rem", fontFamily: "var(--font-mono)", letterSpacing: "0.1em", textTransform: "uppercase" }}>{h}</span>
                   ))}
                 </div>
                 {filtered.map((customer, i) => (
                   <div key={customer.email} style={{
                     display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr 1.5fr",
-                    padding: "14px 24px", alignItems: "center",
+                    padding: "16px 24px", alignItems: "center",
                     borderBottom: i < filtered.length - 1 ? "1px solid var(--border-subtle)" : "none",
                   }}>
-                    <span style={{ color: "var(--text-secondary)", fontSize: "0.75rem", fontFamily: "var(--font-ui)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{customer.email}</span>
-                    <span style={{ color: "var(--text-muted)", fontSize: "0.72rem", fontFamily: "var(--font-mono)" }}>{customer.totalOrders}</span>
-                    <span style={{ color: "var(--gold)", fontSize: "0.75rem", fontFamily: "var(--font-ui)", fontWeight: 700 }}>₦{customer.totalSpent.toLocaleString()}</span>
+                    <span style={{ color: "var(--text-secondary)", fontSize: "0.9rem", fontFamily: "var(--font-ui)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{customer.email}</span>
+                    <span style={{ color: "var(--text-muted)", fontSize: "0.85rem", fontFamily: "var(--font-mono)" }}>{customer.totalOrders}</span>
+                    <span style={{ color: "var(--gold)", fontSize: "0.9rem", fontFamily: "var(--font-ui)", fontWeight: 700 }}>₦{customer.totalSpent.toLocaleString()}</span>
                     <div style={{ display: "flex", gap: "4px", flexWrap: "wrap" }}>
                       {customer.licenses.map((l) => (
                         <span key={l} style={{
-                          fontSize: "0.58rem", fontFamily: "var(--font-mono)",
-                          padding: "2px 6px", borderRadius: "2px",
+                          fontSize: "0.7rem", fontFamily: "var(--font-mono)",
+                          padding: "3px 8px", borderRadius: "2px",
                           textTransform: "uppercase",
                           backgroundColor: "var(--bg-elevated)",
                           color: LICENSE_COLORS[l] ?? "var(--text-muted)",
                         }}>{l}</span>
                       ))}
                     </div>
-                    <span style={{ color: "var(--text-muted)", fontSize: "0.68rem", fontFamily: "var(--font-mono)" }}>
+                    <span style={{ color: "var(--text-muted)", fontSize: "0.8rem", fontFamily: "var(--font-mono)" }}>
                       {new Date(customer.lastPurchase).toLocaleDateString("en-NG", { day: "numeric", month: "short", year: "numeric" })}
                     </span>
                   </div>
@@ -243,21 +244,21 @@ export default function CustomersPage() {
               {/* Mobile cards */}
               <div className="admin-orders-mobile" style={{ display: "none", flexDirection: "column" }}>
                 {filtered.map((customer, i) => (
-                  <div key={customer.email} style={{
-                    padding: "16px 20px",
+                  <div key={customer.email} className="admin-customer-card" style={{
+                    padding: "18px 20px",
                     borderBottom: i < filtered.length - 1 ? "1px solid var(--border-subtle)" : "none",
                   }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
-                      <span style={{ color: "var(--gold)", fontSize: "0.82rem", fontWeight: 700, fontFamily: "var(--font-ui)" }}>₦{customer.totalSpent.toLocaleString()}</span>
-                      <span style={{ color: "var(--text-muted)", fontSize: "0.65rem", fontFamily: "var(--font-mono)" }}>{customer.totalOrders} order{customer.totalOrders !== 1 ? "s" : ""}</span>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+                      <span className="admin-customer-spent" style={{ color: "var(--gold)", fontSize: "1rem", fontWeight: 700, fontFamily: "var(--font-ui)" }}>₦{customer.totalSpent.toLocaleString()}</span>
+                      <span className="admin-customer-orders" style={{ color: "var(--text-muted)", fontSize: "0.78rem", fontFamily: "var(--font-mono)" }}>{customer.totalOrders} order{customer.totalOrders !== 1 ? "s" : ""}</span>
                     </div>
-                    <div style={{ color: "var(--text-secondary)", fontSize: "0.72rem", fontFamily: "var(--font-ui)", marginBottom: "8px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{customer.email}</div>
-                    <div style={{ display: "flex", gap: "4px", flexWrap: "wrap", marginBottom: "6px" }}>
+                    <div className="admin-customer-email" style={{ color: "var(--text-secondary)", fontSize: "0.88rem", fontFamily: "var(--font-ui)", marginBottom: "10px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{customer.email}</div>
+                    <div style={{ display: "flex", gap: "4px", flexWrap: "wrap", marginBottom: "8px" }}>
                       {customer.licenses.map((l) => (
-                        <span key={l} style={{ fontSize: "0.58rem", fontFamily: "var(--font-mono)", padding: "2px 6px", borderRadius: "2px", textTransform: "uppercase", backgroundColor: "var(--bg-elevated)", color: LICENSE_COLORS[l] ?? "var(--text-muted)" }}>{l}</span>
+                        <span key={l} className="admin-customer-license" style={{ fontSize: "0.7rem", fontFamily: "var(--font-mono)", padding: "3px 8px", borderRadius: "2px", textTransform: "uppercase", backgroundColor: "var(--bg-elevated)", color: LICENSE_COLORS[l] ?? "var(--text-muted)" }}>{l}</span>
                       ))}
                     </div>
-                    <span style={{ color: "var(--text-muted)", fontSize: "0.62rem", fontFamily: "var(--font-mono)" }}>
+                    <span className="admin-customer-date" style={{ color: "var(--text-muted)", fontSize: "0.75rem", fontFamily: "var(--font-mono)" }}>
                       {new Date(customer.lastPurchase).toLocaleDateString("en-NG", { day: "numeric", month: "short", year: "numeric" })}
                     </span>
                   </div>
@@ -268,7 +269,7 @@ export default function CustomersPage() {
         </div>
 
         {!loading && (
-          <div style={{ marginTop: "16px", color: "var(--text-muted)", fontSize: "0.68rem", fontFamily: "var(--font-mono)", textAlign: "right" }}>
+          <div style={{ marginTop: "16px", color: "var(--text-muted)", fontSize: "0.8rem", fontFamily: "var(--font-mono)", textAlign: "right" }}>
             {filtered.length} customer{filtered.length !== 1 ? "s" : ""} shown
           </div>
         )}
@@ -276,12 +277,38 @@ export default function CustomersPage() {
 
       <style>{`
         @media (max-width: 768px) {
-          .admin-sidebar { transform: translateX(-100%) !important; transition: transform 0.25s ease; }
-          .admin-main { margin-left: 0 !important; padding: 20px 16px !important; }
+          .admin-main { margin-left: 0 !important; padding: 20px 16px 80px !important; }
           .admin-mobile-header { display: flex !important; }
           .admin-desktop-header { display: none !important; }
+          .admin-mobile-stat { display: block !important; }
           .admin-orders-desktop { display: none !important; }
           .admin-orders-mobile { display: flex !important; }
+
+          .admin-mobile-title {
+            font-size: 1.3rem !important;
+          }
+          .admin-filter-input {
+            font-size: 1rem !important;
+            padding: 13px 14px !important;
+            max-width: 100% !important;
+          }
+
+          .admin-customer-spent {
+            font-size: 1.05rem !important;
+          }
+          .admin-customer-orders {
+            font-size: 0.8rem !important;
+          }
+          .admin-customer-email {
+            font-size: 0.9rem !important;
+          }
+          .admin-customer-license {
+            font-size: 0.72rem !important;
+            padding: 4px 9px !important;
+          }
+          .admin-customer-date {
+            font-size: 0.78rem !important;
+          }
         }
       `}</style>
     </main>
