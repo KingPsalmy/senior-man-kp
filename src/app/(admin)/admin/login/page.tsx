@@ -11,6 +11,8 @@ export default function AdminLoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
+  const [forgotLoading, setForgotLoading] = useState(false)
+  const [forgotSent, setForgotSent] = useState(false)
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault()
@@ -28,7 +30,25 @@ export default function AdminLoginPage() {
     router.refresh()
     router.push("/admin/dashboard")
   }
-  
+
+  async function handleForgotPassword() {
+    if (!email) {
+      setError("Enter your email above first, then click Forgot password.")
+      return
+    }
+    setForgotLoading(true)
+    setError("")
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/admin/auth/callback`,
+    })
+    setForgotLoading(false)
+    if (error) {
+      setError(error.message)
+      return
+    }
+    setForgotSent(true)
+  }
+
   return (
     <main style={{
       minHeight: "100vh",
@@ -97,7 +117,7 @@ export default function AdminLoginPage() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="admin@seniormanKP.com"
+              placeholder="you@example.com"
               required
               style={{
                 width: "100%", padding: "12px 16px",
@@ -198,12 +218,22 @@ export default function AdminLoginPage() {
 
           {/* Forgot password */}
           <div style={{ textAlign: "right", marginTop: "12px" }}>
-            <span style={{
-              color: "var(--gold)", fontSize: "0.72rem",
-              fontFamily: "var(--font-ui)", cursor: "pointer",
-            }}>
-              Forgot password?
-            </span>
+            {forgotSent ? (
+              <span style={{ color: "#4ade80", fontSize: "0.72rem", fontFamily: "var(--font-ui)" }}>
+                Reset link sent — check your email
+              </span>
+            ) : (
+              <span
+                onClick={handleForgotPassword}
+                style={{
+                  color: "var(--gold)", fontSize: "0.72rem",
+                  fontFamily: "var(--font-ui)", cursor: forgotLoading ? "default" : "pointer",
+                  opacity: forgotLoading ? 0.6 : 1,
+                }}
+              >
+                {forgotLoading ? "Sending..." : "Forgot password?"}
+              </span>
+            )}
           </div>
         </form>
 
