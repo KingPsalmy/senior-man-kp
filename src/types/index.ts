@@ -15,6 +15,7 @@ export type Beat = {
   preview_url: string | null
   basic_price: number
   premium_price: number
+  unlimited_price: number
   exclusive_price: number
   stems_url: string | null
   is_published: boolean
