@@ -1,10 +1,10 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { Suspense, useEffect, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { supabase } from "@/lib/supabase/client"
 
-export default function AdminAuthCallback() {
+function AdminAuthCallbackContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [mode, setMode] = useState<"checking" | "recovery" | "redirecting" | "error">("checking")
@@ -139,5 +139,22 @@ export default function AdminAuthCallback() {
         )}
       </div>
     </main>
+  )
+}
+
+export default function AdminAuthCallback() {
+  return (
+    <Suspense fallback={
+      <main style={{
+        minHeight: "100vh", backgroundColor: "var(--bg-void)",
+        display: "flex", alignItems: "center", justifyContent: "center", padding: "24px",
+      }}>
+        <p style={{ color: "var(--text-muted)", fontFamily: "var(--font-ui)", fontSize: "0.92rem" }}>
+          Loading...
+        </p>
+      </main>
+    }>
+      <AdminAuthCallbackContent />
+    </Suspense>
   )
 }
