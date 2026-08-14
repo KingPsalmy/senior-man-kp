@@ -3,6 +3,16 @@ import { createServerClient } from "@supabase/ssr"
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl
+  const hostname = req.headers.get("host") || ""
+
+  // Redirect the auto-generated Vercel domain to the real domain
+  if (hostname.endsWith(".vercel.app")) {
+    const url = req.nextUrl.clone()
+    url.hostname = "www.seniormankp.com"
+    url.protocol = "https"
+    url.port = ""
+    return NextResponse.redirect(url, 308)
+  }
 
   if (pathname === "/admin/login") {
     return NextResponse.next()
@@ -41,5 +51,7 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*"],
+  matcher: [
+    "/((?!_next/static|_next/image|favicon.ico).*)",
+  ],
 }
