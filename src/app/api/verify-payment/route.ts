@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@supabase/supabase-js"
+import { resend } from "@/lib/resend"
+import { purchaseConfirmationEmail } from "@/lib/emails/purchase-confirmation"
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -144,6 +146,27 @@ export async function POST(req: NextRequest) {
         .from("beats")
         .update({ is_exclusive_sold: true, is_published: false })
         .eq("id", beat_id)
+    }
+
+    // Send purchase confirmation email — don't let this block or fail the response
+    try {
+      const { subject, html } = purchaseConfirmationEmail({
+        customerEmail: customer.email,
+        beatTitle: beat_title,
+        licenseType: license_type,
+        amountPaid: amount / 100,
+        downloadToken,
+      })
+
+      await resend.emails.send({
+        from: `Senior Man KP <${process.env.RESEND_FROM_EMAIL}>`,
+        to: customer.email,
+        subject,
+        html,
+      })
+    } catch (emailErr) {
+      console.error("[purchase confirmation email error]", emailErr)
+      // Payment already succeeded — don't let an email failure break the response
     }
 
     return NextResponse.json({

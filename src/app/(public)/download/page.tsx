@@ -9,13 +9,12 @@ type DownloadData = {
   beat: { title: string; cover_url: string | null; preview_url: string | null; stems_url: string | null }
   license_type: string
   customer_email: string
-  download_expires_at: string
 }
 
 function DownloadContent() {
   const searchParams = useSearchParams()
   const token = searchParams.get("token")
-  const [status, setStatus] = useState<"loading" | "ready" | "expired" | "error">("loading")
+  const [status, setStatus] = useState<"loading" | "ready" | "error">("loading")
   const [data, setData] = useState<DownloadData | null>(null)
 
   useEffect(() => {
@@ -24,8 +23,7 @@ function DownloadContent() {
     fetch(`/api/download?token=${token}`)
       .then((r) => r.json())
       .then((d) => {
-        if (d.error === "Download link has expired") setStatus("expired")
-        else if (d.error) setStatus("error")
+        if (d.error) setStatus("error")
         else { setData(d); setStatus("ready") }
       })
       .catch(() => setStatus("error"))
@@ -51,27 +49,6 @@ function DownloadContent() {
         </div>
       )}
 
-      {status === "expired" && (
-        <div style={{ textAlign: "center" }}>
-          <div style={{ fontSize: "3rem", marginBottom: "20px" }}>⏰</div>
-          <h1 style={{ color: "var(--text-primary)", fontSize: "1.5rem", fontWeight: 800, fontFamily: "var(--font-ui)", marginBottom: "12px" }}>
-            Link Expired
-          </h1>
-          <p style={{ color: "var(--text-muted)", fontSize: "0.85rem", fontFamily: "var(--font-ui)", lineHeight: 1.7, marginBottom: "24px" }}>
-            This download link has expired. Please contact us to get a new one.
-          </p>
-          <a href="mailto:kingpsalmyofficial@gmail.com" style={{
-            display: "inline-block", padding: "12px 28px",
-            background: "linear-gradient(135deg, #C9A84C, #F5D98B)",
-            borderRadius: "4px", textDecoration: "none",
-            color: "#000", fontSize: "0.75rem", fontWeight: 800,
-            fontFamily: "var(--font-ui)", letterSpacing: "0.1em", textTransform: "uppercase",
-          }}>
-            Contact Support
-          </a>
-        </div>
-      )}
-
       {status === "error" && (
         <div style={{ textAlign: "center" }}>
           <div style={{ fontSize: "3rem", marginBottom: "20px" }}>⚠️</div>
@@ -79,7 +56,7 @@ function DownloadContent() {
             Invalid Link
           </h1>
           <p style={{ color: "var(--text-muted)", fontSize: "0.85rem", fontFamily: "var(--font-ui)", lineHeight: 1.7, marginBottom: "24px" }}>
-            This download link is invalid or has already been used.
+            This download link is invalid. Please check your email for the correct link or contact support.
           </p>
           <Link href="/store" style={{
             display: "inline-block", padding: "12px 28px",
@@ -102,7 +79,7 @@ function DownloadContent() {
                 Your Downloads
               </h1>
               <p style={{ color: "var(--text-muted)", fontSize: "0.78rem", fontFamily: "var(--font-ui)" }}>
-                Download your files below. Links expire in 48 hours.
+                Download your files below, anytime.
               </p>
             </div>
           </div>
@@ -156,10 +133,7 @@ function DownloadContent() {
           }}>
             <span style={{ color: "var(--gold)", flexShrink: 0 }}>⚠</span>
             <p style={{ color: "var(--text-muted)", fontSize: "0.75rem", fontFamily: "var(--font-ui)", lineHeight: 1.6 }}>
-              These links are private and should not be shared. They will expire on{" "}
-              <strong style={{ color: "var(--text-secondary)" }}>
-                {new Date(data.download_expires_at).toLocaleString()}
-              </strong>
+              This link is private and should not be shared with anyone else.
             </p>
           </div>
 
