@@ -14,6 +14,13 @@ const LICENSE_PRICES: Record<LicenseType, number> = {
   exclusive: 180000,
 }
 
+// Emails allowed to bypass Paystack entirely — handled server-side too,
+// but checked here first to skip the Paystack modal altogether.
+const BYPASS_EMAILS = [
+  "kingpsalmyofficial@gmail.com",
+  "ghostedtife@gmail.com",
+]
+
 function genreColor(genre: string) {
   const map: Record<string, string> = {
     "Afrobeat": "#1a0a2e", "Afro Fusion": "#0a1a2e",
@@ -60,6 +67,14 @@ export default function CheckoutPage() {
     setSelectedLicenses((prev) => ({ ...prev, [beatId]: license }))
   }
 
+  // Grabs the guest_id used elsewhere by the cart (localStorage-based).
+  // If your cart lib exposes its own getter for this, swap this out for that
+  // instead of reading localStorage directly here.
+  function getGuestId(): string | null {
+    if (typeof window === "undefined") return null
+    return localStorage.getItem("guest_id")
+  }
+
   async function handlePayment() {
     if (!form.legalName.trim() || !form.artistName.trim() || !form.email.trim()) {
       setError("Please fill in your legal name, artist name, and email.")
@@ -68,19 +83,60 @@ export default function CheckoutPage() {
     setError("")
     setPaying(true)
 
+    const normalizedEmail = form.email.trim().toLowerCase()
+
+    const orderItems = items.map((item) => ({
+      beat_id: item.beat_id,
+      title: item.beats?.title,
+      license_type: selectedLicenses[item.beat_id] || item.license_type,
+      price: LICENSE_PRICES[selectedLicenses[item.beat_id] || item.license_type],
+      is_free: freeItems.includes(item.beat_id),
+    }))
+
+    // --- Bypass path: skip Paystack entirely for allowlisted emails ---
+    if (BYPASS_EMAILS.includes(normalizedEmail)) {
+      try {
+        const res = await fetch("/api/checkout/test-order", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: normalizedEmail,
+            guest_id: getGuestId(),
+            items: orderItems,
+            subtotal,
+            discount,
+            total,
+            name: form.artistName,
+          }),
+        })
+
+        const data = await res.json()
+
+        if (!res.ok) {
+          setError(data.error || "This account isn't eligible for a free beat right now.")
+          setPaying(false)
+          return
+        }
+
+        await clearCart()
+        router.push(
+          `/success?reference=${data.reference}&email=${encodeURIComponent(normalizedEmail)}&artist_name=${encodeURIComponent(form.artistName)}`
+        )
+      } catch (err) {
+        console.error("[bypass checkout error]", err)
+        setError("Something went wrong processing your free beat. Please try again.")
+        setPaying(false)
+      }
+      return
+    }
+
+    // --- Normal path: everyone else goes through Paystack ---
     const PaystackPop = (window as any).PaystackPop
     if (!PaystackPop) {
       setError("Payment system not loaded. Please refresh the page.")
       setPaying(false)
       return
     }
-
-    const orderItems = items.map((item) => ({
-      beat_id: item.beat_id,
-      license_type: selectedLicenses[item.beat_id] || item.license_type,
-      price: LICENSE_PRICES[selectedLicenses[item.beat_id] || item.license_type],
-      is_free: freeItems.includes(item.beat_id),
-    }))
 
     const handler = PaystackPop.setup({
       key: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY,
