@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@supabase/supabase-js"
 import { resend } from "@/lib/resend"
 import { purchaseConfirmationEmail } from "@/lib/emails/purchase-confirmation"
+import { adminSaleNotificationEmail } from "@/lib/emails/admin-sale-notification"
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -148,7 +149,7 @@ export async function POST(req: NextRequest) {
         .eq("id", beat_id)
     }
 
-    // Send purchase confirmation email — don't let this block or fail the response
+    // Send purchase confirmation email to customer — don't let this block or fail the response
     try {
       const { subject, html } = purchaseConfirmationEmail({
         customerEmail: customer.email,
@@ -167,6 +168,25 @@ export async function POST(req: NextRequest) {
     } catch (emailErr) {
       console.error("[purchase confirmation email error]", emailErr)
       // Payment already succeeded — don't let an email failure break the response
+    }
+
+    // Send new-sale notification to admin — same fire-and-forget approach
+    try {
+      const { subject, html } = adminSaleNotificationEmail({
+        beatTitle: beat_title,
+        licenseType: license_type,
+        amountPaid: amount / 100,
+        customerEmail: customer.email,
+      })
+
+      await resend.emails.send({
+        from: `Senior Man KP <${process.env.RESEND_FROM_EMAIL}>`,
+        to: process.env.ADMIN_NOTIFICATION_EMAIL!,
+        subject,
+        html,
+      })
+    } catch (emailErr) {
+      console.error("[admin sale notification email error]", emailErr)
     }
 
     return NextResponse.json({
