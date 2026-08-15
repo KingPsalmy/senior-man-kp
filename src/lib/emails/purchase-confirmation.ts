@@ -1,9 +1,17 @@
+type SuggestedBeat = {
+  title: string
+  slug: string
+  coverUrl: string | null
+  price: number
+}
+
 type PurchaseConfirmationParams = {
   customerEmail: string
   beatTitle: string
   licenseType: string
   amountPaid: number
   downloadToken: string
+  suggestedBeats?: SuggestedBeat[]
 }
 
 export function purchaseConfirmationEmail({
@@ -11,11 +19,27 @@ export function purchaseConfirmationEmail({
   licenseType,
   amountPaid,
   downloadToken,
+  suggestedBeats = [],
 }: PurchaseConfirmationParams) {
   const downloadUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/download?token=${downloadToken}`
   const licenseLabel = licenseType.charAt(0).toUpperCase() + licenseType.slice(1)
 
   const subject = `Your beat is ready — ${beatTitle} 🎧`
+
+  const suggestionsHtml = suggestedBeats.length > 0 ? `
+    <div style="padding:28px 32px; border-top:1px solid #262626;">
+      <p style="color:#8a8a8a; font-size:11px; letter-spacing:1.5px; text-transform:uppercase; margin:0 0 16px;">You Might Also Like</p>
+      ${suggestedBeats.map((beat) => `
+        <a href="${process.env.NEXT_PUBLIC_SITE_URL}/beat/${beat.slug}" style="display:flex; align-items:center; gap:14px; text-decoration:none; margin-bottom:14px;">
+          ${beat.coverUrl ? `<img src="${beat.coverUrl}" width="52" height="52" style="border-radius:6px; object-fit:cover; flex-shrink:0;" />` : `<div style="width:52px; height:52px; border-radius:6px; background:#262626; flex-shrink:0;"></div>`}
+          <div style="flex:1;">
+            <p style="color:#F5F0E8; font-size:13px; font-weight:600; margin:0 0 2px;">${beat.title}</p>
+            <p style="color:#C9A84C; font-size:12px; margin:0;">from ₦${beat.price.toLocaleString()}</p>
+          </div>
+        </a>
+      `).join("")}
+    </div>
+  ` : ""
 
   const html = `
   <div style="background-color:#0a0a0a; padding:40px 20px; font-family:Arial, sans-serif;">
@@ -49,6 +73,7 @@ export function purchaseConfirmationEmail({
           Need anything else? Just reply to this email.
         </p>
       </div>
+      ${suggestionsHtml}
       <div style="padding:20px 32px; border-top:1px solid #262626;">
         <p style="color:#555; font-size:11px; margin:0;">© ${new Date().getFullYear()} Senior Man KP. All rights reserved.</p>
       </div>

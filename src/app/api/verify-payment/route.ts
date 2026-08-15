@@ -83,9 +83,10 @@ export async function POST(req: NextRequest) {
     }
 
     // Verify beat exists and is still available
+    // NOTE: added "genre" here — required by the suggestedBeats query below
     const { data: beat, error: beatError } = await supabase
       .from("beats")
-      .select("id, title, is_published, is_exclusive_sold, basic_price, premium_price, unlimited_price, exclusive_price")
+      .select("id, title, genre, is_published, is_exclusive_sold, basic_price, premium_price, unlimited_price, exclusive_price")
       .eq("id", beat_id)
       .single()
 
@@ -166,6 +167,22 @@ export async function POST(req: NextRequest) {
         .eq("id", beat_id)
     }
 
+    // Fetch suggested beats — same genre, excluding this one, still available
+    const { data: suggestions } = await supabase
+      .from("beats")
+      .select("title, slug, cover_url, basic_price")
+      .eq("genre", beat.genre)
+      .neq("id", beat_id)
+      .eq("is_published", true)
+      .limit(3)
+
+    const suggestedBeats = (suggestions ?? []).map((b) => ({
+      title: b.title,
+      slug: b.slug,
+      coverUrl: b.cover_url,
+      price: Number(b.basic_price),
+    }))
+
     // Send purchase confirmation email to customer — don't let this block or fail the response
     try {
       const { subject, html } = purchaseConfirmationEmail({
@@ -174,6 +191,7 @@ export async function POST(req: NextRequest) {
         licenseType: license_type,
         amountPaid: amount / 100,
         downloadToken,
+        suggestedBeats,
       })
 
       await resend.emails.send({
