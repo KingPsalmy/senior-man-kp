@@ -25,42 +25,54 @@ export async function getCart() {
 
 export async function addToCart(beatId: string, licenseType: LicenseType = "basic") {
   const guestId = getGuestId()
-  if (!guestId) return
+  if (!guestId) return { error: "No guest ID" }
 
-  await supabase.from("cart_items").upsert({
+  const { error } = await supabase.from("cart_items").upsert({
     guest_id: guestId,
     beat_id: beatId,
     license_type: licenseType,
   }, { onConflict: "guest_id,beat_id" })
+
+  if (error) console.error("[addToCart error]", error)
+  return { error: error?.message ?? null }
 }
 
 export async function updateCartLicense(beatId: string, licenseType: LicenseType) {
   const guestId = getGuestId()
-  if (!guestId) return
+  if (!guestId) return { error: "No guest ID" }
 
-  await supabase.from("cart_items")
+  const { error } = await supabase.from("cart_items")
     .update({ license_type: licenseType })
     .eq("guest_id", guestId)
     .eq("beat_id", beatId)
+
+  if (error) console.error("[updateCartLicense error]", error)
+  return { error: error?.message ?? null }
 }
 
 export async function removeFromCart(beatId: string) {
   const guestId = getGuestId()
-  if (!guestId) return
+  if (!guestId) return { error: "No guest ID" }
 
-  await supabase.from("cart_items")
+  const { error } = await supabase.from("cart_items")
     .delete()
     .eq("guest_id", guestId)
     .eq("beat_id", beatId)
+
+  if (error) console.error("[removeFromCart error]", error)
+  return { error: error?.message ?? null }
 }
 
 export async function clearCart() {
   const guestId = getGuestId()
-  if (!guestId) return
+  if (!guestId) return { error: "No guest ID" }
 
-  await supabase.from("cart_items")
+  const { error } = await supabase.from("cart_items")
     .delete()
     .eq("guest_id", guestId)
+
+  if (error) console.error("[clearCart error]", error)
+  return { error: error?.message ?? null }
 }
 
 export async function getCartCount(): Promise<number> {

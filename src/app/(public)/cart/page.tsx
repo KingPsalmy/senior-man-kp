@@ -25,6 +25,7 @@ function genreColor(genre: string) {
 export default function CartPage() {
   const [items, setItems] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [actionError, setActionError] = useState<string | null>(null)
 
   useEffect(() => {
     async function load() {
@@ -36,12 +37,26 @@ export default function CartPage() {
   }, [])
 
   async function handleRemove(beatId: string) {
-    await removeFromCart(beatId)
+    setActionError(null)
+    const { error } = await removeFromCart(beatId)
+
+    if (error) {
+      setActionError("Couldn't remove this item. Please try again.")
+      return
+    }
+
     setItems((prev) => prev.filter((i) => i.beat_id !== beatId))
   }
 
   async function handleLicenseChange(beatId: string, license: LicenseType) {
-    await updateCartLicense(beatId, license)
+    setActionError(null)
+    const { error } = await updateCartLicense(beatId, license)
+
+    if (error) {
+      setActionError("Couldn't update the license. Please try again.")
+      return
+    }
+
     setItems((prev) => prev.map((i) =>
       i.beat_id === beatId ? { ...i, license_type: license } : i
     ))
@@ -78,6 +93,16 @@ export default function CartPage() {
 
       <div className="cart-page-wrap" style={{ padding: "40px 48px 0" }}>
         <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
+
+          {actionError && (
+            <div style={{
+              backgroundColor: "rgba(255,50,50,0.08)", border: "1px solid rgba(255,50,50,0.2)",
+              borderRadius: "8px", padding: "14px 18px", marginBottom: "20px",
+              color: "#ff6b6b", fontSize: "0.88rem", fontFamily: "var(--font-ui)",
+            }}>
+              {actionError}
+            </div>
+          )}
 
           {loading ? (
             <div style={{ color: "var(--text-muted)", fontFamily: "var(--font-ui)", fontSize: "1rem", padding: "80px 0", textAlign: "center" }}>
