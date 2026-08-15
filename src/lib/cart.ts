@@ -41,26 +41,46 @@ export async function updateCartLicense(beatId: string, licenseType: LicenseType
   const guestId = getGuestId()
   if (!guestId) return { error: "No guest ID" }
 
-  const { error } = await supabase.from("cart_items")
+  const { data, error } = await supabase.from("cart_items")
     .update({ license_type: licenseType })
     .eq("guest_id", guestId)
     .eq("beat_id", beatId)
+    .select()
 
-  if (error) console.error("[updateCartLicense error]", error)
-  return { error: error?.message ?? null }
+  if (error) {
+    console.error("[updateCartLicense error]", error)
+    return { error: error.message }
+  }
+
+  if (!data || data.length === 0) {
+    console.warn("[updateCartLicense] No rows updated — RLS likely blocked this silently")
+    return { error: "This item couldn't be updated (permission denied)" }
+  }
+
+  return { error: null }
 }
 
 export async function removeFromCart(beatId: string) {
   const guestId = getGuestId()
   if (!guestId) return { error: "No guest ID" }
 
-  const { error } = await supabase.from("cart_items")
+  const { data, error } = await supabase.from("cart_items")
     .delete()
     .eq("guest_id", guestId)
     .eq("beat_id", beatId)
+    .select()
 
-  if (error) console.error("[removeFromCart error]", error)
-  return { error: error?.message ?? null }
+  if (error) {
+    console.error("[removeFromCart error]", error)
+    return { error: error.message }
+  }
+
+  if (!data || data.length === 0) {
+    console.warn("[removeFromCart] No rows deleted — RLS likely blocked this silently")
+    return { error: "This item couldn't be removed (permission denied)" }
+  }
+
+  return { error: null }
 }
 
 export async function clearCart() {
