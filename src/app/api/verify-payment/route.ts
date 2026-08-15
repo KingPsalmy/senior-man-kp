@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js"
 import { resend } from "@/lib/resend"
 import { purchaseConfirmationEmail } from "@/lib/emails/purchase-confirmation"
 import { adminSaleNotificationEmail } from "@/lib/emails/admin-sale-notification"
+import { paymentFailedEmail } from "@/lib/emails/payment-failed"
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -40,6 +41,22 @@ export async function POST(req: NextRequest) {
     const paystackData = await paystackRes.json()
 
     if (!paystackData.status || paystackData.data.status !== "success") {
+      // Notify the customer their payment didn't go through — fire-and-forget
+      try {
+        const { subject, html } = paymentFailedEmail({
+          beatTitle: paystackData.data?.metadata?.beat_title ?? "your beat",
+        })
+
+        await resend.emails.send({
+          from: `Senior Man KP <${process.env.RESEND_FROM_EMAIL}>`,
+          to: customer_email,
+          subject,
+          html,
+        })
+      } catch (emailErr) {
+        console.error("[payment failed email error]", emailErr)
+      }
+
       return NextResponse.json(
         { success: false, error: "Payment not successful" },
         { status: 400 }
