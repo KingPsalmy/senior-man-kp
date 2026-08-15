@@ -3,7 +3,8 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useState, useEffect } from "react"
-import { getCartCount } from "@/lib/cart"
+import { refreshCartCount } from "@/lib/cart"
+import { useCartStore } from "@/store/cartStore"
 
 const links = [
   { href: "/store", label: "Store" },
@@ -15,19 +16,11 @@ const links = [
 export default function Navbar() {
   const pathname = usePathname()
   const [menuOpen, setMenuOpen] = useState(false)
-  const [cartCount, setCartCount] = useState(0)
+  const cartCount = useCartStore((state) => state.count)
 
   useEffect(() => {
-    async function loadCount() {
-      try {
-        const count = await getCartCount()
-        setCartCount(count)
-      } catch {
-        setCartCount(0)
-      }
-    }
-    loadCount()
-  }, [pathname])
+    refreshCartCount().catch(() => {})
+  }, [])
 
   useEffect(() => {
     const handleResize = () => {

@@ -1,5 +1,6 @@
 import { supabase } from "./supabase"
 import { getGuestId } from "./guest"
+import { useCartStore } from "@/store/cartStore"
 
 export type LicenseType = "basic" | "premium" | "unlimited" | "exclusive"
 
@@ -23,6 +24,24 @@ export async function getCart() {
   return data ?? []
 }
 
+export async function getCartCount(): Promise<number> {
+  const guestId = getGuestId()
+  if (!guestId) return 0
+
+  const { count } = await supabase
+    .from("cart_items")
+    .select("*", { count: "exact", head: true })
+    .eq("guest_id", guestId)
+
+  return count ?? 0
+}
+
+export async function refreshCartCount() {
+  const count = await getCartCount()
+  useCartStore.getState().setCount(count)
+  return count
+}
+
 export async function addToCart(beatId: string, licenseType: LicenseType = "basic") {
   const guestId = getGuestId()
   if (!guestId) return { error: "No guest ID" }
@@ -33,8 +52,13 @@ export async function addToCart(beatId: string, licenseType: LicenseType = "basi
     license_type: licenseType,
   }, { onConflict: "guest_id,beat_id" })
 
-  if (error) console.error("[addToCart error]", error)
-  return { error: error?.message ?? null }
+  if (error) {
+    console.error("[addToCart error]", error)
+    return { error: error.message }
+  }
+
+  await refreshCartCount()
+  return { error: null }
 }
 
 export async function updateCartLicense(beatId: string, licenseType: LicenseType) {
@@ -53,10 +77,11 @@ export async function updateCartLicense(beatId: string, licenseType: LicenseType
   }
 
   if (!data || data.length === 0) {
-    console.warn("[updateCartLicense] No rows updated — RLS likely blocked this silently")
-    return { error: "This item couldn't be updated (permission denied)" }
+    console.warn("[updateCartLicense] No rows updated")
+    return { error: "This item couldn't be updated" }
   }
 
+  await refreshCartCount()
   return { error: null }
 }
 
@@ -76,10 +101,11 @@ export async function removeFromCart(beatId: string) {
   }
 
   if (!data || data.length === 0) {
-    console.warn("[removeFromCart] No rows deleted — RLS likely blocked this silently")
-    return { error: "This item couldn't be removed (permission denied)" }
+    console.warn("[removeFromCart] No rows deleted")
+    return { error: "This item couldn't be removed" }
   }
 
+  await refreshCartCount()
   return { error: null }
 }
 
@@ -91,18 +117,11 @@ export async function clearCart() {
     .delete()
     .eq("guest_id", guestId)
 
-  if (error) console.error("[clearCart error]", error)
-  return { error: error?.message ?? null }
-}
+  if (error) {
+    console.error("[clearCart error]", error)
+    return { error: error.message }
+  }
 
-export async function getCartCount(): Promise<number> {
-  const guestId = getGuestId()
-  if (!guestId) return 0
-
-  const { count } = await supabase
-    .from("cart_items")
-    .select("*", { count: "exact", head: true })
-    .eq("guest_id", guestId)
-
-  return count ?? 0
+  await refreshCartCount()
+  return { error: null }
 }
