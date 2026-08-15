@@ -6,6 +6,7 @@ import Navbar from "@/components/layout/Navbar"
 import Link from "next/link"
 import { getCart, clearCart, LicenseType } from "@/lib/cart"
 import { calculateDiscount } from "@/lib/discount"
+import { getGuestId } from "@/lib/guest"
 
 const LICENSE_PRICES: Record<LicenseType, number> = {
   basic: 30000,
@@ -65,14 +66,6 @@ export default function CheckoutPage() {
 
   function handleLicenseChange(beatId: string, license: LicenseType) {
     setSelectedLicenses((prev) => ({ ...prev, [beatId]: license }))
-  }
-
-  // Grabs the guest_id used elsewhere by the cart (localStorage-based).
-  // If your cart lib exposes its own getter for this, swap this out for that
-  // instead of reading localStorage directly here.
-  function getGuestId(): string | null {
-    if (typeof window === "undefined") return null
-    return localStorage.getItem("guest_id")
   }
 
   async function handlePayment() {

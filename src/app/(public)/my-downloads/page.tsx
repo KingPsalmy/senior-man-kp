@@ -2,12 +2,6 @@
 
 import { useState } from "react"
 import Navbar from "@/components/layout/Navbar"
-import { createClient } from "@supabase/supabase-js"
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
 
 type Purchase = {
   id: string
@@ -54,47 +48,34 @@ export default function MyDownloadsPage() {
     setLoading(true)
     setError(null)
 
-    const { data, error: dbError } = await supabase
-      .from("purchases")
-      .select("*")
-      .eq("customer_email", email.toLowerCase().trim())
-      .eq("payment_status", "success")
-      .order("created_at", { ascending: false })
+    try {
+      const res = await fetch("/api/my-downloads/lookup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email.toLowerCase().trim() }),
+      })
+      const data = await res.json()
 
-    if (dbError) {
+      if (!res.ok || !data.success) {
+        setError(data.error ?? "Something went wrong. Please try again.")
+        setLoading(false)
+        return
+      }
+
+      setPurchases(
+        data.purchases.map((p: Purchase & { beat_title?: string }) => ({
+          ...p,
+          files: undefined,
+          loading: false,
+          error: undefined,
+        }))
+      )
+      setSubmitted(true)
+    } catch {
       setError("Something went wrong. Please try again.")
+    } finally {
       setLoading(false)
-      return
     }
-
-    if (!data || data.length === 0) {
-      setError("No purchases found for this email address.")
-      setLoading(false)
-      return
-    }
-
-    // Fetch beat titles
-    const beatIds = [...new Set(data.map((p) => p.beat_id))]
-    const { data: beats } = await supabase
-      .from("beats")
-      .select("id, title")
-      .in("id", beatIds)
-
-    const beatMap: Record<string, string> = {}
-    beats?.forEach((b) => { beatMap[b.id] = b.title })
-
-    setPurchases(
-      data.map((p) => ({
-        ...p,
-        beat_title: beatMap[p.beat_id] ?? "Unknown Beat",
-        files: undefined,
-        loading: false,
-        error: undefined,
-      }))
-    )
-
-    setSubmitted(true)
-    setLoading(false)
   }
 
   async function handleGetFiles(purchase: PurchaseWithFiles) {

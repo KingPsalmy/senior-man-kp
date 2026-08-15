@@ -20,7 +20,10 @@ function SuccessContent() {
 
     async function verifyPayment() {
       try {
-        const res = await fetch("/api/verify-payment", {
+        const isTestOrder = reference!.startsWith("TEST_")
+        const endpoint = isTestOrder ? "/api/checkout/verify-test-order" : "/api/verify-payment"
+
+        const res = await fetch(endpoint, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ reference, customer_email: email }),
