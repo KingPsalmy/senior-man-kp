@@ -101,36 +101,36 @@ export async function POST(req: NextRequest) {
 
     const downloadTokens: Record<string, string> = {}
 
-    for (const item of items as CartItem[]) {
-      const downloadToken = crypto.randomUUID()
-      downloadTokens[item.beat_id] = downloadToken
+for (const item of items as CartItem[]) {
+  const downloadToken = crypto.randomUUID()
+  downloadTokens[item.beat_id] = downloadToken
 
-      await supabase.from("purchases").upsert(
-        {
-          beat_id: item.beat_id,
-          customer_email: normalizedEmail,
-          license_type: item.license_type,
-          amount_paid: LICENSE_PRICES[item.license_type] ?? 0,
-          paystack_reference: reference,
-          payment_status: "success",
-          download_token: downloadToken,
-          download_expires_at: null,
-        },
-        { onConflict: "paystack_reference,beat_id" }
-      )
+  const { error: purchaseError } = await supabase.from("purchases").insert({
+    beat_id: item.beat_id,
+    customer_email: email,
+    license_type: item.license_type,
+    amount_paid: LICENSE_PRICES[item.license_type] ?? 0,
+    paystack_reference: reference,
+    payment_status: "success",
+    download_token: downloadToken,
+    download_expires_at: null,
+  })
 
-      if (item.license_type === "exclusive") {
-        await supabase
-          .from("beats")
-          .update({
-            is_exclusive_sold: true,
-            is_published: false,
-            status: "sold_exclusive",
-            locked_at: null,
-          })
-          .eq("id", item.beat_id)
-      }
-    }
+  if (purchaseError) {
+    console.error("Test purchase insert failed:", purchaseError)
+    return NextResponse.json(
+      { error: "Failed to record purchase", details: purchaseError.message },
+      { status: 500 }
+    )
+  }
+
+  if (item.license_type === "exclusive") {
+    await supabase
+      .from("beats")
+      .update({ is_exclusive_sold: true, is_published: false, status: "sold_exclusive", locked_at: null })
+      .eq("id", item.beat_id)
+  }
+}
 
     await supabase.from("orders").update({ download_tokens: downloadTokens }).eq("id", order.id)
 
