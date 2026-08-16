@@ -17,38 +17,39 @@ const LICENSE_PRICES: Record<string, number> = {
 
 export async function POST(req: NextRequest) {
   try {
-    const { beat_id, customer_email, current_license_type } = await req.json()
+    const { purchase_id } = await req.json()
 
-    if (!beat_id || !customer_email || !current_license_type) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
+    if (!purchase_id) {
+      return NextResponse.json({ error: "Missing purchase_id" }, { status: 400 })
     }
 
-    if (current_license_type === "exclusive") {
-      return NextResponse.json({ error: "This is already an exclusive license" }, { status: 400 })
-    }
-
-    // Confirm this customer actually owns this beat at this license type
-    const { data: existingPurchase } = await supabase
+    // Look up the purchase — never trust price/license data from the client
+    const { data: purchase, error: purchaseError } = await supabase
       .from("purchases")
-      .select("id")
-      .eq("beat_id", beat_id)
-      .eq("customer_email", customer_email)
-      .eq("license_type", current_license_type)
-      .eq("payment_status", "success")
-      .maybeSingle()
+      .select("id, beat_id, customer_email, license_type, payment_status")
+      .eq("id", purchase_id)
+      .single()
 
-    if (!existingPurchase) {
-      return NextResponse.json({ error: "No matching purchase found" }, { status: 403 })
+    if (purchaseError || !purchase) {
+      return NextResponse.json({ error: "Purchase not found" }, { status: 404 })
+    }
+
+    if (purchase.payment_status !== "success") {
+      return NextResponse.json({ error: "Purchase is not valid" }, { status: 400 })
+    }
+
+    if (purchase.license_type === "exclusive") {
+      return NextResponse.json({ error: "This beat is already licensed exclusively to you" }, { status: 400 })
     }
 
     // Confirm the beat hasn't already been sold exclusively to someone else
-    const { data: beat } = await supabase
+    const { data: beat, error: beatError } = await supabase
       .from("beats")
-      .select("title, is_exclusive_sold")
-      .eq("id", beat_id)
+      .select("id, title, is_exclusive_sold")
+      .eq("id", purchase.beat_id)
       .single()
 
-    if (!beat) {
+    if (beatError || !beat) {
       return NextResponse.json({ error: "Beat not found" }, { status: 404 })
     }
 
@@ -56,39 +57,46 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "This beat has already been sold exclusively" }, { status: 400 })
     }
 
-    // Check for an existing pending request to avoid duplicates
+    // Avoid duplicate pending requests for the same purchase
     const { data: existingRequest } = await supabase
       .from("upgrade_requests")
-      .select("id")
-      .eq("beat_id", beat_id)
-      .eq("customer_email", customer_email)
+      .select("id, status")
+      .eq("purchase_id", purchase_id)
       .eq("status", "pending")
       .maybeSingle()
 
     if (existingRequest) {
-      return NextResponse.json({ error: "You already have a pending request for this beat" }, { status: 400 })
+      return NextResponse.json({
+        success: true,
+        message: "You already have a pending upgrade request for this beat. We'll be in touch.",
+      })
     }
 
-    const priceDifference = LICENSE_PRICES.exclusive - LICENSE_PRICES[current_license_type]
+    const currentPrice = LICENSE_PRICES[purchase.license_type] ?? 0
+    const priceDifference = LICENSE_PRICES.exclusive - currentPrice
 
-    const { error: insertError } = await supabase.from("upgrade_requests").insert({
-      beat_id,
-      customer_email,
-      current_license_type,
-      price_difference: priceDifference,
-      status: "pending",
-    })
+    const { error: insertError } = await supabase
+      .from("upgrade_requests")
+      .insert({
+        purchase_id: purchase.id,
+        beat_id: purchase.beat_id,
+        customer_email: purchase.customer_email,
+        current_license: purchase.license_type,
+        price_difference: priceDifference,
+        status: "pending",
+      })
 
     if (insertError) {
-      console.error("[upgrade request insert error]", insertError)
-      return NextResponse.json({ error: "Failed to save request" }, { status: 500 })
+      console.error("[request-upgrade] insert failed:", insertError)
+      return NextResponse.json({ error: "Something went wrong. Please try again." }, { status: 500 })
     }
 
+    // Notify admin — fire and forget, don't fail the request if email fails
     try {
       const { subject, html } = upgradeRequestNotificationEmail({
         beatTitle: beat.title,
-        customerEmail: customer_email,
-        currentLicenseType: current_license_type,
+        customerEmail: purchase.customer_email,
+        currentLicense: purchase.license_type,
         priceDifference,
       })
 
@@ -102,7 +110,10 @@ export async function POST(req: NextRequest) {
       console.error("[upgrade request notification email error]", emailErr)
     }
 
-    return NextResponse.json({ success: true, priceDifference })
+    return NextResponse.json({
+      success: true,
+      message: "Upgrade request sent! We'll reach out with payment details shortly.",
+    })
   } catch (err) {
     console.error("[request-upgrade error]", err)
     return NextResponse.json({ error: "Server error" }, { status: 500 })

@@ -11,6 +11,7 @@ type Purchase = {
   download_token: string
   created_at: string
   payment_status: string
+  beat_is_exclusive_sold?: boolean
 }
 
 type DownloadFile = {
@@ -23,6 +24,10 @@ type PurchaseWithFiles = Purchase & {
   files?: DownloadFile[]
   loading?: boolean
   error?: string
+  upgradeLoading?: boolean
+  upgradeMessage?: string
+  upgradeError?: string
+  upgradeRequested?: boolean
 }
 
 const LICENSE_LABELS: Record<string, string> = {
@@ -118,6 +123,52 @@ export default function MyDownloadsPage() {
     }
   }
 
+  async function handleRequestUpgrade(purchase: PurchaseWithFiles) {
+    setPurchases((prev) =>
+      prev.map((p) =>
+        p.id === purchase.id
+          ? { ...p, upgradeLoading: true, upgradeError: undefined, upgradeMessage: undefined }
+          : p
+      )
+    )
+
+    try {
+      const res = await fetch("/api/request-upgrade", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ purchase_id: purchase.id }),
+      })
+      const data = await res.json()
+
+      if (!res.ok || !data.success) {
+        setPurchases((prev) =>
+          prev.map((p) =>
+            p.id === purchase.id
+              ? { ...p, upgradeLoading: false, upgradeError: data.error ?? "Something went wrong. Please try again." }
+              : p
+          )
+        )
+        return
+      }
+
+      setPurchases((prev) =>
+        prev.map((p) =>
+          p.id === purchase.id
+            ? { ...p, upgradeLoading: false, upgradeRequested: true, upgradeMessage: data.message }
+            : p
+        )
+      )
+    } catch {
+      setPurchases((prev) =>
+        prev.map((p) =>
+          p.id === purchase.id
+            ? { ...p, upgradeLoading: false, upgradeError: "Something went wrong. Please try again." }
+            : p
+        )
+      )
+    }
+  }
+
   return (
     <main style={{ backgroundColor: "var(--bg-void)", minHeight: "100vh", paddingBottom: "120px" }}>
       <Navbar />
@@ -184,68 +235,114 @@ export default function MyDownloadsPage() {
             </div>
 
             <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-              {purchases.map((purchase) => (
-                <div key={purchase.id} style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-subtle)", borderRadius: "8px", padding: "24px" }}>
-                  <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: "16px", gap: "12px" }}>
-                    <div>
-                      <div style={{ color: "var(--text-primary)", fontSize: "0.95rem", fontWeight: 700, fontFamily: "var(--font-ui)", marginBottom: "6px" }}>
-                        {purchase.beat_title}
+              {purchases.map((purchase) => {
+                const isUpgradeEligible =
+                  purchase.license_type !== "exclusive" && !purchase.beat_is_exclusive_sold
+
+                return (
+                  <div key={purchase.id} style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-subtle)", borderRadius: "8px", padding: "24px" }}>
+                    <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: "16px", gap: "12px" }}>
+                      <div>
+                        <div style={{ color: "var(--text-primary)", fontSize: "0.95rem", fontWeight: 700, fontFamily: "var(--font-ui)", marginBottom: "6px" }}>
+                          {purchase.beat_title}
+                        </div>
+                        <div style={{ display: "flex", gap: "10px", alignItems: "center", flexWrap: "wrap" }}>
+                          <span style={{ backgroundColor: "rgba(201,168,76,0.12)", color: "var(--gold)", fontSize: "0.62rem", fontFamily: "var(--font-mono)", padding: "3px 10px", borderRadius: "2px", textTransform: "uppercase" }}>
+                            {LICENSE_LABELS[purchase.license_type] ?? purchase.license_type}
+                          </span>
+                          <span style={{ color: "var(--text-muted)", fontSize: "0.65rem", fontFamily: "var(--font-mono)" }}>
+                            ₦{purchase.amount_paid?.toLocaleString()}
+                          </span>
+                          <span style={{ color: "var(--text-muted)", fontSize: "0.65rem", fontFamily: "var(--font-mono)" }}>
+                            {new Date(purchase.created_at).toLocaleDateString("en-NG", { day: "numeric", month: "short", year: "numeric" })}
+                          </span>
+                        </div>
                       </div>
-                      <div style={{ display: "flex", gap: "10px", alignItems: "center", flexWrap: "wrap" }}>
-                        <span style={{ backgroundColor: "rgba(201,168,76,0.12)", color: "var(--gold)", fontSize: "0.62rem", fontFamily: "var(--font-mono)", padding: "3px 10px", borderRadius: "2px", textTransform: "uppercase" }}>
-                          {LICENSE_LABELS[purchase.license_type] ?? purchase.license_type}
-                        </span>
-                        <span style={{ color: "var(--text-muted)", fontSize: "0.65rem", fontFamily: "var(--font-mono)" }}>
-                          ₦{purchase.amount_paid?.toLocaleString()}
-                        </span>
-                        <span style={{ color: "var(--text-muted)", fontSize: "0.65rem", fontFamily: "var(--font-mono)" }}>
-                          {new Date(purchase.created_at).toLocaleDateString("en-NG", { day: "numeric", month: "short", year: "numeric" })}
-                        </span>
-                      </div>
+
+                      {!purchase.files && (
+                        <button
+                          onClick={() => handleGetFiles(purchase)}
+                          disabled={purchase.loading}
+                          style={{ padding: "10px 20px", background: purchase.loading ? "var(--bg-elevated)" : "linear-gradient(135deg, #C9A84C, #F5D98B)", border: "none", borderRadius: "4px", cursor: purchase.loading ? "not-allowed" : "pointer", color: purchase.loading ? "var(--text-muted)" : "#000", fontSize: "0.68rem", fontWeight: 700, fontFamily: "var(--font-ui)", letterSpacing: "0.1em", textTransform: "uppercase", flexShrink: 0 }}
+                        >
+                          {purchase.loading ? "Loading..." : "Get Files"}
+                        </button>
+                      )}
                     </div>
 
-                    {!purchase.files && (
-                      <button
-                        onClick={() => handleGetFiles(purchase)}
-                        disabled={purchase.loading}
-                        style={{ padding: "10px 20px", background: purchase.loading ? "var(--bg-elevated)" : "linear-gradient(135deg, #C9A84C, #F5D98B)", border: "none", borderRadius: "4px", cursor: purchase.loading ? "not-allowed" : "pointer", color: purchase.loading ? "var(--text-muted)" : "#000", fontSize: "0.68rem", fontWeight: 700, fontFamily: "var(--font-ui)", letterSpacing: "0.1em", textTransform: "uppercase", flexShrink: 0 }}
-                      >
-                        {purchase.loading ? "Loading..." : "Get Files"}
-                      </button>
+                    {purchase.error && (
+                      <div style={{ backgroundColor: "rgba(255,100,100,0.1)", border: "1px solid rgba(255,100,100,0.3)", borderRadius: "6px", padding: "10px 14px", marginBottom: "12px" }}>
+                        <p style={{ color: "#ff6464", fontSize: "0.72rem", fontFamily: "var(--font-ui)" }}>{purchase.error}</p>
+                      </div>
+                    )}
+
+                    {purchase.files && purchase.files.length > 0 && (
+                      <div style={{ borderTop: "1px solid var(--border-subtle)", paddingTop: "16px", display: "flex", flexDirection: "column", gap: "10px", marginBottom: isUpgradeEligible ? "16px" : 0 }}>
+                        {purchase.files.map((file) => (
+                          <a
+                            key={file.label}
+                            href={file.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 16px", backgroundColor: "var(--bg-elevated)", border: "1px solid var(--border-dim)", borderRadius: "6px", textDecoration: "none" }}
+                          >
+                            <span style={{ color: "var(--text-primary)", fontSize: "0.78rem", fontFamily: "var(--font-ui)", fontWeight: 600 }}>
+                              {file.label}
+                            </span>
+                            <span style={{ color: "var(--gold)", fontSize: "0.68rem", fontFamily: "var(--font-ui)", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase" }}>
+                              Download ↓
+                            </span>
+                          </a>
+                        ))}
+                        <p style={{ color: "var(--text-muted)", fontSize: "0.62rem", fontFamily: "var(--font-ui)", marginTop: "4px" }}>
+                          Download links are active for 1 hour. Refresh this page to generate new links.
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Upgrade to Exclusive */}
+                    {isUpgradeEligible && (
+                      <div style={{ borderTop: "1px solid var(--border-subtle)", paddingTop: "16px" }}>
+                        {purchase.upgradeRequested ? (
+                          <div style={{ backgroundColor: "rgba(201,168,76,0.08)", border: "1px solid rgba(201,168,76,0.25)", borderRadius: "6px", padding: "12px 14px" }}>
+                            <p style={{ color: "var(--gold)", fontSize: "0.75rem", fontFamily: "var(--font-ui)" }}>
+                              {purchase.upgradeMessage ?? "Upgrade request sent — we'll be in touch."}
+                            </p>
+                          </div>
+                        ) : (
+                          <>
+                            <button
+                              onClick={() => handleRequestUpgrade(purchase)}
+                              disabled={purchase.upgradeLoading}
+                              style={{
+                                width: "100%",
+                                padding: "12px",
+                                background: "transparent",
+                                border: "1px solid var(--gold)",
+                                borderRadius: "4px",
+                                cursor: purchase.upgradeLoading ? "not-allowed" : "pointer",
+                                color: purchase.upgradeLoading ? "var(--text-muted)" : "var(--gold)",
+                                fontSize: "0.7rem",
+                                fontWeight: 700,
+                                fontFamily: "var(--font-ui)",
+                                letterSpacing: "0.1em",
+                                textTransform: "uppercase",
+                              }}
+                            >
+                              {purchase.upgradeLoading ? "Sending Request..." : "Upgrade to Exclusive"}
+                            </button>
+                            {purchase.upgradeError && (
+                              <p style={{ color: "#ff6464", fontSize: "0.7rem", fontFamily: "var(--font-ui)", marginTop: "8px" }}>
+                                {purchase.upgradeError}
+                              </p>
+                            )}
+                          </>
+                        )}
+                      </div>
                     )}
                   </div>
-
-                  {purchase.error && (
-                    <div style={{ backgroundColor: "rgba(255,100,100,0.1)", border: "1px solid rgba(255,100,100,0.3)", borderRadius: "6px", padding: "10px 14px" }}>
-                      <p style={{ color: "#ff6464", fontSize: "0.72rem", fontFamily: "var(--font-ui)" }}>{purchase.error}</p>
-                    </div>
-                  )}
-
-                  {purchase.files && purchase.files.length > 0 && (
-                    <div style={{ borderTop: "1px solid var(--border-subtle)", paddingTop: "16px", display: "flex", flexDirection: "column", gap: "10px" }}>
-                      {purchase.files.map((file) => (
-                        <a
-                          key={file.label}
-                          href={file.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 16px", backgroundColor: "var(--bg-elevated)", border: "1px solid var(--border-dim)", borderRadius: "6px", textDecoration: "none" }}
-                        >
-                          <span style={{ color: "var(--text-primary)", fontSize: "0.78rem", fontFamily: "var(--font-ui)", fontWeight: 600 }}>
-                            {file.label}
-                          </span>
-                          <span style={{ color: "var(--gold)", fontSize: "0.68rem", fontFamily: "var(--font-ui)", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase" }}>
-                            Download ↓
-                          </span>
-                        </a>
-                      ))}
-                      <p style={{ color: "var(--text-muted)", fontSize: "0.62rem", fontFamily: "var(--font-ui)", marginTop: "4px" }}>
-                        Download links are active for 1 hour. Refresh this page to generate new links.
-                      </p>
-                    </div>
-                  )}
-                </div>
-              ))}
+                )
+              })}
             </div>
 
             <div style={{ marginTop: "40px", padding: "20px", backgroundColor: "var(--bg-card)", border: "1px solid var(--border-subtle)", borderRadius: "8px", textAlign: "center" }}>
