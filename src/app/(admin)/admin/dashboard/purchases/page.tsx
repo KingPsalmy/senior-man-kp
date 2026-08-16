@@ -42,6 +42,10 @@ export default function PurchasesPage() {
   const [search, setSearch] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
+  const [refundingBeatId, setRefundingBeatId] = useState<string | null>(null)
+  const [confirmingBeatId, setConfirmingBeatId] = useState<string | null>(null)
+  const [refundError, setRefundError] = useState("")
+  const [refundedBeatIds, setRefundedBeatIds] = useState<string[]>([])
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }: { data: any }) => {
@@ -83,6 +87,52 @@ export default function PurchasesPage() {
   async function handleLogout() {
     await supabase.auth.signOut()
     router.push("/admin/login")
+  }
+
+  function openOrder(order: Order) {
+    setSelectedOrder(order)
+    setRefundedBeatIds([])
+    setRefundError("")
+    setConfirmingBeatId(null)
+  }
+
+  async function handleRefund(beatId: string) {
+    if (!selectedOrder) return
+    setRefundError("")
+    setRefundingBeatId(beatId)
+
+    try {
+      const { data: sessionData } = await supabase.auth.getSession()
+      const token = sessionData.session?.access_token
+
+      const res = await fetch("/api/admin/refund", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          paystack_reference: selectedOrder.paystack_reference,
+          beat_id: beatId,
+        }),
+      })
+
+      const data = await res.json()
+
+      if (!res.ok) {
+        setRefundError(data.error || "Failed to process refund.")
+        setRefundingBeatId(null)
+        return
+      }
+
+      setRefundedBeatIds((prev) => [...prev, beatId])
+      setConfirmingBeatId(null)
+    } catch (err) {
+      console.error("[refund error]", err)
+      setRefundError("Something went wrong. Please try again.")
+    } finally {
+      setRefundingBeatId(null)
+    }
   }
 
   if (checking) return (
@@ -218,7 +268,7 @@ export default function PurchasesPage() {
                     <span style={{ color: "var(--gold)", fontSize: "0.9rem", fontFamily: "var(--font-ui)", fontWeight: 700 }}>₦{Number(order.total).toLocaleString()}</span>
                     <span style={{ color: "var(--text-muted)", fontSize: "0.8rem", fontFamily: "var(--font-mono)" }}>{new Date(order.created_at).toLocaleDateString("en-NG", { day: "numeric", month: "short", year: "numeric" })}</span>
                     <button
-                      onClick={() => setSelectedOrder(order)}
+                      onClick={() => openOrder(order)}
                       style={{ padding: "6px 14px", borderRadius: "3px", backgroundColor: "var(--bg-elevated)", border: "1px solid var(--border-dim)", color: "var(--text-muted)", fontSize: "0.72rem", fontFamily: "var(--font-mono)", cursor: "pointer" }}
                     >
                       View
@@ -230,7 +280,7 @@ export default function PurchasesPage() {
               {/* Mobile cards */}
               <div className="admin-orders-mobile" style={{ display: "none", flexDirection: "column" }}>
                 {filtered.map((order, i) => (
-                  <div key={order.id} onClick={() => setSelectedOrder(order)} className="admin-order-card" style={{
+                  <div key={order.id} onClick={() => openOrder(order)} className="admin-order-card" style={{
                     padding: "18px 20px", cursor: "pointer",
                     borderBottom: i < filtered.length - 1 ? "1px solid var(--border-subtle)" : "none",
                   }}>
@@ -283,18 +333,57 @@ export default function PurchasesPage() {
                 ))}
               </div>
 
+              {refundError && (
+                <div style={{ backgroundColor: "rgba(255,50,50,0.08)", border: "1px solid rgba(255,50,50,0.2)", borderRadius: "6px", padding: "10px 14px", marginBottom: "16px", color: "#ff6b6b", fontSize: "0.82rem", fontFamily: "var(--font-ui)" }}>
+                  {refundError}
+                </div>
+              )}
+
               {/* Items */}
               <div style={{ marginBottom: "20px" }}>
                 <div className="admin-order-section-label" style={{ color: "var(--text-muted)", fontSize: "0.72rem", fontFamily: "var(--font-mono)", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "12px" }}>Items</div>
                 <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                  {(selectedOrder.items ?? []).map((item: any, i: number) => (
-                    <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "11px 15px", backgroundColor: "var(--bg-elevated)", borderRadius: "6px" }}>
-                      <div>
-                        <div className="admin-order-item-title" style={{ color: "var(--text-primary)", fontSize: "0.92rem", fontWeight: 600, fontFamily: "var(--font-ui)" }}>{item.title}</div>
-                        <div className="admin-order-item-license" style={{ color: "var(--gold)", fontSize: "0.75rem", fontFamily: "var(--font-mono)", textTransform: "uppercase" }}>{LICENSE_LABELS[item.license_type] ?? item.license_type}</div>
+                  {(selectedOrder.items ?? []).map((item: any, i: number) => {
+                    const isRefunded = refundedBeatIds.includes(item.beat_id)
+                    const isRefunding = refundingBeatId === item.beat_id
+                    const isConfirming = confirmingBeatId === item.beat_id
+
+                    return (
+                      <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "11px 15px", backgroundColor: "var(--bg-elevated)", borderRadius: "6px", gap: "12px" }}>
+                        <div>
+                          <div className="admin-order-item-title" style={{ color: "var(--text-primary)", fontSize: "0.92rem", fontWeight: 600, fontFamily: "var(--font-ui)" }}>{item.title}</div>
+                          <div className="admin-order-item-license" style={{ color: "var(--gold)", fontSize: "0.75rem", fontFamily: "var(--font-mono)", textTransform: "uppercase" }}>{LICENSE_LABELS[item.license_type] ?? item.license_type}</div>
+                        </div>
+
+                        {isRefunded ? (
+                          <span style={{ fontSize: "0.68rem", fontFamily: "var(--font-mono)", color: "#4ade80", textTransform: "uppercase", flexShrink: 0 }}>Refunded</span>
+                        ) : isConfirming ? (
+                          <div style={{ display: "flex", gap: "6px", flexShrink: 0 }}>
+                            <button
+                              onClick={() => handleRefund(item.beat_id)}
+                              disabled={isRefunding}
+                              style={{ padding: "6px 12px", borderRadius: "3px", backgroundColor: "#ff6b6b", border: "none", color: "#000", fontSize: "0.68rem", fontFamily: "var(--font-mono)", cursor: isRefunding ? "not-allowed" : "pointer", fontWeight: 700 }}
+                            >
+                              {isRefunding ? "..." : "Confirm"}
+                            </button>
+                            <button
+                              onClick={() => setConfirmingBeatId(null)}
+                              style={{ padding: "6px 12px", borderRadius: "3px", backgroundColor: "transparent", border: "1px solid var(--border-dim)", color: "var(--text-muted)", fontSize: "0.68rem", fontFamily: "var(--font-mono)", cursor: "pointer" }}
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => setConfirmingBeatId(item.beat_id)}
+                            style={{ padding: "6px 14px", borderRadius: "3px", backgroundColor: "transparent", border: "1px solid rgba(255,107,107,0.4)", color: "#ff6b6b", fontSize: "0.68rem", fontFamily: "var(--font-mono)", cursor: "pointer", flexShrink: 0 }}
+                          >
+                            Refund
+                          </button>
+                        )}
                       </div>
-                    </div>
-                  ))}
+                    )
+                  })}
                 </div>
               </div>
 
