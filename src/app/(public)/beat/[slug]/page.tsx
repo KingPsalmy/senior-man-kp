@@ -17,13 +17,13 @@ const LICENSE_OPTIONS = [
     value: "basic",
     label: "Basic License",
     price: 30000,
-    features: ["MP3 & WAV files", "Non-exclusive rights", "Up to 10,000 streams", "1 Music Video", "YouTube & Social Media"],
+    features: ["MP3 & WAV files", "Non-exclusive rights", "Up to 100,000 streams", "1 Music Video", "YouTube & Social Media"],
   },
   {
     value: "premium",
     label: "Premium License",
     price: 70000,
-    features: ["MP3, WAV & Track Stems", "Non-exclusive rights", "Unlimited streams", "Unlimited Music Videos", "Radio Broadcasting Rights", "Commercial use"],
+    features: ["MP3, WAV & Track Stems", "Non-exclusive rights", "Up to 500,000 streams", "Unlimited Music Videos", "Radio Broadcasting Rights", "Commercial use"],
   },
   {
     value: "unlimited",

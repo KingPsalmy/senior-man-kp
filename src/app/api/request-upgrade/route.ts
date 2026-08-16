@@ -17,42 +17,31 @@ const LICENSE_PRICES: Record<string, number> = {
 
 export async function POST(req: NextRequest) {
   try {
-    const { beat_id, customer_email, current_license_type } = await req.json()
+    const { purchase_id } = await req.json()
 
-    if (!beat_id || !customer_email || !current_license_type) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
+    if (!purchase_id) {
+      return NextResponse.json({ error: "Missing purchase_id" }, { status: 400 })
     }
+
+    // Look up the purchase — this gives us beat_id, customer_email, and license_type
+    const { data: purchase, error: purchaseError } = await supabase
+      .from("purchases")
+      .select("*, beats(title, is_exclusive_sold)")
+      .eq("id", purchase_id)
+      .eq("payment_status", "success")
+      .single()
+
+    if (purchaseError || !purchase) {
+      return NextResponse.json({ error: "Purchase not found" }, { status: 404 })
+    }
+
+    const { beat_id, customer_email, license_type: current_license_type, beats: beat } = purchase
 
     if (current_license_type === "exclusive") {
       return NextResponse.json({ error: "This is already an exclusive license" }, { status: 400 })
     }
 
-    // Confirm this customer actually owns this beat at this license type
-    const { data: existingPurchase } = await supabase
-      .from("purchases")
-      .select("id")
-      .eq("beat_id", beat_id)
-      .eq("customer_email", customer_email)
-      .eq("license_type", current_license_type)
-      .eq("payment_status", "success")
-      .maybeSingle()
-
-    if (!existingPurchase) {
-      return NextResponse.json({ error: "No matching purchase found" }, { status: 403 })
-    }
-
-    // Confirm the beat hasn't already been sold exclusively to someone else
-    const { data: beat } = await supabase
-      .from("beats")
-      .select("title, is_exclusive_sold")
-      .eq("id", beat_id)
-      .single()
-
-    if (!beat) {
-      return NextResponse.json({ error: "Beat not found" }, { status: 404 })
-    }
-
-    if (beat.is_exclusive_sold) {
+    if (beat?.is_exclusive_sold) {
       return NextResponse.json({ error: "This beat has already been sold exclusively" }, { status: 400 })
     }
 
@@ -86,7 +75,7 @@ export async function POST(req: NextRequest) {
 
     try {
       const { subject, html } = upgradeRequestNotificationEmail({
-        beatTitle: beat.title,
+        beatTitle: beat?.title ?? "your beat",
         customerEmail: customer_email,
         currentLicenseType: current_license_type,
         priceDifference,
