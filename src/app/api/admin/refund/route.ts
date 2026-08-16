@@ -12,9 +12,17 @@ async function verifyAdmin(req: NextRequest) {
   const authHeader = req.headers.get("authorization")
   const token = authHeader?.replace("Bearer ", "")
   if (!token) return false
+
   const { data, error } = await supabase.auth.getUser(token)
-  if (error || !data.user) return false
-  return true
+  if (error || !data.user?.email) return false
+
+  const { data: adminRow } = await supabase
+    .from("admin_users")
+    .select("id")
+    .eq("email", data.user.email)
+    .maybeSingle()
+
+  return !!adminRow
 }
 
 export async function POST(req: NextRequest) {
