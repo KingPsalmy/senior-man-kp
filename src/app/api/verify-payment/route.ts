@@ -84,7 +84,6 @@ export async function POST(req: NextRequest) {
     }
 
     // Verify beat exists and is still available
-    // NOTE: added "genre" here — required by the suggestedBeats query below
     const { data: beat, error: beatError } = await supabase
       .from("beats")
       .select("id, title, genre, is_published, is_exclusive_sold, basic_price, premium_price, unlimited_price, exclusive_price")
@@ -160,36 +159,43 @@ export async function POST(req: NextRequest) {
 
     if (error) throw error
 
-    // If exclusive — mark beat as sold
+    // Clear any pending abandoned-cart record now that checkout succeeded
+    await supabase
+      .from("orders")
+      .delete()
+      .eq("email", customer.email)
+      .eq("status", "pending")
+
+    // If exclusive — mark beat as sold and notify past buyers
     if (license_type === "exclusive") {
       await supabase
         .from("beats")
         .update({ is_exclusive_sold: true, is_published: false })
         .eq("id", beat_id)
-      
-         const { data: pastBuyers } = await supabase
-    .from("purchases")
-    .select("customer_email")
-    .eq("beat_id", beat_id)
-    .neq("customer_email", customer.email)
-    .eq("payment_status", "success")
 
-  const uniqueEmails = [...new Set((pastBuyers ?? []).map((p) => p.customer_email))]
+      const { data: pastBuyers } = await supabase
+        .from("purchases")
+        .select("customer_email")
+        .eq("beat_id", beat_id)
+        .neq("customer_email", customer.email)
+        .eq("payment_status", "success")
 
-  for (const email of uniqueEmails) {
-    try {
-      const { subject, html } = exclusiveSoldNoticeEmail({ beatTitle: beat_title })
-      await resend.emails.send({
-        from: `Senior Man KP <${process.env.RESEND_FROM_EMAIL}>`,
-        to: email,
-        subject,
-        html,
-      })
-    } catch (emailErr) {
-      console.error(`[exclusive sold notice error for ${email}]`, emailErr)
+      const uniqueEmails = [...new Set((pastBuyers ?? []).map((p) => p.customer_email))]
+
+      for (const email of uniqueEmails) {
+        try {
+          const { subject, html } = exclusiveSoldNoticeEmail({ beatTitle: beat_title })
+          await resend.emails.send({
+            from: `Senior Man KP <${process.env.RESEND_FROM_EMAIL}>`,
+            to: email,
+            subject,
+            html,
+          })
+        } catch (emailErr) {
+          console.error(`[exclusive sold notice error for ${email}]`, emailErr)
+        }
+      }
     }
-  }
-}
 
     // Fetch suggested beats — same genre, excluding this one, still available
     const { data: suggestions } = await supabase

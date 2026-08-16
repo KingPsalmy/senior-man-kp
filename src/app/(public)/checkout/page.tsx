@@ -60,6 +60,33 @@ export default function CheckoutPage() {
     items.map((item) => ({ ...item, license_type: selectedLicenses[item.beat_id] || item.license_type }))
   )
 
+  // Save this checkout attempt as "pending" for abandoned-cart tracking,
+  // debounced so it doesn't fire on every keystroke.
+  useEffect(() => {
+    if (!form.email.trim() || !form.email.includes("@") || items.length === 0) return
+
+    const timer = setTimeout(() => {
+      fetch("/api/checkout/save-pending", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          guest_id: getGuestId(),
+          email: form.email.trim().toLowerCase(),
+          items: items.map((item) => ({
+            title: item.beats?.title,
+            license_type: selectedLicenses[item.beat_id] || item.license_type,
+            price: LICENSE_PRICES[selectedLicenses[item.beat_id] || item.license_type],
+          })),
+          subtotal,
+          discount,
+          total,
+        }),
+      }).catch(() => {})
+    }, 1500)
+
+    return () => clearTimeout(timer)
+  }, [form.email, items, selectedLicenses, subtotal, discount, total])
+
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }))
   }
