@@ -4,6 +4,7 @@ import { resend } from "@/lib/resend"
 import { purchaseConfirmationEmail } from "@/lib/emails/purchase-confirmation"
 import { adminSaleNotificationEmail } from "@/lib/emails/admin-sale-notification"
 import { paymentFailedEmail } from "@/lib/emails/payment-failed"
+import { exclusiveSoldNoticeEmail } from "@/lib/emails/exclusive-sold-notice"
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -165,7 +166,30 @@ export async function POST(req: NextRequest) {
         .from("beats")
         .update({ is_exclusive_sold: true, is_published: false })
         .eq("id", beat_id)
+      
+         const { data: pastBuyers } = await supabase
+    .from("purchases")
+    .select("customer_email")
+    .eq("beat_id", beat_id)
+    .neq("customer_email", customer.email)
+    .eq("payment_status", "success")
+
+  const uniqueEmails = [...new Set((pastBuyers ?? []).map((p) => p.customer_email))]
+
+  for (const email of uniqueEmails) {
+    try {
+      const { subject, html } = exclusiveSoldNoticeEmail({ beatTitle: beat_title })
+      await resend.emails.send({
+        from: `Senior Man KP <${process.env.RESEND_FROM_EMAIL}>`,
+        to: email,
+        subject,
+        html,
+      })
+    } catch (emailErr) {
+      console.error(`[exclusive sold notice error for ${email}]`, emailErr)
     }
+  }
+}
 
     // Fetch suggested beats — same genre, excluding this one, still available
     const { data: suggestions } = await supabase
