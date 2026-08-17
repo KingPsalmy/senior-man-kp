@@ -33,6 +33,10 @@ const navItems = [
   { icon: "⚙", label: "Settings", href: "/admin/dashboard/settings" },
 ]
 
+function isTestOrder(order: Order) {
+  return order.paystack_reference?.startsWith("TEST_")
+}
+
 export default function PurchasesPage() {
   const router = useRouter()
   const [checking, setChecking] = useState(true)
@@ -141,7 +145,9 @@ export default function PurchasesPage() {
     </div>
   )
 
-  const totalRevenue = filtered.reduce((sum, o) => sum + Number(o.total), 0)
+  const totalRevenue = filtered
+    .filter((o) => !isTestOrder(o))
+    .reduce((sum, o) => sum + Number(o.total), 0)
 
   return (
     <main style={{ minHeight: "100vh", backgroundColor: "var(--bg-void)", display: "flex" }}>
@@ -196,6 +202,7 @@ export default function PurchasesPage() {
           <div style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-subtle)", borderRadius: "8px", padding: "16px 24px", textAlign: "right" }}>
             <div style={{ color: "var(--text-muted)", fontSize: "0.72rem", fontFamily: "var(--font-mono)", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "4px" }}>Filtered Revenue</div>
             <div style={{ color: "var(--gold)", fontSize: "1.6rem", fontWeight: 800, fontFamily: "var(--font-ui)" }}>₦{totalRevenue.toLocaleString()}</div>
+            <div style={{ color: "var(--text-muted)", fontSize: "0.62rem", fontFamily: "var(--font-mono)", marginTop: "2px" }}>excludes free/test orders</div>
           </div>
         </div>
 
@@ -203,6 +210,7 @@ export default function PurchasesPage() {
         <div className="admin-mobile-revenue" style={{ display: "none", backgroundColor: "var(--bg-card)", border: "1px solid var(--border-subtle)", borderRadius: "8px", padding: "16px 20px", marginBottom: "20px" }}>
           <div style={{ color: "var(--text-muted)", fontSize: "0.75rem", fontFamily: "var(--font-mono)", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "6px" }}>Filtered Revenue</div>
           <div style={{ color: "var(--gold)", fontSize: "1.8rem", fontWeight: 800, fontFamily: "var(--font-ui)" }}>₦{totalRevenue.toLocaleString()}</div>
+          <div style={{ color: "var(--text-muted)", fontSize: "0.65rem", fontFamily: "var(--font-mono)", marginTop: "2px" }}>excludes free/test orders</div>
         </div>
 
         {/* Filters */}
@@ -262,7 +270,12 @@ export default function PurchasesPage() {
                     padding: "16px 24px", alignItems: "center",
                     borderBottom: i < filtered.length - 1 ? "1px solid var(--border-subtle)" : "none",
                   }}>
-                    <span style={{ color: "var(--text-secondary)", fontSize: "0.9rem", fontFamily: "var(--font-ui)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{order.email}</span>
+                    <span style={{ color: "var(--text-secondary)", fontSize: "0.9rem", fontFamily: "var(--font-ui)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", display: "flex", alignItems: "center", gap: "8px" }}>
+                      {order.email}
+                      {isTestOrder(order) && (
+                        <span style={{ backgroundColor: "rgba(148,148,148,0.15)", color: "#999", fontSize: "0.6rem", fontFamily: "var(--font-mono)", padding: "2px 8px", borderRadius: "2px", textTransform: "uppercase", flexShrink: 0 }}>Test</span>
+                      )}
+                    </span>
                     <span style={{ color: "var(--text-muted)", fontSize: "0.8rem", fontFamily: "var(--font-mono)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{order.paystack_reference}</span>
                     <span style={{ color: "var(--text-muted)", fontSize: "0.85rem", fontFamily: "var(--font-ui)" }}>{order.items?.length ?? 0} beat{(order.items?.length ?? 0) !== 1 ? "s" : ""}</span>
                     <span style={{ color: "var(--gold)", fontSize: "0.9rem", fontFamily: "var(--font-ui)", fontWeight: 700 }}>₦{Number(order.total).toLocaleString()}</span>
@@ -286,7 +299,12 @@ export default function PurchasesPage() {
                   }}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
                       <span className="admin-order-amount" style={{ color: "var(--text-primary)", fontSize: "1.05rem", fontWeight: 700, fontFamily: "var(--font-ui)" }}>₦{Number(order.total).toLocaleString()}</span>
-                      <span className="admin-order-status" style={{ backgroundColor: "rgba(74,222,128,0.12)", color: "#4ade80", fontSize: "0.72rem", fontFamily: "var(--font-mono)", padding: "4px 10px", borderRadius: "2px", textTransform: "uppercase" }}>{order.status}</span>
+                      <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
+                        {isTestOrder(order) && (
+                          <span style={{ backgroundColor: "rgba(148,148,148,0.15)", color: "#999", fontSize: "0.6rem", fontFamily: "var(--font-mono)", padding: "2px 8px", borderRadius: "2px", textTransform: "uppercase" }}>Test</span>
+                        )}
+                        <span className="admin-order-status" style={{ backgroundColor: "rgba(74,222,128,0.12)", color: "#4ade80", fontSize: "0.72rem", fontFamily: "var(--font-mono)", padding: "4px 10px", borderRadius: "2px", textTransform: "uppercase" }}>{order.status}</span>
+                      </div>
                     </div>
                     <div className="admin-order-email" style={{ color: "var(--text-muted)", fontSize: "0.88rem", fontFamily: "var(--font-ui)", marginBottom: "6px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{order.email}</div>
                     <div style={{ display: "flex", justifyContent: "space-between" }}>
@@ -313,7 +331,12 @@ export default function PurchasesPage() {
         <div style={{ position: "fixed", inset: 0, zIndex: 100, backgroundColor: "rgba(0,0,0,0.85)", backdropFilter: "blur(8px)", display: "flex", alignItems: "center", justifyContent: "center", padding: "24px" }}>
           <div className="admin-order-modal" style={{ backgroundColor: "var(--bg-card)", border: "1px solid rgba(201,168,76,0.25)", borderRadius: "12px", width: "100%", maxWidth: "560px", maxHeight: "85vh", overflow: "hidden", display: "flex", flexDirection: "column" }}>
             <div className="admin-order-modal-header" style={{ padding: "20px 24px", borderBottom: "1px solid var(--border-subtle)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              <h2 className="admin-order-modal-title" style={{ color: "var(--text-primary)", fontSize: "1.05rem", fontWeight: 700, fontFamily: "var(--font-ui)" }}>Order Details</h2>
+              <h2 className="admin-order-modal-title" style={{ color: "var(--text-primary)", fontSize: "1.05rem", fontWeight: 700, fontFamily: "var(--font-ui)" }}>
+                Order Details
+                {isTestOrder(selectedOrder) && (
+                  <span style={{ marginLeft: "10px", backgroundColor: "rgba(148,148,148,0.15)", color: "#999", fontSize: "0.6rem", fontFamily: "var(--font-mono)", padding: "3px 9px", borderRadius: "2px", textTransform: "uppercase", verticalAlign: "middle" }}>Test / Free</span>
+                )}
+              </h2>
               <button onClick={() => setSelectedOrder(null)} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: "1.2rem" }}>✕</button>
             </div>
             <div className="admin-order-modal-body" style={{ padding: "24px", overflowY: "auto", flex: 1 }}>
