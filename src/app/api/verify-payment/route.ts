@@ -18,6 +18,11 @@ const LICENSE_PRICES: Record<string, number> = {
   exclusive: 180000,
 }
 
+function getCustomField(customFields: any[], key: string): string | null {
+  const field = customFields?.find((f: any) => f.variable_name === key)
+  return field?.value ?? null
+}
+
 export async function POST(req: NextRequest) {
   const { reference, customer_email } = await req.json()
 
@@ -29,7 +34,6 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    // Verify with Paystack
     const paystackRes = await fetch(
       `https://api.paystack.co/transaction/verify/${reference}`,
       {
@@ -42,7 +46,6 @@ export async function POST(req: NextRequest) {
     const paystackData = await paystackRes.json()
 
     if (!paystackData.status || paystackData.data.status !== "success") {
-      // Notify the customer their payment didn't go through — fire-and-forget
       try {
         const { subject, html } = paymentFailedEmail({
           beatTitle: paystackData.data?.metadata?.beat_title ?? "your beat",
@@ -67,7 +70,10 @@ export async function POST(req: NextRequest) {
     const { metadata, amount, customer } = paystackData.data
     const { beat_id, beat_title, license_type } = metadata
 
-    // Verify email matches — prevents reference hijacking
+    const customFields = metadata?.custom_fields ?? []
+    const customerName = getCustomField(customFields, "legal_name")
+    const artistName = getCustomField(customFields, "artist_name")
+
     if (customer.email.toLowerCase() !== customer_email.toLowerCase()) {
       return NextResponse.json(
         { success: false, error: "Unauthorized" },
@@ -75,7 +81,6 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // Verify license type is valid
     if (!LICENSE_PRICES[license_type]) {
       return NextResponse.json(
         { success: false, error: "Invalid license type" },
@@ -83,7 +88,6 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // Verify beat exists and is still available
     const { data: beat, error: beatError } = await supabase
       .from("beats")
       .select("id, title, genre, is_published, is_exclusive_sold, basic_price, premium_price, unlimited_price, exclusive_price")
@@ -111,7 +115,6 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // Verify amount matches database price — never trust frontend
     const priceMap: Record<string, number> = {
       basic: Number(beat.basic_price),
       premium: Number(beat.premium_price),
@@ -119,7 +122,7 @@ export async function POST(req: NextRequest) {
       exclusive: Number(beat.exclusive_price),
     }
 
-    const expectedAmount = priceMap[license_type] * 100 // kobo
+    const expectedAmount = priceMap[license_type] * 100
     if (amount !== expectedAmount) {
       return NextResponse.json(
         { success: false, error: "Amount mismatch" },
@@ -127,7 +130,6 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // Idempotency check
     const { data: existing } = await supabase
       .from("purchases")
       .select("*")
@@ -138,15 +140,15 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: true, purchase: existing })
     }
 
-    // Generate download token — no expiry, customer uses /my-downloads
     const downloadToken = crypto.randomUUID()
 
-    // Save purchase
     const { data: purchase, error } = await supabase
       .from("purchases")
       .insert({
         beat_id,
         customer_email: customer.email,
+        customer_name: customerName,
+        artist_name: artistName,
         license_type,
         amount_paid: amount / 100,
         paystack_reference: reference,
@@ -159,14 +161,12 @@ export async function POST(req: NextRequest) {
 
     if (error) throw error
 
-    // Clear any pending abandoned-cart record now that checkout succeeded
     await supabase
       .from("orders")
       .delete()
       .eq("email", customer.email)
       .eq("status", "pending")
 
-    // If exclusive — mark beat as sold and notify past buyers
     if (license_type === "exclusive") {
       await supabase
         .from("beats")
@@ -197,7 +197,6 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Fetch suggested beats — same genre, excluding this one, still available
     const { data: suggestions } = await supabase
       .from("beats")
       .select("title, slug, cover_url, basic_price")
@@ -213,7 +212,6 @@ export async function POST(req: NextRequest) {
       price: Number(b.basic_price),
     }))
 
-    // Send purchase confirmation email to customer — don't let this block or fail the response
     try {
       const { subject, html } = purchaseConfirmationEmail({
         customerEmail: customer.email,
@@ -232,10 +230,8 @@ export async function POST(req: NextRequest) {
       })
     } catch (emailErr) {
       console.error("[purchase confirmation email error]", emailErr)
-      // Payment already succeeded — don't let an email failure break the response
     }
 
-    // Send new-sale notification to admin — same fire-and-forget approach
     try {
       const { subject, html } = adminSaleNotificationEmail({
         beatTitle: beat_title,
