@@ -31,6 +31,10 @@ type Stats = {
   totalBeats: number
 }
 
+function isTestOrder(order: Order) {
+  return order.paystack_reference?.startsWith("TEST_")
+}
+
 export default function AdminDashboard() {
   const router = useRouter()
   const [checking, setChecking] = useState(true)
@@ -48,7 +52,7 @@ export default function AdminDashboard() {
     })
   }, [router])
 
-async function fetchDashboardData() {
+  async function fetchDashboardData() {
     setLoadingStats(true)
 
     const { data } = await supabase
@@ -58,10 +62,11 @@ async function fetchDashboardData() {
       .order("created_at", { ascending: false })
 
     const orders = (data ?? []) as Order[]
+    const realOrders = orders.filter((o) => !isTestOrder(o))
 
-    const totalRevenue = orders.reduce((sum: number, o: Order) => sum + Number(o.total), 0)
-    const totalOrders = orders.length
-    const uniqueEmails = new Set(orders.map((o: Order) => o.email))
+    const totalRevenue = realOrders.reduce((sum: number, o: Order) => sum + Number(o.total), 0)
+    const totalOrders = realOrders.length
+    const uniqueEmails = new Set(realOrders.map((o: Order) => o.email))
     const totalCustomers = uniqueEmails.size
 
     const { count: totalBeats } = await supabase
@@ -88,7 +93,6 @@ async function fetchDashboardData() {
   return (
     <main style={{ minHeight: "100vh", backgroundColor: "var(--bg-void)", display: "flex" }}>
 
-      {/* Sidebar (desktop: left rail — mobile: bottom tab bar, styled via globals.css) */}
       <aside className="admin-sidebar" style={{
         width: "220px", flexShrink: 0,
         backgroundColor: "var(--bg-deep)",
@@ -123,10 +127,8 @@ async function fetchDashboardData() {
         </nav>
       </aside>
 
-      {/* Main */}
       <div className="admin-main" style={{ marginLeft: "220px", flex: 1, padding: "32px", minWidth: 0 }}>
 
-        {/* Mobile header — title + quick store link only; nav lives in the bottom tab bar */}
         <div className="admin-mobile-header" style={{
           display: "none", alignItems: "center", justifyContent: "space-between",
           marginBottom: "24px",
@@ -135,7 +137,6 @@ async function fetchDashboardData() {
           <Link href="/store" className="admin-mobile-store-link" style={{ fontSize: "0.85rem", color: "var(--gold)", fontFamily: "var(--font-ui)", textDecoration: "none" }}>Store →</Link>
         </div>
 
-        {/* Desktop header */}
         <div className="admin-desktop-header" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "32px", flexWrap: "wrap", gap: "12px" }}>
           <h1 style={{ color: "var(--text-primary)", fontSize: "1.9rem", fontWeight: 800, fontFamily: "var(--font-ui)" }}>
             Dashboard
@@ -155,8 +156,7 @@ async function fetchDashboardData() {
           </div>
         </div>
 
-        {/* Stats */}
-        <div className="admin-stats-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "16px", marginBottom: "32px" }}>
+        <div className="admin-stats-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "16px", marginBottom: "8px" }}>
           {loadingStats ? (
             [...Array(4)].map((_, i) => (
               <div key={i} style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-subtle)", borderRadius: "8px", padding: "22px", height: "108px", opacity: 0.5 }} />
@@ -180,7 +180,10 @@ async function fetchDashboardData() {
           )}
         </div>
 
-        {/* Recent Orders */}
+        <div style={{ marginBottom: "24px", color: "var(--text-muted)", fontSize: "0.68rem", fontFamily: "var(--font-mono)" }}>
+          Stats exclude test/free orders
+        </div>
+
         <div style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-subtle)", borderRadius: "8px", overflow: "hidden" }}>
           <div className="admin-section-header" style={{ padding: "20px 24px", borderBottom: "1px solid var(--border-subtle)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <h2 className="admin-section-title" style={{ color: "var(--text-primary)", fontSize: "1.05rem", fontWeight: 700, fontFamily: "var(--font-ui)" }}>
@@ -201,7 +204,6 @@ async function fetchDashboardData() {
             </div>
           ) : (
             <>
-              {/* Desktop table */}
               <div className="admin-orders-desktop">
                 <div style={{ display: "grid", gridTemplateColumns: "2fr 1.5fr 1fr 1fr 1.5fr", padding: "12px 24px", borderBottom: "1px solid var(--border-subtle)" }}>
                   {["Customer", "Items", "Total", "Status", "Date"].map((h) => (
@@ -214,7 +216,12 @@ async function fetchDashboardData() {
                     padding: "16px 24px", alignItems: "center",
                     borderBottom: i < recentOrders.length - 1 ? "1px solid var(--border-subtle)" : "none",
                   }}>
-                    <span style={{ color: "var(--text-secondary)", fontSize: "0.9rem", fontFamily: "var(--font-ui)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{order.email}</span>
+                    <span style={{ color: "var(--text-secondary)", fontSize: "0.9rem", fontFamily: "var(--font-ui)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", display: "flex", alignItems: "center", gap: "8px" }}>
+                      {order.email}
+                      {isTestOrder(order) && (
+                        <span style={{ backgroundColor: "rgba(148,148,148,0.15)", color: "#999", fontSize: "0.6rem", fontFamily: "var(--font-mono)", padding: "2px 8px", borderRadius: "2px", textTransform: "uppercase", flexShrink: 0 }}>Test</span>
+                      )}
+                    </span>
                     <span style={{ color: "var(--text-muted)", fontSize: "0.85rem", fontFamily: "var(--font-ui)" }}>{order.items?.length ?? 0} beat{(order.items?.length ?? 0) !== 1 ? "s" : ""}</span>
                     <span style={{ color: "var(--gold)", fontSize: "0.9rem", fontFamily: "var(--font-ui)", fontWeight: 700 }}>₦{Number(order.total).toLocaleString()}</span>
                     <span style={{ display: "inline-block", backgroundColor: "rgba(74,222,128,0.12)", color: "#4ade80", fontSize: "0.72rem", fontFamily: "var(--font-mono)", padding: "4px 10px", borderRadius: "2px", width: "fit-content", textTransform: "uppercase" }}>{order.status}</span>
@@ -223,7 +230,6 @@ async function fetchDashboardData() {
                 ))}
               </div>
 
-              {/* Mobile cards */}
               <div className="admin-orders-mobile" style={{ display: "none", flexDirection: "column" }}>
                 {recentOrders.map((order, i) => (
                   <div key={order.id} className="admin-order-card" style={{
@@ -232,7 +238,12 @@ async function fetchDashboardData() {
                   }}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
                       <span className="admin-order-amount" style={{ color: "var(--text-primary)", fontSize: "1.05rem", fontWeight: 700, fontFamily: "var(--font-ui)" }}>₦{Number(order.total).toLocaleString()}</span>
-                      <span className="admin-order-status" style={{ backgroundColor: "rgba(74,222,128,0.12)", color: "#4ade80", fontSize: "0.72rem", fontFamily: "var(--font-mono)", padding: "4px 10px", borderRadius: "2px", textTransform: "uppercase" }}>{order.status}</span>
+                      <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
+                        {isTestOrder(order) && (
+                          <span style={{ backgroundColor: "rgba(148,148,148,0.15)", color: "#999", fontSize: "0.6rem", fontFamily: "var(--font-mono)", padding: "2px 8px", borderRadius: "2px", textTransform: "uppercase" }}>Test</span>
+                        )}
+                        <span className="admin-order-status" style={{ backgroundColor: "rgba(74,222,128,0.12)", color: "#4ade80", fontSize: "0.72rem", fontFamily: "var(--font-mono)", padding: "4px 10px", borderRadius: "2px", textTransform: "uppercase" }}>{order.status}</span>
+                      </div>
                     </div>
                     <div className="admin-order-email" style={{ color: "var(--text-muted)", fontSize: "0.88rem", fontFamily: "var(--font-ui)", marginBottom: "6px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{order.email}</div>
                     <div style={{ display: "flex", justifyContent: "space-between" }}>
