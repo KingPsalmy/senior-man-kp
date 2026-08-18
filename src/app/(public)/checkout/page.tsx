@@ -127,6 +127,7 @@ export default function CheckoutPage() {
             discount,
             total,
             name: form.artistName,
+            legal_name: form.legalName,
           }),
         })
 

@@ -130,7 +130,7 @@ export default function Footer() {
             Contact
           </h4>
           <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-            <a href="mailto:kingpsalmyofficial@gmail.com"
+            <a href="mailto:contact@seniormankp.com"
               style={{ color: "rgba(245,240,232,0.55)", fontSize: "1.02rem", fontFamily: "var(--font-ui)", textDecoration: "none" }}>
               kingpsalmyofficial@gmail.com
             </a>
@@ -152,9 +152,7 @@ export default function Footer() {
         <span style={{ color: "rgba(245,240,232,0.4)", fontSize: "0.85rem", fontFamily: "var(--font-mono)" }}>
           © 2025 Senior Man KP. All rights reserved.
         </span>
-        <span style={{ color: "rgba(245,240,232,0.4)", fontSize: "0.85rem", fontFamily: "var(--font-mono)" }}>
-          Built for artists who move culture forward.
-        </span>
+    
       </div>
     </footer>
   )
