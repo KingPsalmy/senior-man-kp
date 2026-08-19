@@ -15,11 +15,10 @@ const LICENSE_PRICES: Record<LicenseType, number> = {
   exclusive: 180000,
 }
 
-// Emails allowed to bypass Paystack entirely — handled server-side too,
-// but checked here first to skip the Paystack modal altogether.
+// Only the internal test account bypasses payment — ghostedtife@gmail.com
+// used his one-time free first purchase and pays normally from here on.
 const BYPASS_EMAILS = [
   "kingpsalmyofficial@gmail.com",
-  "ghostedtife@gmail.com",
 ]
 
 function genreColor(genre: string) {

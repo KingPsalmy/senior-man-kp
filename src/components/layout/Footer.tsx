@@ -132,7 +132,7 @@ export default function Footer() {
           <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
             <a href="mailto:contact@seniormankp.com"
               style={{ color: "rgba(245,240,232,0.55)", fontSize: "1.02rem", fontFamily: "var(--font-ui)", textDecoration: "none" }}>
-              kingpsalmyofficial@gmail.com
+              contact@seniormankp.com
             </a>
             <a href="https://instagram.com/kingpsalmy_" target="_blank" rel="noopener noreferrer"
               style={{ color: "rgba(245,240,232,0.55)", fontSize: "1.02rem", fontFamily: "var(--font-ui)", textDecoration: "none" }}>
