@@ -351,10 +351,10 @@ export default function HomePage() {
 
         <div className="hero-content" style={{ position: "relative", zIndex: 10, paddingLeft: "clamp(24px, 8vw, 140px)", paddingRight: "24px", maxWidth: "620px", width: "100%" }}>
           <h1 style={{ fontSize: "clamp(2.7rem, 3.6vw, 4.4rem)", lineHeight: 1.08, fontWeight: 800, letterSpacing: "-0.02em", marginBottom: "24px", fontFamily: "var(--font-ui)" }}>
-            <span style={{ color: "var(--text-primary)", display: "block" }}>Find Your Sound.</span>
-            <span style={{ color: "var(--text-primary)", display: "block" }}>Own It.</span>
+            <span style={{ color: "var(--text-primary)", display: "block" }}>Every Great Song</span>
+            <span style={{ color: "var(--text-primary)", display: "block" }}>Starts With a Sound</span>
             <span style={{ display: "block", fontStyle: "italic", background: "linear-gradient(135deg, #C9A84C, #F5D98B)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-              Create Freely.
+              Find Yours Here
             </span>
           </h1>
 
@@ -364,7 +364,7 @@ export default function HomePage() {
               color: "rgba(245,240,232,0.85)", letterSpacing: "0.02em",
               paddingLeft: "16px", borderLeft: "3px solid var(--gold)", maxWidth: "380px",
             }}>
-              Original instrumentals for artists building something real.
+              Original instrumentals for artists building something massive.
             </p>
           </div>
 
