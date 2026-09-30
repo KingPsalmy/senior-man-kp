@@ -360,7 +360,7 @@ export default function HomePage() {
 
           <div style={{ marginBottom: "28px" }}>
             <p className={subtitleVisible ? "hero-subtitle-visible" : "hero-subtitle-hidden"} style={{
-              fontSize: "1.05rem", lineHeight: 1.7, fontWeight: 500, fontFamily: "var(--font-ui)",
+              fontSize: "1.00rem", lineHeight: 1.7, fontWeight: 500, fontFamily: "var(--font-ui)",
               color: "rgba(245,240,232,0.85)", letterSpacing: "0.02em",
               paddingLeft: "16px", borderLeft: "3px solid var(--gold)", maxWidth: "380px",
             }}>
