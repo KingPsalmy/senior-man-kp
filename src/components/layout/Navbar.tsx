@@ -31,11 +31,6 @@ export default function Navbar() {
   }, [])
 
   useEffect(() => {
-    document.body.style.overflow = menuOpen ? "hidden" : ""
-    return () => { document.body.style.overflow = "" }
-  }, [menuOpen])
-
-  useEffect(() => {
     setMenuOpen(false)
   }, [pathname])
 
@@ -120,38 +115,42 @@ export default function Navbar() {
 
       {menuOpen && (
         <div style={{
-          position: "fixed", top: "76px", left: 0, right: 0, bottom: 0, zIndex: 49,
-          backgroundColor: "#020202",
-          borderBottom: "1px solid var(--border-subtle)",
-          padding: "32px 28px", display: "flex", flexDirection: "column", gap: "28px",
-          overflowY: "auto",
+          position: "fixed", top: "76px", left: "12px", right: "12px", zIndex: 49,
+          backgroundColor: "#0c0c0c",
+          border: "1px solid rgba(255,255,255,0.08)",
+          borderRadius: "0 0 14px 14px",
+          boxShadow: "0 16px 32px rgba(0,0,0,0.5)",
+          padding: "20px 22px", display: "flex", flexDirection: "column", gap: "4px",
         }}>
           {links.map((link) => (
             <Link key={link.href} href={link.href} onClick={() => setMenuOpen(false)} style={{
-              fontFamily: "var(--font-ui)", fontSize: "1.2rem", fontWeight: 700,
-              textDecoration: "none", letterSpacing: "0.1em", textTransform: "uppercase",
+              fontFamily: "var(--font-ui)", fontSize: "0.95rem", fontWeight: 700,
+              textDecoration: "none", letterSpacing: "0.08em", textTransform: "uppercase",
               color: pathname === link.href ? "var(--gold)" : "var(--text-primary)",
+              padding: "11px 4px",
+              borderBottom: "1px solid rgba(255,255,255,0.05)",
             }}>
               {link.label}
             </Link>
           ))}
           <Link href="/favorites" onClick={() => setMenuOpen(false)} style={{
-            fontFamily: "var(--font-ui)", fontSize: "1.2rem", fontWeight: 700,
-            textDecoration: "none", letterSpacing: "0.1em", textTransform: "uppercase",
+            fontFamily: "var(--font-ui)", fontSize: "0.95rem", fontWeight: 700,
+            textDecoration: "none", letterSpacing: "0.08em", textTransform: "uppercase",
             color: pathname === "/favorites" ? "var(--gold)" : "var(--text-primary)",
+            padding: "11px 4px",
           }}>
             ♡ Saved Beats
           </Link>
           <Link href="/cart" onClick={() => setMenuOpen(false)} style={{
-            display: "flex", alignItems: "center", justifyContent: "center", gap: "10px",
+            display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",
             background: "linear-gradient(135deg, #C9A84C, #F5D98B)",
-            borderRadius: "6px", padding: "16px 20px",
+            borderRadius: "6px", padding: "13px 16px", marginTop: "10px",
             fontFamily: "var(--font-ui)", fontWeight: 700,
-            fontSize: "1rem", letterSpacing: "0.1em",
+            fontSize: "0.82rem", letterSpacing: "0.08em",
             textTransform: "uppercase", color: "#000",
             textDecoration: "none", width: "100%",
           }}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="8" cy="21" r="1" /><circle cx="19" cy="21" r="1" />
               <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" />
             </svg>
@@ -169,3 +168,4 @@ export default function Navbar() {
     </>
   )
 }
+
