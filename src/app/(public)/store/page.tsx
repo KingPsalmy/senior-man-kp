@@ -303,18 +303,19 @@ function StorePageInner() {
 
                       {/* Featured / Sold badge */}
                       {beat.is_featured && !beat.is_exclusive_sold && (
-                        <div style={{ position: "absolute", top: "10px", left: "10px", backgroundColor: "var(--gold)", color: "#000", fontSize: "0.6rem", fontWeight: 700, padding: "4px 10px", borderRadius: "20px", fontFamily: "var(--font-mono)", letterSpacing: "0.1em", textTransform: "uppercase", zIndex: 2 }}>
+                        <div className="store-badge" style={{ position: "absolute", top: "10px", left: "10px", backgroundColor: "var(--gold)", color: "#000", fontSize: "0.6rem", fontWeight: 700, padding: "4px 10px", borderRadius: "20px", fontFamily: "var(--font-mono)", letterSpacing: "0.1em", textTransform: "uppercase", zIndex: 2 }}>
                           Featured
                         </div>
                       )}
                       {beat.is_exclusive_sold && (
-                        <div style={{ position: "absolute", top: "10px", left: "10px", backgroundColor: "rgba(255,50,50,0.9)", color: "#fff", fontSize: "0.6rem", fontWeight: 700, padding: "4px 10px", borderRadius: "20px", fontFamily: "var(--font-mono)", letterSpacing: "0.1em", textTransform: "uppercase", zIndex: 2 }}>
+                        <div className="store-badge" style={{ position: "absolute", top: "10px", left: "10px", backgroundColor: "rgba(255,50,50,0.9)", color: "#fff", fontSize: "0.6rem", fontWeight: 700, padding: "4px 10px", borderRadius: "20px", fontFamily: "var(--font-mono)", letterSpacing: "0.1em", textTransform: "uppercase", zIndex: 2 }}>
                           Sold
                         </div>
                       )}
 
                       {/* Share trigger */}
                       <button
+                        className="store-more"
                         onClick={(e) => { e.stopPropagation(); setShareBeat(beat) }}
                         style={{
                           position: "absolute", top: "10px", right: "10px",
@@ -341,6 +342,7 @@ function StorePageInner() {
 
                       {/* Play / Pause */}
                       <button
+                        className="store-play"
                         onClick={(e) => { e.stopPropagation(); handlePlay(beat) }}
                         style={{
                           position: "absolute", bottom: "12px", right: "12px",
@@ -360,16 +362,17 @@ function StorePageInner() {
                     </div>
 
                     {/* Info */}
-                    <div style={{ padding: "16px" }}>
+                    <div className="store-info" style={{ padding: "16px" }}>
                       <div
                         onClick={() => router.push(`/beat/${beat.slug}`)}
                         style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "6px", gap: "8px", cursor: "pointer" }}
                       >
-                        <h3 style={{ color: "var(--text-primary)", fontSize: "1.05rem", fontWeight: 700, fontFamily: "var(--font-ui)", lineHeight: 1.3, flex: 1, margin: 0 }}>
+                        <h3 className="store-title" style={{ color: "var(--text-primary)", fontSize: "1.05rem", fontWeight: 700, fontFamily: "var(--font-ui)", lineHeight: 1.3, flex: 1, margin: 0 }}>
                           {beat.title}
                         </h3>
                         {/* Heart */}
                         <button
+                          className="store-heart"
                           onClick={(e) => { e.stopPropagation(); toggleFavorite(String(beat.id)) }}
                           style={{
                             background: "none", border: "none", cursor: "pointer",
@@ -384,41 +387,43 @@ function StorePageInner() {
                       </div>
 
                       <Link
+                        className="store-genre"
                         href={`/store?genre=${encodeURIComponent(beat.genre)}`}
                         style={{ color: "var(--gold)", fontSize: "0.82rem", fontFamily: "var(--font-ui)", fontWeight: 600, marginBottom: "8px", display: "inline-block", textDecoration: "none" }}
                       >
                         {beat.genre}
                       </Link>
 
-                      <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "14px", flexWrap: "wrap" }}>
+                      <div className="store-meta" style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "14px", flexWrap: "wrap" }}>
                         {beat.mood && (
                           <>
                             <Link href={`/store?mood=${encodeURIComponent(beat.mood)}`} style={{ color: "var(--text-muted)", fontSize: "0.78rem", fontFamily: "var(--font-mono)", textDecoration: "none" }}>
                               {beat.mood}
                             </Link>
-                            <span style={{ color: "var(--border-dim)" }}>•</span>
+                            <span className="store-dot" style={{ color: "var(--border-dim)" }}>•</span>
                           </>
                         )}
                         <Link href={`/store?bpm=${beat.bpm}`} style={{ color: "var(--text-muted)", fontSize: "0.78rem", fontFamily: "var(--font-mono)", textDecoration: "none" }}>
                           {beat.bpm} BPM
                         </Link>
-                        <span style={{ color: "var(--border-dim)" }}>•</span>
+                        <span className="store-dot" style={{ color: "var(--border-dim)" }}>•</span>
                         <Link href={`/store?key=${encodeURIComponent(beat.key)}`} style={{ color: "var(--text-muted)", fontSize: "0.78rem", fontFamily: "var(--font-mono)", textDecoration: "none" }}>
                           {beat.key}
                         </Link>
                         {beat.duration && (
                           <>
-                            <span style={{ color: "var(--border-dim)" }}>•</span>
+                            <span className="store-dot" style={{ color: "var(--border-dim)" }}>•</span>
                             <span style={{ color: "var(--text-muted)", fontSize: "0.78rem", fontFamily: "var(--font-mono)" }}>{beat.duration}</span>
                           </>
                         )}
                       </div>
 
-                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                        <span style={{ color: "var(--text-primary)", fontSize: "0.95rem", fontWeight: 700, fontFamily: "var(--font-ui)" }}>
+                      <div className="store-footer" style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                        <span className="store-price" style={{ color: "var(--text-primary)", fontSize: "0.95rem", fontWeight: 700, fontFamily: "var(--font-ui)" }}>
                           from ₦{beat.basic_price.toLocaleString()}
                         </span>
                         <button
+                          className="store-cart"
                           onClick={(e) => { e.stopPropagation(); openLicensePicker(beat) }}
                           style={{
                             width: "34px", height: "34px", borderRadius: "50%",
@@ -653,14 +658,65 @@ function StorePageInner() {
 
       <style>{`
         @media (max-width: 1100px) { .beat-grid { grid-template-columns: repeat(3, 1fr) !important; } }
+
         @media (max-width: 768px) {
           .beat-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 12px !important; }
-          .store-filters > div:first-child {
-            max-width: 100% !important;
-            width: 100% !important;
+          .store-filters > div:first-child { max-width: 100% !important; width: 100% !important; }
+          .store-filters select { margin-left: 0 !important; }
+
+          /* Card becomes a column so the price row always sits at the bottom */
+          .beat-grid .beat-card {
+            display: flex !important;
+            flex-direction: column !important;
+            border-radius: 12px !important;
           }
-          .store-filters select {
-            margin-left: 0 !important;
+
+          .store-info {
+            padding: 10px 11px 12px !important;
+            flex: 1 !important;
+            display: flex !important;
+            flex-direction: column !important;
+          }
+
+          /* Title: max 2 lines */
+          .store-title {
+            font-size: 0.9rem !important;
+            line-height: 1.25 !important;
+            display: -webkit-box !important;
+            -webkit-line-clamp: 2 !important;
+            -webkit-box-orient: vertical !important;
+            overflow: hidden !important;
+          }
+          .store-heart { font-size: 1rem !important; }
+
+          .store-genre { font-size: 0.74rem !important; margin-bottom: 5px !important; }
+
+          /* Meta: all details kept, smaller, tight lines, no dots */
+          .store-meta {
+            gap: 1px 9px !important;
+            margin-bottom: 10px !important;
+            line-height: 1.35 !important;
+          }
+          .store-meta a,
+          .store-meta span { font-size: 0.66rem !important; }
+          .store-dot { display: none !important; }
+
+          .store-footer { margin-top: auto !important; }
+          .store-price { font-size: 0.86rem !important; }
+          .store-cart { width: 30px !important; height: 30px !important; }
+
+          /* Overlay controls on the cover */
+          .store-play {
+            width: 34px !important; height: 34px !important;
+            bottom: 8px !important; right: 8px !important;
+          }
+          .store-badge {
+            top: 8px !important; left: 8px !important;
+            font-size: 0.54rem !important; padding: 3px 8px !important;
+          }
+          .store-more {
+            top: 8px !important; right: 8px !important;
+            padding: 3px 8px !important; font-size: 0.75rem !important;
           }
         }
       `}</style>
