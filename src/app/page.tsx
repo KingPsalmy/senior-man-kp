@@ -16,6 +16,7 @@ function HeartButton({ beatId }: { beatId: string }) {
   const { favorited, toggle } = useFavorite(beatId)
   return (
     <button
+      className="beat-heart"
       onClick={(e) => { e.stopPropagation(); toggle() }}
       style={{
         position: "absolute", top: "10px", left: "10px",
@@ -119,6 +120,7 @@ export default function HomePage() {
       <div key={beat.id} className="beat-card" style={{ backgroundColor: "var(--bg-card)", border: `1px solid ${isThisPlaying ? "rgba(201,168,76,0.4)" : "var(--border-subtle)"}`, borderRadius: "10px", overflow: "hidden", transition: "transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease" }}>
         {/* Cover */}
         <div
+          className="beat-cover"
           onClick={() => router.push(`/beat/${beat.slug}`)}
           style={{ position: "relative", aspectRatio: "1", background: beat.cover_url ? "none" : `linear-gradient(135deg, ${genreColor[beat.genre] ?? "#111"} 0%, #0a0a0a 100%)`, backgroundColor: "#0a0a0a", cursor: "pointer" }}
         >
@@ -137,11 +139,12 @@ export default function HomePage() {
             </div>
           )}
 
-          <div onClick={(e) => { e.stopPropagation(); setShareBeat(beat) }} style={{ position: "absolute", top: "10px", right: "12px", color: "var(--text-muted)", fontSize: "1rem", zIndex: 2, cursor: "pointer" }}>···</div>
+          <div className="beat-more" onClick={(e) => { e.stopPropagation(); setShareBeat(beat) }} style={{ position: "absolute", top: "10px", right: "12px", color: "var(--text-muted)", fontSize: "1rem", zIndex: 2, cursor: "pointer" }}>···</div>
 
           <HeartButton beatId={String(beat.id)} />
 
           <button
+            className="beat-play"
             onClick={(e) => { e.stopPropagation(); if (isThisPlaying) { pause() } else { setQueue(featuredBeats.length ? featuredBeats : [beat]); play(beat) } }}
             style={{ position: "absolute", bottom: "12px", right: "12px", width: "38px", height: "38px", borderRadius: "50%", backgroundColor: "var(--gold)", border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", outline: "none", WebkitAppearance: "none" as any, zIndex: 2 }}>
             {isThisPlaying
@@ -153,21 +156,22 @@ export default function HomePage() {
 
         {/* Info */}
         <div
+          className="beat-info"
           onClick={() => router.push(`/beat/${beat.slug}`)}
           style={{ padding: "18px", cursor: "pointer" }}
         >
-          <h3 style={{ color: "var(--text-primary)", fontSize: "1.1rem", fontWeight: 700, fontFamily: "var(--font-ui)", marginBottom: "6px", lineHeight: 1.3 }}>{beat.title}</h3>
+          <h3 className="beat-title" style={{ color: "var(--text-primary)", fontSize: "1.1rem", fontWeight: 700, fontFamily: "var(--font-ui)", marginBottom: "6px", lineHeight: 1.3 }}>{beat.title}</h3>
           <Link
             href={`/store?genre=${encodeURIComponent(beat.genre)}`}
             onClick={(e) => e.stopPropagation()}
-            className="beat-tag-link"
+            className="beat-tag-link beat-genre"
             style={{ color: "var(--gold)", fontSize: "0.85rem", fontFamily: "var(--font-ui)", fontWeight: 600, marginBottom: "10px", display: "inline-block", textDecoration: "none" }}
           >
             {beat.genre}
           </Link>
-          <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "16px", flexWrap: "wrap" }}>
+          <div className="beat-meta" style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "16px", flexWrap: "wrap" }}>
             {beat.mood && (
-              <>
+              <span className="beat-mood" style={{ display: "contents" }}>
                 <Link
                   href={`/store?mood=${encodeURIComponent(beat.mood)}`}
                   onClick={(e) => e.stopPropagation()}
@@ -177,7 +181,7 @@ export default function HomePage() {
                   {beat.mood}
                 </Link>
                 <span style={{ color: "var(--border-dim)" }}>•</span>
-              </>
+              </span>
             )}
             <Link
               href={`/store?bpm=${beat.bpm}`}
@@ -201,11 +205,12 @@ export default function HomePage() {
               </>
             )}
           </div>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <Link href={`/beat/${beat.slug}`} onClick={(e) => e.stopPropagation()} style={{ color: "var(--text-primary)", fontSize: "1rem", fontWeight: 700, fontFamily: "var(--font-ui)", textDecoration: "none" }}>
+          <div className="beat-footer" style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <Link className="beat-price" href={`/beat/${beat.slug}`} onClick={(e) => e.stopPropagation()} style={{ color: "var(--text-primary)", fontSize: "1rem", fontWeight: 700, fontFamily: "var(--font-ui)", textDecoration: "none" }}>
               from ₦{beat.basic_price?.toLocaleString()}
             </Link>
             <button
+              className="beat-cart"
               onClick={(e) => { e.stopPropagation(); openLicensePicker(beat) }}
               style={{ width: "34px", height: "34px", borderRadius: "50%", backgroundColor: "var(--gold)", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", outline: "none", WebkitAppearance: "none" as any }}
             >
@@ -284,8 +289,31 @@ export default function HomePage() {
           scroll-snap-align: start;
         }
 
+        /* ═════════ MOBILE (phones) ═════════ */
         @media (max-width: 768px) {
-          .hero-search-wrap { max-width: 100% !important; }
+
+          /* ── Hero ── */
+          .hero-section {
+            min-height: auto !important;
+            padding: 104px 0 44px !important;
+          }
+          .hero-content h1 {
+            font-size: clamp(1.85rem, 8.2vw, 2.4rem) !important;
+            line-height: 1.12 !important;
+            margin-bottom: 18px !important;
+          }
+          .hero-content p {
+            font-size: 0.95rem !important;
+            line-height: 1.6 !important;
+            padding-left: 12px !important;
+          }
+          .hero-search-wrap { max-width: 100% !important; margin-bottom: 16px !important; }
+          .hero-search-wrap input {
+            font-size: 1rem !important;          /* 16px stops iOS zoom-on-focus */
+            padding: 13px 14px !important;
+            min-width: 0 !important;
+          }
+          .hero-search-wrap button { padding: 13px 18px !important; }
           .hero-filters-wrap { max-width: 100% !important; }
           .hero-filters-wrap select,
           .hero-filters-wrap input {
@@ -293,28 +321,119 @@ export default function HomePage() {
             width: auto !important;
             min-width: 0 !important;
           }
-          .hero-ctas a { flex: 1 !important; text-align: center !important; }
+          .hero-ctas { gap: 10px !important; margin-bottom: 28px !important; }
+          .hero-ctas a {
+            flex: 1 !important;
+            text-align: center !important;
+            padding: 13px 8px !important;
+            font-size: 0.74rem !important;
+            letter-spacing: 0.08em !important;
+            white-space: nowrap !important;
+          }
 
+          /* Genre chips: one scrollable row, like Trakroom */
+          .hero-content .genre-tags {
+            flex-wrap: nowrap !important;
+            overflow-x: auto !important;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            padding-bottom: 4px;
+          }
+          .hero-content .genre-tags::-webkit-scrollbar { display: none; }
+          .hero-content .genre-tags a {
+            flex: 0 0 auto !important;
+            padding: 8px 14px !important;
+            font-size: 0.74rem !important;
+          }
+
+          /* ── Section spacing ── */
+          .section-padding { padding: 48px 20px !important; }
           .featured-header {
-            align-items: flex-start !important;
+            align-items: center !important;
+            gap: 12px !important;
+            margin-bottom: 22px !important;
+            flex-wrap: nowrap !important;
+          }
+          .featured-header h2 { font-size: 1.7rem !important; }
+          .see-more-cta {
+            padding: 10px 18px !important;
+            font-size: 0.68rem !important;
+          }
+          .last-played-section { padding: 36px 20px 0 !important; }
+          .last-played-card { width: 156px !important; }
+          .last-played-scroll { gap: 12px !important; }
+
+          /* ── Beat grid ── */
+          .featured-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 12px !important;
+          }
+
+          /* ── Beat card (the compact version) ── */
+          .beat-card {
+            display: flex !important;
+            flex-direction: column !important;
+            border-radius: 12px !important;
+          }
+          .beat-card .beat-info {
+            padding: 11px 11px 12px !important;
+            flex: 1 !important;
+            display: flex !important;
+            flex-direction: column !important;
+          }
+          .beat-card .beat-title {
+            font-size: 0.92rem !important;
+            line-height: 1.25 !important;
+            margin-bottom: 4px !important;
+            display: -webkit-box !important;
+            -webkit-line-clamp: 2 !important;
+            -webkit-box-orient: vertical !important;
+            overflow: hidden !important;
+          }
+          .beat-card .beat-genre {
+            font-size: 0.76rem !important;
+            margin-bottom: 6px !important;
+          }
+          .beat-card .beat-mood { display: none !important; }
+          .beat-card .beat-meta {
+            flex-wrap: nowrap !important;
+            gap: 6px !important;
+            margin-bottom: 10px !important;
+            overflow: hidden !important;
+            white-space: nowrap !important;
+          }
+          .beat-card .beat-meta a,
+          .beat-card .beat-meta span {
+            font-size: 0.68rem !important;
+          }
+          .beat-card .beat-footer { margin-top: auto !important; }
+          .beat-card .beat-price { font-size: 0.86rem !important; }
+          .beat-card .beat-cart { width: 30px !important; height: 30px !important; }
+          .beat-card .beat-play {
+            width: 34px !important; height: 34px !important;
+            bottom: 8px !important; right: 8px !important;
+          }
+          .beat-card .beat-heart {
+            width: 28px !important; height: 28px !important;
+            top: 8px !important; left: 8px !important;
+            font-size: 0.78rem !important;
+          }
+          .beat-card .beat-more { top: 8px !important; right: 10px !important; }
+
+          /* ── Learn More ── */
+          .learn-more-section { padding: 56px 20px !important; }
+          .learn-more-head { margin-bottom: 32px !important; }
+          .learn-more-head h2 { font-size: 1.7rem !important; }
+          .learn-more-grid {
+            grid-template-columns: 1fr !important;
             gap: 14px !important;
           }
-          .see-more-cta {
-            padding: 10px 20px !important;
-            font-size: 0.7rem !important;
-          }
-          .section-padding {
-            padding: 60px 20px !important;
-          }
-
-          .last-played-section {
-            padding: 40px 20px 0 !important;
-          }
-          .last-played-card {
-            width: 160px !important;
-          }
-          .last-played-scroll {
-            gap: 12px !important;
+          .learn-more-card { padding: 26px 22px !important; border-radius: 14px !important; }
+          .learn-more-card h3 { font-size: 1.1rem !important; margin-bottom: 10px !important; }
+          .learn-more-card p {
+            font-size: 0.95rem !important;
+            line-height: 1.65 !important;
+            margin-bottom: 20px !important;
           }
         }
       `}</style>
@@ -479,9 +598,9 @@ export default function HomePage() {
       </section>
 
       {/* ── Learn More ── */}
-      <section style={{ padding: "100px 48px", backgroundColor: "var(--bg-void)", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+      <section className="learn-more-section" style={{ padding: "100px 48px", backgroundColor: "var(--bg-void)", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
         <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
-          <div style={{ textAlign: "center", marginBottom: "64px" }}>
+          <div className="learn-more-head" style={{ textAlign: "center", marginBottom: "64px" }}>
             <span style={{ display: "inline-block", color: "var(--gold)", fontSize: "0.72rem", fontFamily: "var(--font-mono)", letterSpacing: "0.28em", textTransform: "uppercase", marginBottom: "16px", padding: "6px 16px", border: "1px solid rgba(201,168,76,0.25)", borderRadius: "20px", backgroundColor: "rgba(201,168,76,0.05)" }}>
               Learn More
             </span>
@@ -496,7 +615,7 @@ export default function HomePage() {
               { title: "Frequently Asked Questions", desc: "Need clarity? Explore answers to our most frequently asked questions about licenses and services.", link: "/faq", cta: "Read FAQ", external: false },
               { title: "Contact Producer", desc: "Looking for something unique? Get in! Let's create a sound tailored to your vision.", link: "mailto:contact@seniormankp.com", cta: "Get in Touch", external: true },
             ].map((item) => (
-              <div key={item.title} style={{ backgroundColor: "var(--bg-card)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: "16px", padding: "48px 36px", display: "flex", flexDirection: "column", position: "relative", overflow: "hidden" }}>
+              <div key={item.title} className="learn-more-card" style={{ backgroundColor: "var(--bg-card)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: "16px", padding: "48px 36px", display: "flex", flexDirection: "column", position: "relative", overflow: "hidden" }}>
                 <div style={{ position: "absolute", top: 0, left: "36px", right: "36px", height: "1px", background: "linear-gradient(90deg, transparent, rgba(201,168,76,0.4), transparent)" }} />
                 <h3 style={{ color: "var(--text-primary)", fontSize: "1.25rem", fontWeight: 700, fontFamily: "var(--font-ui)", marginBottom: "16px", lineHeight: 1.3 }}>
                   {item.title}
