@@ -148,7 +148,7 @@ export default function FloatingPlayer() {
       }}>
 
         <div className="floating-player-bar" style={{
-          height: "72px",
+          height: "68px",
           display: "flex", alignItems: "center",
           padding: "0 24px",
           gap: "20px",
@@ -156,7 +156,7 @@ export default function FloatingPlayer() {
 
           {/* Beat info */}
           <div className="floating-player-info" style={{ display: "flex", alignItems: "center", gap: "14px", minWidth: "220px", flex: "0 0 220px" }}>
-            <div style={{ width: "44px", height: "44px", borderRadius: "6px", flexShrink: 0, overflow: "hidden", backgroundColor: "var(--bg-elevated)" }}>
+            <div style={{ width: "44px", height: "41px", borderRadius: "6px", flexShrink: 0, overflow: "hidden", backgroundColor: "var(--bg-elevated)" }}>
               {beat.cover_url
                 ? <img src={beat.cover_url} alt={beat.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                 : <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--text-muted)", fontSize: "0.7rem" }}>♪</div>
