@@ -12,32 +12,40 @@ import BeatStatusBadge from "@/components/ui/BeatStatusBadge"
 import { getBeatStatus } from "@/lib/beatLifecycle"
 import { usePlayerStore } from "@/store/playerStore"
 
-const LICENSE_OPTIONS = [
-  {
-    value: "basic",
+// Features match the /licensing page. Prices come from the beat itself.
+const LICENSE_FEATURES: Record<string, { label: string; features: string[] }> = {
+  basic: {
     label: "Basic License",
-    price: 30000,
-    features: ["MP3 & WAV files", "Non-exclusive rights", "Up to 100,000 streams", "1 Music Video", "YouTube & Social Media"],
+    features: ["MP3 & WAV files", "One commercial song", "Streaming & YouTube monetization", "Live performances"],
   },
-  {
-    value: "premium",
+  premium: {
     label: "Premium License",
-    price: 70000,
-    features: ["MP3, WAV & Track Stems", "Non-exclusive rights", "Up to 500,000 streams", "Unlimited Music Videos", "Radio Broadcasting Rights", "Commercial use"],
+    features: ["MP3, WAV & full stems", "Unlimited music videos", "Radio broadcasting rights", "Online commercial promotion"],
   },
-  {
-    value: "unlimited",
+  unlimited: {
     label: "Unlimited License",
-    price: 120000,
-    features: ["MP3, WAV & Track Stems", "Non-exclusive rights", "Unlimited Streams", "Unlimited Music Videos", "Radio Broadcasting Rights", "Commercial use"],
+    features: ["MP3, WAV & full stems", "Radio & television usage", "Commercial advertising usage", "Physical distribution"],
   },
-  {
-    value: "exclusive",
+  exclusive: {
     label: "Exclusive License",
-    price: 180000,
-    features: ["MP3, WAV & Track Stems", "100% Exclusive rights", "Unlimited everything", "Direct producer access", "Beat customization", "Removed from store"],
+    features: ["MP3, WAV & full stems", "Full commercial exploitation rights", "Direct producer access", "Removed from store"],
   },
-]
+}
+
+function getLicenseOptions(beat: any) {
+  const priceMap: Record<string, number> = {
+    basic: beat.basic_price,
+    premium: beat.premium_price,
+    unlimited: beat.unlimited_price,
+    exclusive: beat.exclusive_price,
+  }
+  return Object.keys(LICENSE_FEATURES).map((value) => ({
+    value,
+    label: LICENSE_FEATURES[value].label,
+    features: LICENSE_FEATURES[value].features,
+    price: Number(priceMap[value] ?? 0),
+  }))
+}
 
 function genreColor(genre: string) {
   const map: Record<string, string> = {
@@ -106,7 +114,8 @@ export default function BeatDetailPage() {
     )
   }
 
-  const selectedOption = LICENSE_OPTIONS.find((o) => o.value === selectedLicense)
+  const licenseOptions = getLicenseOptions(beat)
+  const selectedOption = licenseOptions.find((o) => o.value === selectedLicense)
   const isUnavailable = status === "SOLD_EXCLUSIVE" || status === "LOCKED"
   const isThisBeatPlaying = currentBeat?.id != null && String(currentBeat.id) === beat.id && isPlaying
 
@@ -124,15 +133,66 @@ export default function BeatDetailPage() {
         }
 
         @media (max-width: 768px) {
-          .beat-detail-wrap {
-            padding: 90px 20px 0 !important;
+          .beat-detail-wrap { padding: 92px 20px 0 !important; }
+
+          .beat-detail-crumbs { margin-bottom: 20px !important; }
+
+          .beat-detail-top {
+            gap: 24px !important;
+            margin-bottom: 40px !important;
           }
+
+          /* Cover: capped and centered, not full-bleed */
+          .beat-detail-cover {
+            width: 100% !important;
+            max-width: 340px !important;
+            margin: 0 auto !important;
+          }
+
+          .beat-detail-title {
+            font-size: 1.55rem !important;
+            line-height: 1.2 !important;
+          }
+          .beat-detail-title-row {
+            flex-wrap: wrap !important;
+            gap: 8px !important;
+          }
+          .beat-detail-meta { gap: 6px 14px !important; }
+          .beat-detail-desc {
+            font-size: 0.9rem !important;
+            line-height: 1.65 !important;
+            margin-top: 12px !important;
+          }
+
+          /* License rows: tighter, 2 features max */
           .beat-detail-license-option {
-            padding: 14px 16px !important;
+            padding: 13px 14px !important;
+            gap: 10px !important;
           }
-          .beat-detail-actions button,
-          .beat-detail-actions a {
+          .beat-detail-license-name { font-size: 0.9rem !important; }
+          .beat-detail-license-features {
+            padding-left: 22px !important;
+            gap: 4px 10px !important;
+          }
+          .beat-detail-license-features span { font-size: 0.7rem !important; }
+          .beat-detail-license-features span:nth-child(n+3) { display: none !important; }
+          .beat-detail-license-price {
+            font-size: 0.95rem !important;
+            margin-left: 8px !important;
+          }
+
+          /* Actions: Add to Cart full width, heart + View Cart below */
+          .beat-detail-actions { gap: 10px !important; }
+          .beat-detail-addcart {
             flex: 1 1 100% !important;
+            padding: 15px 16px !important;
+            font-size: 0.78rem !important;
+          }
+          .beat-detail-fav { flex: 0 0 48px !important; }
+          .beat-detail-viewcart {
+            flex: 1 !important;
+            justify-content: center !important;
+            padding: 14px 16px !important;
           }
         }
       `}</style>
@@ -141,7 +201,7 @@ export default function BeatDetailPage() {
         <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
 
           {/* Breadcrumb */}
-          <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "32px" }}>
+          <div className="beat-detail-crumbs" style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "32px", flexWrap: "wrap" }}>
             <Link href="/" style={{ color: "var(--text-muted)", fontSize: "0.78rem", fontFamily: "var(--font-ui)", textDecoration: "none" }}>Home</Link>
             <span style={{ color: "var(--text-muted)" }}>›</span>
             <Link href="/store" style={{ color: "var(--text-muted)", fontSize: "0.78rem", fontFamily: "var(--font-ui)", textDecoration: "none" }}>Beats</Link>
@@ -179,65 +239,66 @@ export default function BeatDetailPage() {
                 )}
               </div>
 
-             {/* Play/Pause button */}
-                {!isUnavailable && (
-                  <button
-                    onClick={() => {
-                      if (isThisBeatPlaying) {
-                        pause()
-                      } else {
-                        setQueue([beat])
-                        play(beat)
-                      }
-                    }}
-                    style={{
-                      width: "100%", marginTop: "16px", padding: "14px",
-                      background: "linear-gradient(135deg, #C9A84C, #F5D98B)",
-                      border: "none", borderRadius: "4px", cursor: "pointer",
-                      display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",
-                      color: "#000", fontSize: "0.75rem", fontWeight: 700,
-                      fontFamily: "var(--font-ui)", letterSpacing: "0.1em", textTransform: "uppercase",
-                      WebkitAppearance: "none", appearance: "none", outline: "none",
-                      WebkitTapHighlightColor: "transparent",
-                    }}
-                  >
-                    {isThisBeatPlaying ? (
-                      <>
-                        <div style={{ display: "flex", alignItems: "center", gap: "3px", height: "16px" }}>
-                          {[1, 2, 3, 4].map((b) => (
-                            <div
-                              key={b}
-                              className={`wave-bar-${b}`}
-                              style={{
-                                width: "3px", height: "14px",
-                                backgroundColor: "#000",
-                                borderRadius: "2px",
-                                transformOrigin: "bottom",
-                              }}
-                            />
-                          ))}
-                        </div>
-                        Pause Preview
-                      </>
-                    ) : (
-                      <><span>▶</span> Play Preview</>
-                    )}
-                  </button>
-                )}
-                </div>
+              {/* Play/Pause button */}
+              {!isUnavailable && (
+                <button
+                  onClick={() => {
+                    if (isThisBeatPlaying) {
+                      pause()
+                    } else {
+                      setQueue([beat])
+                      play(beat)
+                    }
+                  }}
+                  style={{
+                    width: "100%", marginTop: "16px", padding: "14px",
+                    background: "linear-gradient(135deg, #C9A84C, #F5D98B)",
+                    border: "none", borderRadius: "4px", cursor: "pointer",
+                    display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",
+                    color: "#000", fontSize: "0.75rem", fontWeight: 700,
+                    fontFamily: "var(--font-ui)", letterSpacing: "0.1em", textTransform: "uppercase",
+                    WebkitAppearance: "none", appearance: "none", outline: "none",
+                    WebkitTapHighlightColor: "transparent",
+                  }}
+                >
+                  {isThisBeatPlaying ? (
+                    <>
+                      <div style={{ display: "flex", alignItems: "center", gap: "3px", height: "16px" }}>
+                        {[1, 2, 3, 4].map((b) => (
+                          <div
+                            key={b}
+                            className={`wave-bar-${b}`}
+                            style={{
+                              width: "3px", height: "14px",
+                              backgroundColor: "#000",
+                              borderRadius: "2px",
+                              transformOrigin: "bottom",
+                            }}
+                          />
+                        ))}
+                      </div>
+                      Pause Preview
+                    </>
+                  ) : (
+                    <><span>▶</span> Play Preview</>
+                  )}
+                </button>
+              )}
+            </div>
+
             {/* Info + Licensing */}
             <div className="beat-detail-info" style={{ flex: 1, minWidth: 0 }}>
 
               {/* Title + meta */}
               <div style={{ marginBottom: "28px" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "8px" }}>
-                  <h1 style={{ color: "var(--text-primary)", fontSize: "clamp(1.8rem, 3vw, 2.8rem)", fontWeight: 800, fontFamily: "var(--font-ui)", letterSpacing: "-0.02em" }}>
+                <div className="beat-detail-title-row" style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "8px" }}>
+                  <h1 className="beat-detail-title" style={{ color: "var(--text-primary)", fontSize: "clamp(1.8rem, 3vw, 2.8rem)", fontWeight: 800, fontFamily: "var(--font-ui)", letterSpacing: "-0.02em" }}>
                     {beat.title}
                   </h1>
                   <BeatStatusBadge status={status} />
                 </div>
 
-                <div style={{ display: "flex", alignItems: "center", gap: "16px", flexWrap: "wrap" }}>
+                <div className="beat-detail-meta" style={{ display: "flex", alignItems: "center", gap: "16px", flexWrap: "wrap" }}>
                   <Link href={`/store?genre=${encodeURIComponent(beat.genre)}`} className="beat-tag-link" style={{ color: "var(--gold)", fontSize: "0.78rem", fontFamily: "var(--font-ui)", fontWeight: 600 }}>
                     {beat.genre}
                   </Link>
@@ -256,7 +317,7 @@ export default function BeatDetailPage() {
                 </div>
 
                 {beat.description && (
-                  <p style={{ color: "var(--text-secondary)", fontSize: "0.82rem", fontFamily: "var(--font-ui)", lineHeight: 1.8, marginTop: "16px", maxWidth: "520px" }}>
+                  <p className="beat-detail-desc" style={{ color: "var(--text-secondary)", fontSize: "0.82rem", fontFamily: "var(--font-ui)", lineHeight: 1.8, marginTop: "16px", maxWidth: "520px" }}>
                     {beat.description}
                   </p>
                 )}
@@ -285,7 +346,7 @@ export default function BeatDetailPage() {
                     Select License
                   </div>
                   <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-                    {LICENSE_OPTIONS.map((option) => (
+                    {licenseOptions.map((option) => (
                       <div
                         key={option.value}
                         className="beat-detail-license-option"
@@ -298,7 +359,7 @@ export default function BeatDetailPage() {
                           display: "flex", justifyContent: "space-between", alignItems: "center",
                         }}
                       >
-                        <div>
+                        <div style={{ minWidth: 0 }}>
                           <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "6px" }}>
                             <div style={{
                               width: "14px", height: "14px", borderRadius: "50%",
@@ -309,17 +370,17 @@ export default function BeatDetailPage() {
                                 <div style={{ width: "6px", height: "6px", borderRadius: "50%", backgroundColor: "var(--gold)" }} />
                               )}
                             </div>
-                            <span style={{ color: "var(--text-primary)", fontSize: "0.82rem", fontWeight: 700, fontFamily: "var(--font-ui)" }}>
+                            <span className="beat-detail-license-name" style={{ color: "var(--text-primary)", fontSize: "0.82rem", fontWeight: 700, fontFamily: "var(--font-ui)" }}>
                               {option.label}
                             </span>
                           </div>
-                          <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", paddingLeft: "22px" }}>
+                          <div className="beat-detail-license-features" style={{ display: "flex", gap: "12px", flexWrap: "wrap", paddingLeft: "22px" }}>
                             {option.features.slice(0, 3).map((f) => (
                               <span key={f} style={{ color: "var(--text-muted)", fontSize: "0.65rem", fontFamily: "var(--font-ui)" }}>✓ {f}</span>
                             ))}
                           </div>
                         </div>
-                        <div style={{ color: selectedLicense === option.value ? "var(--gold)" : "var(--text-primary)", fontSize: "1rem", fontWeight: 800, fontFamily: "var(--font-ui)", flexShrink: 0, marginLeft: "16px" }}>
+                        <div className="beat-detail-license-price" style={{ color: selectedLicense === option.value ? "var(--gold)" : "var(--text-primary)", fontSize: "1rem", fontWeight: 800, fontFamily: "var(--font-ui)", flexShrink: 0, marginLeft: "16px" }}>
                           ₦{option.price.toLocaleString()}
                         </div>
                       </div>
@@ -332,6 +393,7 @@ export default function BeatDetailPage() {
               {!isUnavailable ? (
                 <div className="beat-detail-actions" style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
                   <button
+                    className="beat-detail-addcart"
                     onClick={handleAddToCart}
                     style={{
                       flex: 1, padding: "14px 24px",
@@ -343,10 +405,11 @@ export default function BeatDetailPage() {
                       textTransform: "uppercase", transition: "all 0.2s",
                     }}
                   >
-                    {addedToCart ? "✓ Added to Cart" : `Add to Cart — ₦${selectedOption?.price.toLocaleString()}`}
+                    {addedToCart ? "✓ Added to Cart" : `Add to Cart — ₦${(selectedOption?.price ?? 0).toLocaleString()}`}
                   </button>
 
                   <button
+                    className="beat-detail-fav"
                     onClick={toggleFavorite}
                     style={{
                       width: "48px", height: "48px",
@@ -360,7 +423,7 @@ export default function BeatDetailPage() {
                     {favorited ? "♥" : "♡"}
                   </button>
 
-                  <Link href="/cart" style={{
+                  <Link className="beat-detail-viewcart" href="/cart" style={{
                     padding: "14px 24px", border: "1px solid rgba(201,168,76,0.3)",
                     borderRadius: "4px", textDecoration: "none", color: "var(--gold)",
                     fontSize: "0.75rem", fontWeight: 700, fontFamily: "var(--font-ui)",
