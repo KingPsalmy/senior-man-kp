@@ -30,6 +30,15 @@ export default function Navbar() {
     return () => window.removeEventListener("resize", handleResize)
   }, [])
 
+  useEffect(() => {
+    document.body.style.overflow = menuOpen ? "hidden" : ""
+    return () => { document.body.style.overflow = "" }
+  }, [menuOpen])
+
+  useEffect(() => {
+    setMenuOpen(false)
+  }, [pathname])
+
   const cartLabel = cartCount === 0 ? "0 Items" : `${cartCount} Item${cartCount !== 1 ? "s" : ""}`
 
   return (
@@ -45,13 +54,11 @@ export default function Navbar() {
           display: "flex", alignItems: "center", justifyContent: "space-between",
           height: "100%", padding: "0 40px", maxWidth: "1400px", margin: "0 auto",
         }}>
-          {/* Logo */}
           <Link href="/" style={{ textDecoration: "none", flexShrink: 0 }}>
             <img src="/logo-white.png" alt="Senior Man KP"
               style={{ height: "62px", width: "auto", objectFit: "contain" }} />
           </Link>
 
-          {/* Desktop Nav */}
           <nav className="desktop-nav" style={{ display: "flex", gap: "48px", alignItems: "center" }}>
             {links.map((link) => (
               <Link key={link.href} href={link.href} style={{
@@ -69,9 +76,7 @@ export default function Navbar() {
             ))}
           </nav>
 
-          {/* Desktop right side — favorites + cart */}
           <div className="desktop-nav" style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-            {/* Favorites icon */}
             <Link href="/favorites" title="Saved Beats" style={{
               width: "44px", height: "44px", borderRadius: "50%",
               display: "flex", alignItems: "center", justifyContent: "center",
@@ -84,7 +89,6 @@ export default function Navbar() {
               ♡
             </Link>
 
-            {/* Cart */}
             <Link href="/cart" style={{
               display: "flex", alignItems: "center", gap: "9px",
               background: "linear-gradient(135deg, #C9A84C, #F5D98B)",
@@ -102,7 +106,6 @@ export default function Navbar() {
             </Link>
           </div>
 
-          {/* Mobile Hamburger */}
           <button className="mobile-menu-btn" onClick={() => setMenuOpen(!menuOpen)} style={{
             background: "none", border: "none", cursor: "pointer", padding: "8px",
             display: "none", flexDirection: "column", justifyContent: "center",
@@ -115,12 +118,13 @@ export default function Navbar() {
         </div>
       </header>
 
-      {/* Mobile Menu */}
       {menuOpen && (
         <div style={{
-          position: "fixed", top: "76px", left: 0, right: 0, zIndex: 49,
-          background: "rgba(2,2,2,0.98)", borderBottom: "1px solid var(--border-subtle)",
+          position: "fixed", top: "76px", left: 0, right: 0, bottom: 0, zIndex: 49,
+          backgroundColor: "#020202",
+          borderBottom: "1px solid var(--border-subtle)",
           padding: "32px 28px", display: "flex", flexDirection: "column", gap: "28px",
+          overflowY: "auto",
         }}>
           {links.map((link) => (
             <Link key={link.href} href={link.href} onClick={() => setMenuOpen(false)} style={{
@@ -155,6 +159,13 @@ export default function Navbar() {
           </Link>
         </div>
       )}
+
+      <style>{`
+        @media (max-width: 900px) {
+          .desktop-nav { display: none !important; }
+          .mobile-menu-btn { display: flex !important; }
+        }
+      `}</style>
     </>
   )
 }
