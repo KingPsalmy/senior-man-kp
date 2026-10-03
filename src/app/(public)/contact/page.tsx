@@ -42,9 +42,9 @@ const contacts = [
   {
     icon: "/discord.png",
     label: "Discord",
-    value: "@kingpsalmy",
+    value: "@kingpsalmy_",
     cta: "Join",
-    href: "https://discord.gg/kingpsalmy",
+    href: "https://discord.gg/kingpsalmy_",
   },
 ]
 
