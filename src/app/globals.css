@@ -34,6 +34,12 @@
   --font-mono: 'JetBrains Mono', monospace;
 }
 
+:root { --player-h: 74px; }
+
+@media (max-width: 768px) {
+  :root { --player-h: 58px; }
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -51,7 +57,7 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
-  padding-bottom: 72px;
+    padding-bottom: calc(var(--player-h) + env(safe-area-inset-bottom, 0px));
 }
 
 ::-webkit-scrollbar { width: 4px; }
@@ -358,86 +364,6 @@ body {
   }
 }
 
-/* Floating player mobile */
-@media (max-width: 768px) {
-  .floating-player-bar {
-    padding: 0 12px !important;
-    gap: 10px !important;
-  }
-  .floating-player-info {
-    min-width: 0 !important;
-    flex: 1 1 auto !important;
-  }
-  .floating-player-middle {
-    min-width: 0 !important;
-    flex: 0 0 auto !important;
-  }
-  .floating-player-progress {
-    display: none !important;
-  }
-  .floating-player-buttons {
-    gap: 10px !important;
-  }
-  .floating-player-buttons button:nth-child(1),
-  .floating-player-buttons button:nth-child(3) {
-    display: none !important;
-  }
-  .floating-player-volume {
-    display: none !important;
-  }
-  .floating-player-right {
-    flex: 0 0 auto !important;
-    gap: 0 !important;
-  }
-  .floating-player-license {
-    padding: 8px 14px !important;
-    font-size: 0.65rem !important;
-  }
-}
-
-/* Mobile seek bar — full width, beneath the mini player */
-.mobile-seek-wrap {
-  display: none;
-}
-
-@media (max-width: 768px) {
-  .mobile-seek-wrap {
-    display: block;
-    position: relative;
-    width: 100%;
-    height: 24px;
-    touch-action: none;
-    cursor: pointer;
-  }
-  .mobile-seek-track {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    height: 4px;
-    background: rgba(255, 255, 255, 0.12);
-  }
-  .mobile-seek-fill {
-    height: 100%;
-    background: var(--gold);
-    transition: width 0.1s linear;
-  }
-  .mobile-seek-thumb {
-    position: absolute;
-    bottom: -4px;
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background: var(--gold);
-    transform: translateX(-50%);
-    box-shadow: 0 0 8px rgba(0, 0, 0, 0.6);
-    pointer-events: none;
-  }
-
-  body {
-    padding-bottom: 96px !important;
-  }
-}
 
 @keyframes wave-bar {
   0%, 100% { transform: scaleY(0.4); }
