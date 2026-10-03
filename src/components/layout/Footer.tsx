@@ -12,6 +12,7 @@ const socials = [
   { href: "https://x.com/kingpsalmy_", icon: "/twitter_x.png", label: "X" },
   { href: "https://youtube.com/@kingpsalmy_", icon: "/youtube.png", label: "YouTube" },
   { href: "https://tiktok.com/@kingpsalmy_", icon: "/tiktok.png", label: "TikTok" },
+  { href: "https://discord.gg/kingpsalmy", icon: "/discord.png", label: "Discord" },
 ]
 
 const navLinks = [

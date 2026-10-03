@@ -5,44 +5,44 @@ import Link from "next/link"
 
 const contacts = [
   {
-    icon: "✉",
+    icon: "/mail.png",
     label: "Email",
     value: "kingpsalmyofficial@gmail.com",
     cta: "Send Email",
     href: "mailto:kingpsalmyofficial@gmail.com",
   },
   {
-    icon: "◉",
+    icon: "/instagram.png",
     label: "Instagram",
     value: "@kingpsalmy_",
     cta: "Follow",
     href: "https://instagram.com/kingpsalmy_",
   },
   {
-    icon: "▶",
+    icon: "/youtube.png",
     label: "YouTube",
     value: "@kingpsalmy_",
     cta: "Subscribe",
     href: "https://youtube.com/@kingpsalmy_",
   },
   {
-    icon: "✕",
+    icon: "/twitter_x.png",
     label: "X (Twitter)",
     value: "@kingpsalmy_",
     cta: "Follow",
     href: "https://x.com/kingpsalmy_",
   },
   {
-    icon: "♪",
+    icon: "/tiktok.png",
     label: "TikTok",
     value: "@kingpsalmy_",
     cta: "Follow",
     href: "https://tiktok.com/@kingpsalmy_",
   },
   {
-    icon: "🎮",
+    icon: "/discord.png",
     label: "Discord",
-    value: "@kingpsalmy_",
+    value: "@kingpsalmy",
     cta: "Join",
     href: "https://discord.gg/kingpsalmy",
   },
@@ -85,7 +85,7 @@ export default function ContactPage() {
       </section>
 
       {/* Contact Cards */}
-      <section className="contact-section" style={{ padding: "100px 48px" }}>
+     <section className="contact-section" style={{ padding: "100px 48px" }}>
         <div style={{ maxWidth: "960px", margin: "0 auto" }}>
           <div className="contact-grid" style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "24px", marginBottom: "32px" }}>
             {contacts.map((c) => (
@@ -124,9 +124,19 @@ export default function ContactPage() {
                     backgroundColor: "rgba(201,168,76,0.08)",
                     border: "1px solid rgba(201,168,76,0.15)",
                     display: "flex", alignItems: "center", justifyContent: "center",
-                    fontSize: "1.4rem", marginBottom: "28px",
+                    marginBottom: "28px",
                   }}>
-                    {c.icon}
+                    <img
+                      src={c.icon}
+                      alt=""
+                      style={{
+                        width: "24px",
+                        height: "24px",
+                        objectFit: "contain",
+                        filter: "grayscale(1) invert(1)",
+                        opacity: 0.75,
+                      }}
+                    />
                   </div>
 
                   <div style={{ color: "var(--gold)", fontSize: "0.78rem", fontFamily: "var(--font-mono)", letterSpacing: "0.18em", textTransform: "uppercase", fontWeight: 600, marginBottom: "10px" }}>
