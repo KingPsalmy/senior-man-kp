@@ -27,7 +27,7 @@ const faqs = [
   },
   {
     q: "How do I credit the producer?",
-    a: 'All releases using beats from this store must credit "Prod. by Senior Man KP" in the title, description, or credits section.',
+    a: 'All releases using beats from this store must credit "Prod. by KP" in the title, description, or credits section.',
   },
   {
     q: "Can I use the beat for commercial projects?",
@@ -86,7 +86,7 @@ export default function FAQPage() {
           maxWidth: "600px", margin: "0 auto",
           fontFamily: "var(--font-ui)",
         }}>
-          Everything you need to know about licensing, payments, and working with Senior Man KP.
+          Everything you need to know about licensing, payments, and working with Senior man, KP.
         </p>
       </section>
 

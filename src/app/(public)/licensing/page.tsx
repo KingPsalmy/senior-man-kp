@@ -19,15 +19,10 @@ const licenses = [
       "Social media usage",
       "Live performances",
     ],
-    restrictions: [
-      "No stems",
-      "No advertising or film usage",
-      "No Content ID registration",
-      "No exclusivity",
-    ],
     bulkDeal: "Buy 3 Beats, Get 1 FREE" as string | null,
-    ctaStyle: "outline",
+    ctaStyle: "outline", 
   },
+  
   {
     type: "premium",
     name: "Premium License",
@@ -43,11 +38,7 @@ const licenses = [
       "Online commercial promotion",
       "Live performances",
     ],
-    restrictions: [
-      "No TV or large-scale advertising",
-      "No Content ID registration",
-      "No exclusivity",
-    ],
+   
     bulkDeal: "Buy 3 Beats, Get 1 Basic Beat FREE" as string | null,
     ctaStyle: "filled",
   },
@@ -67,11 +58,7 @@ const licenses = [
       "Physical distribution",
       "Live performances",
     ],
-    restrictions: [
-      "No exclusivity",
-      "No Content ID registration",
-      "No ownership of instrumental",
-    ],
+    
     bulkDeal: "Buy 3 Beats, Get 1 Unlimited Beat FREE" as string | null,
     ctaStyle: "outline",
   },
@@ -91,9 +78,7 @@ const licenses = [
       "Direct producer access",
       "Beat modifications & collaboration",
     ],
-    restrictions: [
-      "Prior licenses remain valid",
-    ],
+   
     bulkDeal: "Buy 3 Exclusives, Get 1 Exclusive FREE" as string | null,
     ctaStyle: "gold",
   },
@@ -346,18 +331,6 @@ export default function LicensingPage() {
                       <div key={feature} style={{ display: "flex", gap: "10px", alignItems: "flex-start" }}>
                         <span style={{ color: "var(--gold)", marginTop: "2px", flexShrink: 0, fontSize: "1.05rem" }}>✓</span>
                         <span style={{ color: "rgba(245,240,232,0.85)", fontSize: "1rem", lineHeight: 1.5, fontFamily: "var(--font-ui)" }}>{feature}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div style={{ marginBottom: "32px" }}>
-                  <div style={{ color: "var(--text-muted)", fontSize: "0.75rem", letterSpacing: "0.12em", textTransform: "uppercase", fontFamily: "var(--font-mono)", marginBottom: "14px", fontWeight: 600 }}>Limitations</div>
-                  <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-                    {item.restrictions.map((restriction) => (
-                      <div key={restriction} style={{ display: "flex", gap: "10px", alignItems: "flex-start" }}>
-                        <span style={{ color: "var(--text-muted)", marginTop: "2px", flexShrink: 0, fontSize: "1rem" }}>×</span>
-                        <span style={{ color: "rgba(245,240,232,0.55)", fontSize: "0.94rem", lineHeight: 1.5, fontFamily: "var(--font-ui)" }}>{restriction}</span>
                       </div>
                     ))}
                   </div>
