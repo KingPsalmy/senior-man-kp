@@ -44,7 +44,7 @@ const contacts = [
     label: "Discord",
     value: "@kingpsalmy_",
     cta: "Join",
-    href: "https://discord.gg/kingpsalmy_",
+    href: "https://https://discord.com/channels/@seniormankp",
   },
 ]
 
