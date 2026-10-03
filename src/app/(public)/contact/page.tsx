@@ -7,9 +7,9 @@ const contacts = [
   {
     icon: "/mail.png",
     label: "Email",
-    value: "kingpsalmyofficial@gmail.com",
+    value: "contact@seniormankp.com",
     cta: "Send Email",
-    href: "mailto:kingpsalmyofficial@gmail.com",
+    href: "mailto:contact@seniormankp.com",
   },
   {
     icon: "/instagram.png",

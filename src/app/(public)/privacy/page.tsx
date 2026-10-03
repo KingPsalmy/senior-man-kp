@@ -36,11 +36,11 @@ export default function PrivacyPage() {
             },
             {
               title: "Data Retention",
-              body: "Order records are retained for accounting and legal compliance. You may request deletion of your personal data by emailing kingpsalmyofficial@gmail.com.",
+              body: "Order records are retained for accounting and legal compliance. You may request deletion of your personal data by emailing contact@seniormankp.com.",
             },
             {
               title: "Contact",
-              body: "For privacy-related questions, contact: kingpsalmyofficial@gmail.com",
+              body: "For privacy-related questions, contact: contact@seniormankp.com",
             },
           ].map((section) => (
             <div key={section.title} style={{ marginBottom: "40px" }}>
