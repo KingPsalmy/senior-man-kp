@@ -373,22 +373,3 @@ body {
 .wave-bar-3 { animation: wave-bar 0.8s ease-in-out infinite; animation-delay: 0.3s; }
 .wave-bar-4 { animation: wave-bar 0.8s ease-in-out infinite; animation-delay: 0.45s; }
 
-/* Share modal: narrow phones only (Redmi 13C, iPhone SE) */
-@media (max-width: 400px) {
-  .sm-overlay { padding: 12px !important; }
-  .sm-box { padding: 20px 16px !important; }
-  .sm-glow { left: 16px !important; right: 16px !important; }
-  .sm-head { margin-bottom: 14px !important; }
-  .sm-preview { padding: 10px !important; gap: 10px !important; margin-bottom: 16px !important; }
-  .sm-cover { width: 40px !important; height: 40px !important; }
-  .sm-copyrow { gap: 6px !important; margin-bottom: 14px !important; }
-  .sm-input { padding: 9px 10px !important; font-size: 0.68rem !important; }
-  .sm-copy { padding: 9px 12px !important; font-size: 0.64rem !important; }
-  .sm-socials { gap: 8px !important; }
-  .sm-social { padding: 9px 10px !important; gap: 6px !important; font-size: 0.68rem !important; }
-}
-
-/* Very small screens (old iPhone SE at 320px): stack the social buttons */
-@media (max-width: 340px) {
-  .sm-socials { grid-template-columns: minmax(0, 1fr) !important; }
-}

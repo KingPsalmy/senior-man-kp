@@ -45,20 +45,21 @@ type PlayerStore = {
   volume: number
   progress: number
   duration: number
-  lastBeatId: number | null        // track previous beat for double-prev
-  lastPlayed: PlayerBeat[]         // persisted play history, most recent first
-  hasHydratedHistory: boolean      // guards against re-hydrating after mount
+  lastBeatId: number | null
+  lastPlayed: PlayerBeat[]
+  hasHydratedHistory: boolean
   setQueue: (beats: PlayerBeat[]) => void
   play: (beat: PlayerBeat) => void
   pause: () => void
   toggle: () => void
-  restart: () => void              // restart current beat from beginning
+  restart: () => void
   next: () => void
   prev: () => void
   setVolume: (v: number) => void
   setProgress: (p: number) => void
   setDuration: (d: number) => void
   clearHistory: () => void
+  removeFromHistory: (beatId: number) => void
   hydrateHistory: () => void
 }
 
@@ -82,7 +83,6 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
   play: (beat) => {
     const { queue, currentBeat, lastPlayed } = get()
     const index = queue.findIndex((b) => b.id === beat.id)
-    // If clicking the same beat that's already loaded, restart from beginning
     set({
       currentBeat: beat,
       isPlaying: true,
@@ -121,13 +121,11 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
     const { queue, currentIndex, currentBeat, progress, lastBeatId, lastPlayed } = get()
     if (!queue.length) return
 
-    // If more than 3 seconds in, restart current beat
     if (progress > 3) {
       set({ progress: 0, isPlaying: true })
       return
     }
 
-    // If within first 3 seconds and we have a lastBeatId, go to that beat
     if (lastBeatId !== null) {
       const lastIndex = queue.findIndex((b) => b.id === lastBeatId)
       if (lastIndex >= 0) {
@@ -144,7 +142,6 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
       }
     }
 
-    // Fallback: go to previous in queue
     const prevIndex = (currentIndex - 1 + queue.length) % queue.length
     const prevBeat = queue[prevIndex]
     set({
@@ -164,6 +161,12 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
   clearHistory: () => {
     saveHistory([])
     set({ lastPlayed: [] })
+  },
+
+  removeFromHistory: (beatId) => {
+    const updated = get().lastPlayed.filter((b) => b.id !== beatId)
+    saveHistory(updated)
+    set({ lastPlayed: updated })
   },
 
   hydrateHistory: () => {

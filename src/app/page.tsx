@@ -10,13 +10,12 @@ import { usePlayerStore } from "@/store/playerStore"
 import { useFavorite } from "@/hooks/useFavorites"
 import { addToCart, LicenseType } from "@/lib/cart"
 
-const LAST_PLAYED_COUNT = 6 // change to 1 if you'd rather show only the very last beat
+const LAST_PLAYED_COUNT = 6
 
 function HeartButton({ beatId }: { beatId: string }) {
   const { favorited, toggle } = useFavorite(beatId)
   return (
     <button
-      className="beat-heart"
       onClick={(e) => { e.stopPropagation(); toggle() }}
       style={{
         position: "absolute", top: "10px", left: "10px",
@@ -52,13 +51,19 @@ function getLicenseOptions(beat: any) {
 export default function HomePage() {
   const router = useRouter()
   const [heroLeft, setHeroLeft] = useState(1)
+  const [heroSearch, setHeroSearch] = useState("")
   const [featuredBeats, setFeaturedBeats] = useState<any[]>([])
   const [shareBeat, setShareBeat] = useState<any | null>(null)
   const [licenseBeat, setLicenseBeat] = useState<any | null>(null)
   const [selectedLicense, setSelectedLicense] = useState<LicenseType>("basic")
   const [justAdded, setJustAdded] = useState(false)
   const [subtitleVisible, setSubtitleVisible] = useState(false)
-  const { setQueue, play, pause, currentBeat, isPlaying, lastPlayed, hydrateHistory } = usePlayerStore()
+
+  const [resolvedLastPlayed, setResolvedLastPlayed] = useState<any[]>([])
+  const [unavailableBeat, setUnavailableBeat] = useState<any | null>(null)
+  const [suggestedForUnavailable, setSuggestedForUnavailable] = useState<any[]>([])
+
+  const { setQueue, play, pause, currentBeat, isPlaying, lastPlayed, hydrateHistory, removeFromHistory } = usePlayerStore()
 
   useEffect(() => {
     hydrateHistory()
@@ -69,8 +74,6 @@ export default function HomePage() {
         .order("created_at", { ascending: false }).limit(4)
       if (data) {
         setFeaturedBeats(data)
-        // Only auto-play on a genuinely fresh session (nothing currently loaded).
-        // Prevents restarting playback every time the user navigates back home.
         if (!currentBeat) {
           setQueue(data)
           play(data[0])
@@ -84,6 +87,37 @@ export default function HomePage() {
     }, 25000)
     return () => { clearInterval(interval); clearTimeout(t) }
   }, [])
+
+  useEffect(() => {
+    async function resolveLastPlayed() {
+      if (!lastPlayed || lastPlayed.length === 0) {
+        setResolvedLastPlayed([])
+        return
+      }
+
+      const ids = lastPlayed.map((b: any) => b.id)
+
+      const { data } = await supabase
+        .from("beats")
+        .select("id, title, slug, cover_url, genre, mood, bpm, key, basic_price, premium_price, unlimited_price, exclusive_price, is_published, is_exclusive_sold")
+        .in("id", ids)
+
+      const byId: Record<string, any> = {}
+      ;(data ?? []).forEach((b) => { byId[b.id] = b })
+
+      const resolved = lastPlayed
+        .map((stored: any) => byId[stored.id])
+        .filter(Boolean)
+        .map((beat: any) => ({
+          ...beat,
+          available: beat.is_published && !beat.is_exclusive_sold,
+        }))
+        .slice(0, LAST_PLAYED_COUNT)
+
+      setResolvedLastPlayed(resolved)
+    }
+    resolveLastPlayed()
+  }, [lastPlayed])
 
   const controlStyle = {
     padding: "13px 18px",
@@ -114,14 +148,49 @@ export default function HomePage() {
     }, 900)
   }
 
+  function handleHeroSearch(e: React.FormEvent) {
+    e.preventDefault()
+    const query = heroSearch.trim()
+    router.push(query ? `/store?search=${encodeURIComponent(query)}` : "/store")
+  }
+
+  async function handleLastPlayedPlay(beat: any) {
+    if (!beat.available) {
+      const { data } = await supabase
+        .from("beats")
+        .select("*")
+        .eq("is_published", true)
+        .or(`genre.eq.${beat.genre},mood.eq.${beat.mood}`)
+        .neq("id", beat.id)
+        .limit(4)
+
+      setSuggestedForUnavailable(data ?? [])
+      setUnavailableBeat(beat)
+      return
+    }
+
+    const isThisPlaying = currentBeat?.id === beat.id && isPlaying
+    if (isThisPlaying) {
+      pause()
+    } else {
+      const playable = resolvedLastPlayed.filter((b) => b.available)
+      setQueue(playable.length ? playable : [beat])
+      play(beat)
+    }
+  }
+
+  function handleRemoveLastPlayed(id: string | number) {
+    const numericId = Number(id)
+    setResolvedLastPlayed((prev) => prev.filter((b) => Number(b.id) !== numericId))
+    removeFromHistory(numericId)
+  }
+
   function renderBeatCard(beat: any) {
     const isThisPlaying = currentBeat?.id === beat.id && isPlaying
     return (
       <div key={beat.id} className="beat-card" style={{ backgroundColor: "var(--bg-card)", border: `1px solid ${isThisPlaying ? "rgba(201,168,76,0.4)" : "var(--border-subtle)"}`, borderRadius: "10px", overflow: "hidden", transition: "transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease" }}>
-        {/* Cover */}
         <div
-          className="beat-cover"
-          onClick={() => router.push(`/beat/${beat.slug}`)}
+          onClick={() => router.push(`/store/beat/${beat.slug}`)}
           style={{ position: "relative", aspectRatio: "1", background: beat.cover_url ? "none" : `linear-gradient(135deg, ${genreColor[beat.genre] ?? "#111"} 0%, #0a0a0a 100%)`, backgroundColor: "#0a0a0a", cursor: "pointer" }}
         >
           {beat.cover_url
@@ -139,12 +208,11 @@ export default function HomePage() {
             </div>
           )}
 
-          <div className="beat-more" onClick={(e) => { e.stopPropagation(); setShareBeat(beat) }} style={{ position: "absolute", top: "10px", right: "12px", color: "var(--text-muted)", fontSize: "1rem", zIndex: 2, cursor: "pointer" }}>···</div>
+          <div onClick={(e) => { e.stopPropagation(); setShareBeat(beat) }} style={{ position: "absolute", top: "10px", right: "12px", color: "var(--text-muted)", fontSize: "1rem", zIndex: 2, cursor: "pointer" }}>···</div>
 
           <HeartButton beatId={String(beat.id)} />
 
           <button
-            className="beat-play"
             onClick={(e) => { e.stopPropagation(); if (isThisPlaying) { pause() } else { setQueue(featuredBeats.length ? featuredBeats : [beat]); play(beat) } }}
             style={{ position: "absolute", bottom: "12px", right: "12px", width: "38px", height: "38px", borderRadius: "50%", backgroundColor: "var(--gold)", border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", outline: "none", WebkitAppearance: "none" as any, zIndex: 2 }}>
             {isThisPlaying
@@ -154,24 +222,22 @@ export default function HomePage() {
           </button>
         </div>
 
-        {/* Info */}
         <div
-          className="beat-info"
-          onClick={() => router.push(`/beat/${beat.slug}`)}
+          onClick={() => router.push(`/store/beat/${beat.slug}`)}
           style={{ padding: "18px", cursor: "pointer" }}
         >
-          <h3 className="beat-title" style={{ color: "var(--text-primary)", fontSize: "1.1rem", fontWeight: 700, fontFamily: "var(--font-ui)", marginBottom: "6px", lineHeight: 1.3 }}>{beat.title}</h3>
+          <h3 style={{ color: "var(--text-primary)", fontSize: "1.1rem", fontWeight: 700, fontFamily: "var(--font-ui)", marginBottom: "6px", lineHeight: 1.3 }}>{beat.title}</h3>
           <Link
             href={`/store?genre=${encodeURIComponent(beat.genre)}`}
             onClick={(e) => e.stopPropagation()}
-            className="beat-tag-link beat-genre"
+            className="beat-tag-link"
             style={{ color: "var(--gold)", fontSize: "0.85rem", fontFamily: "var(--font-ui)", fontWeight: 600, marginBottom: "10px", display: "inline-block", textDecoration: "none" }}
           >
             {beat.genre}
           </Link>
-          <div className="beat-meta" style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "16px", flexWrap: "wrap" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "16px", flexWrap: "wrap" }}>
             {beat.mood && (
-              <span className="beat-mood" style={{ display: "contents" }}>
+              <>
                 <Link
                   href={`/store?mood=${encodeURIComponent(beat.mood)}`}
                   onClick={(e) => e.stopPropagation()}
@@ -181,7 +247,7 @@ export default function HomePage() {
                   {beat.mood}
                 </Link>
                 <span style={{ color: "var(--border-dim)" }}>•</span>
-              </span>
+              </>
             )}
             <Link
               href={`/store?bpm=${beat.bpm}`}
@@ -205,12 +271,11 @@ export default function HomePage() {
               </>
             )}
           </div>
-          <div className="beat-footer" style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <Link className="beat-price" href={`/beat/${beat.slug}`} onClick={(e) => e.stopPropagation()} style={{ color: "var(--text-primary)", fontSize: "1rem", fontWeight: 700, fontFamily: "var(--font-ui)", textDecoration: "none" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <Link href={`/store/beat/${beat.slug}`} onClick={(e) => e.stopPropagation()} style={{ color: "var(--text-primary)", fontSize: "1rem", fontWeight: 700, fontFamily: "var(--font-ui)", textDecoration: "none" }}>
               from ₦{beat.basic_price?.toLocaleString()}
             </Link>
             <button
-              className="beat-cart"
               onClick={(e) => { e.stopPropagation(); openLicensePicker(beat) }}
               style={{ width: "34px", height: "34px", borderRadius: "50%", backgroundColor: "var(--gold)", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", outline: "none", WebkitAppearance: "none" as any }}
             >
@@ -220,6 +285,107 @@ export default function HomePage() {
               </svg>
             </button>
           </div>
+        </div>
+      </div>
+    )
+  }
+
+  function renderLastPlayedCard(beat: any) {
+    const isThisPlaying = currentBeat?.id === beat.id && isPlaying && beat.available
+
+    return (
+      <div key={beat.id} className="beat-card" style={{ backgroundColor: "var(--bg-card)", border: `1px solid ${isThisPlaying ? "rgba(201,168,76,0.4)" : "var(--border-subtle)"}`, borderRadius: "10px", overflow: "hidden" }}>
+        <div
+          onClick={() => beat.available && router.push(`/store/beat/${beat.slug}`)}
+          style={{
+            position: "relative", aspectRatio: "1",
+            background: beat.cover_url ? "none" : `linear-gradient(135deg, ${genreColor[beat.genre] ?? "#111"} 0%, #0a0a0a 100%)`,
+            backgroundColor: "#0a0a0a",
+            cursor: beat.available ? "pointer" : "default",
+          }}
+        >
+          {beat.cover_url ? (
+            <img
+              src={beat.cover_url}
+              alt={beat.title}
+              style={{ width: "100%", height: "100%", objectFit: "cover", filter: beat.available ? "none" : "grayscale(1) brightness(0.5)" }}
+            />
+          ) : (
+            <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <span style={{ color: "rgba(255,255,255,0.06)", fontSize: "1.4rem", fontWeight: 900, fontFamily: "var(--font-ui)", textAlign: "center", padding: "0 12px" }}>{beat.title.toUpperCase()}</span>
+            </div>
+          )}
+
+          {!beat.available && (
+            <div style={{ position: "absolute", top: "10px", left: "10px", backgroundColor: "rgba(200,40,40,0.9)", color: "#fff", fontSize: "0.6rem", fontWeight: 700, padding: "4px 10px", borderRadius: "20px", fontFamily: "var(--font-mono)", letterSpacing: "0.1em", textTransform: "uppercase", zIndex: 2 }}>
+              Sold
+            </div>
+          )}
+
+          <button
+            onClick={(e) => { e.stopPropagation(); handleRemoveLastPlayed(beat.id) }}
+            title="Remove from Last Played"
+            style={{
+              position: "absolute", top: "8px", right: "8px",
+              width: "24px", height: "24px", borderRadius: "50%",
+              backgroundColor: "rgba(0,0,0,0.6)", border: "1px solid rgba(255,255,255,0.15)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              color: "rgba(255,255,255,0.8)", fontSize: "0.7rem", cursor: "pointer",
+              zIndex: 3, WebkitAppearance: "none" as any, outline: "none",
+            }}
+          >
+            ✕
+          </button>
+
+          {isThisPlaying && (
+            <div style={{ position: "absolute", inset: 0, backgroundColor: "rgba(0,0,0,0.35)", display: "flex", alignItems: "center", justifyContent: "center", pointerEvents: "none" }}>
+              <div style={{ display: "flex", alignItems: "flex-end", gap: "3px", height: "28px" }}>
+                {[1, 2, 3, 4].map((b) => (
+                  <div key={b} className={`wave-bar-${b}`} style={{ width: "3px", height: "18px", backgroundColor: "var(--gold)", borderRadius: "2px", transformOrigin: "bottom" }} />
+                ))}
+              </div>
+            </div>
+          )}
+
+          <button
+            onClick={(e) => { e.stopPropagation(); handleLastPlayedPlay(beat) }}
+            style={{
+              position: "absolute", bottom: "12px", right: "12px", width: "38px", height: "38px", borderRadius: "50%",
+              backgroundColor: beat.available ? "var(--gold)" : "rgba(255,255,255,0.15)",
+              border: "none", display: "flex", alignItems: "center", justifyContent: "center",
+              cursor: "pointer", outline: "none", WebkitAppearance: "none" as any, zIndex: 2,
+            }}
+          >
+            {isThisPlaying
+              ? <svg width="12" height="12" viewBox="0 0 12 12" fill="#000"><rect x="1" y="0" width="4" height="12" rx="1" /><rect x="7" y="0" width="4" height="12" rx="1" /></svg>
+              : <span style={{ color: beat.available ? "#000" : "rgba(255,255,255,0.6)", fontSize: "0.7rem", marginLeft: "2px" }}>▶</span>
+            }
+          </button>
+        </div>
+
+        <div style={{ padding: "18px", opacity: beat.available ? 1 : 0.6 }}>
+          <h3 style={{ color: "var(--text-primary)", fontSize: "1.1rem", fontWeight: 700, fontFamily: "var(--font-ui)", marginBottom: "6px", lineHeight: 1.3 }}>{beat.title}</h3>
+          <span style={{ color: "var(--gold)", fontSize: "0.85rem", fontFamily: "var(--font-ui)", fontWeight: 600, marginBottom: "10px", display: "inline-block" }}>
+            {beat.genre}
+          </span>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "16px", flexWrap: "wrap" }}>
+            {beat.mood && (
+              <>
+                <span style={{ color: "var(--text-muted)", fontSize: "0.8rem", fontFamily: "var(--font-mono)" }}>{beat.mood}</span>
+                <span style={{ color: "var(--border-dim)" }}>•</span>
+              </>
+            )}
+            <span style={{ color: "var(--text-muted)", fontSize: "0.8rem", fontFamily: "var(--font-mono)" }}>{beat.bpm} BPM</span>
+            {beat.key && (
+              <>
+                <span style={{ color: "var(--border-dim)" }}>•</span>
+                <span style={{ color: "var(--text-muted)", fontSize: "0.8rem", fontFamily: "var(--font-mono)" }}>{beat.key}</span>
+              </>
+            )}
+          </div>
+          <span style={{ color: beat.available ? "var(--text-primary)" : "var(--text-muted)", fontSize: "1rem", fontWeight: 700, fontFamily: "var(--font-ui)" }}>
+            {beat.available ? `from ₦${beat.basic_price?.toLocaleString()}` : "No longer available"}
+          </span>
         </div>
       </div>
     )
@@ -284,36 +450,25 @@ export default function HomePage() {
         .last-played-scroll {
           scroll-snap-type: x mandatory;
           -webkit-overflow-scrolling: touch;
+          scrollbar-width: thin;
+          scrollbar-color: rgba(201,168,76,0.45) transparent;
         }
         .last-played-card {
           scroll-snap-align: start;
         }
+        .last-played-scroll::-webkit-scrollbar {
+          height: 4px;
+        }
+        .last-played-scroll::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .last-played-scroll::-webkit-scrollbar-thumb {
+          background: rgba(201,168,76,0.45);
+          border-radius: 10px;
+        }
 
-        /* ═════════ MOBILE (phones) ═════════ */
         @media (max-width: 768px) {
-
-          /* ── Hero ── */
-          .hero-section {
-            min-height: auto !important;
-            padding: 104px 0 44px !important;
-          }
-          .hero-content h1 {
-            font-size: clamp(1.85rem, 8.2vw, 2.4rem) !important;
-            line-height: 1.12 !important;
-            margin-bottom: 18px !important;
-          }
-          .hero-content p {
-            font-size: 0.95rem !important;
-            line-height: 1.6 !important;
-            padding-left: 12px !important;
-          }
-          .hero-search-wrap { max-width: 100% !important; margin-bottom: 16px !important; }
-          .hero-search-wrap input {
-            font-size: 1rem !important;          /* 16px stops iOS zoom-on-focus */
-            padding: 13px 14px !important;
-            min-width: 0 !important;
-          }
-          .hero-search-wrap button { padding: 13px 18px !important; }
+          .hero-search-wrap { max-width: 100% !important; }
           .hero-filters-wrap { max-width: 100% !important; }
           .hero-filters-wrap select,
           .hero-filters-wrap input {
@@ -321,124 +476,32 @@ export default function HomePage() {
             width: auto !important;
             min-width: 0 !important;
           }
-          .hero-ctas { gap: 10px !important; margin-bottom: 28px !important; }
-          .hero-ctas a {
-            flex: 1 !important;
-            text-align: center !important;
-            padding: 13px 8px !important;
-            font-size: 0.74rem !important;
-            letter-spacing: 0.08em !important;
-            white-space: nowrap !important;
-          }
+          .hero-ctas a { flex: 1 !important; text-align: center !important; }
 
-          /* Genre chips: one scrollable row, like Trakroom */
-          .hero-content .genre-tags {
-            flex-wrap: nowrap !important;
-            overflow-x: auto !important;
-            -webkit-overflow-scrolling: touch;
-            scrollbar-width: none;
-            padding-bottom: 4px;
-          }
-          .hero-content .genre-tags::-webkit-scrollbar { display: none; }
-          .hero-content .genre-tags a {
-            flex: 0 0 auto !important;
-            padding: 8px 14px !important;
-            font-size: 0.74rem !important;
-          }
-
-          /* ── Section spacing ── */
-          .section-padding { padding: 48px 20px !important; }
           .featured-header {
-            align-items: center !important;
-            gap: 12px !important;
-            margin-bottom: 22px !important;
-            flex-wrap: nowrap !important;
-          }
-          .featured-header h2 { font-size: 1.7rem !important; }
-          .see-more-cta {
-            padding: 10px 18px !important;
-            font-size: 0.68rem !important;
-          }
-          .last-played-section { padding: 36px 20px 0 !important; }
-          .last-played-card { width: 156px !important; }
-          .last-played-scroll { gap: 12px !important; }
-
-          /* ── Beat grid ── */
-          .featured-grid {
-            grid-template-columns: repeat(2, 1fr) !important;
-            gap: 12px !important;
-          }
-
-          /* ── Beat card (the compact version) ── */
-          .beat-card {
-            display: flex !important;
-            flex-direction: column !important;
-            border-radius: 12px !important;
-          }
-          .beat-card .beat-info {
-            padding: 11px 11px 12px !important;
-            flex: 1 !important;
-            display: flex !important;
-            flex-direction: column !important;
-          }
-          .beat-card .beat-title {
-            font-size: 0.92rem !important;
-            line-height: 1.25 !important;
-            margin-bottom: 4px !important;
-            display: -webkit-box !important;
-            -webkit-line-clamp: 2 !important;
-            -webkit-box-orient: vertical !important;
-            overflow: hidden !important;
-          }
-          .beat-card .beat-genre {
-            font-size: 0.76rem !important;
-            margin-bottom: 6px !important;
-          }
-          .beat-card .beat-mood { display: none !important; }
-          .beat-card .beat-meta {
-            flex-wrap: nowrap !important;
-            gap: 6px !important;
-            margin-bottom: 10px !important;
-            overflow: hidden !important;
-            white-space: nowrap !important;
-          }
-          .beat-card .beat-meta a,
-          .beat-card .beat-meta span {
-            font-size: 0.68rem !important;
-          }
-          .beat-card .beat-footer { margin-top: auto !important; }
-          .beat-card .beat-price { font-size: 0.86rem !important; }
-          .beat-card .beat-cart { width: 30px !important; height: 30px !important; }
-          .beat-card .beat-play {
-            width: 34px !important; height: 34px !important;
-            bottom: 8px !important; right: 8px !important;
-          }
-          .beat-card .beat-heart {
-            width: 28px !important; height: 28px !important;
-            top: 8px !important; left: 8px !important;
-            font-size: 0.78rem !important;
-          }
-          .beat-card .beat-more { top: 8px !important; right: 10px !important; }
-
-          /* ── Learn More ── */
-          .learn-more-section { padding: 56px 20px !important; }
-          .learn-more-head { margin-bottom: 32px !important; }
-          .learn-more-head h2 { font-size: 1.7rem !important; }
-          .learn-more-grid {
-            grid-template-columns: 1fr !important;
+            align-items: flex-start !important;
             gap: 14px !important;
           }
-          .learn-more-card { padding: 26px 22px !important; border-radius: 14px !important; }
-          .learn-more-card h3 { font-size: 1.1rem !important; margin-bottom: 10px !important; }
-          .learn-more-card p {
-            font-size: 0.95rem !important;
-            line-height: 1.65 !important;
-            margin-bottom: 20px !important;
+          .see-more-cta {
+            padding: 10px 20px !important;
+            font-size: 0.7rem !important;
+          }
+          .section-padding {
+            padding: 60px 20px !important;
+          }
+
+          .last-played-section {
+            padding: 40px 20px 0 !important;
+          }
+          .last-played-card {
+            width: 160px !important;
+          }
+          .last-played-scroll {
+            gap: 12px !important;
           }
         }
       `}</style>
 
-      {/* ── Hero ── */}
       <section className="hero-section" style={{ position: "relative", minHeight: "100vh", display: "flex", alignItems: "center" }}>
 
         <div className="hero-image" style={{ position: "absolute", right: 0, top: 0, height: "100%", width: "70%", pointerEvents: "none", zIndex: 0 }}>
@@ -469,21 +532,17 @@ export default function HomePage() {
         <HeroParticles />
 
         <div className="hero-content" style={{ position: "relative", zIndex: 10, paddingLeft: "clamp(24px, 8vw, 140px)", paddingRight: "24px", maxWidth: "620px", width: "100%" }}>
-         <h1 style={{ fontSize: "clamp(2.7rem, 3.6vw, 4.4rem)", lineHeight: 1.08, fontWeight: 800, letterSpacing: "-0.02em", marginBottom: "24px", fontFamily: "var(--font-ui)" }}>
-      <span style={{ color: "var(--text-primary)", display: "block", whiteSpace: "nowrap" }}>
-        Every Great Song
-      </span>
-    <span style={{ color: "var(--text-primary)", display: "block", whiteSpace: "nowrap" }}>
-        Starts With a Sound
-      </span>
-    <span style={{ display: "block", whiteSpace: "nowrap", fontStyle: "italic", background: "linear-gradient(135deg, #C9A84C, #F5D98B)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-        Find Yours Here
-      </span>
-    </h1>
+          <h1 style={{ fontSize: "clamp(2.1rem, 6vw, 4.4rem)", lineHeight: 1.1, fontWeight: 800, letterSpacing: "-0.02em", marginBottom: "24px", fontFamily: "var(--font-ui)" }}>
+            <span style={{ color: "var(--text-primary)", display: "block" }}>Every Great Song</span>
+            <span style={{ color: "var(--text-primary)", display: "block" }}>Starts With a Sound</span>
+            <span style={{ display: "block", fontStyle: "italic", background: "linear-gradient(135deg, #C9A84C, #F5D98B)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+              Find Yours Here
+            </span>
+          </h1>
 
           <div style={{ marginBottom: "28px" }}>
             <p className={subtitleVisible ? "hero-subtitle-visible" : "hero-subtitle-hidden"} style={{
-              fontSize: "1.00rem", lineHeight: 1.7, fontWeight: 500, fontFamily: "var(--font-ui)",
+              fontSize: "1.05rem", lineHeight: 1.7, fontWeight: 500, fontFamily: "var(--font-ui)",
               color: "rgba(245,240,232,0.85)", letterSpacing: "0.02em",
               paddingLeft: "16px", borderLeft: "3px solid var(--gold)", maxWidth: "380px",
             }}>
@@ -491,10 +550,11 @@ export default function HomePage() {
             </p>
           </div>
 
-          {/* Search bar */}
-          <div className="hero-search-wrap" style={{ display: "flex", marginBottom: "12px", maxWidth: "500px" }}>
+          <form onSubmit={handleHeroSearch} className="hero-search-wrap" style={{ display: "flex", marginBottom: "12px", maxWidth: "500px" }}>
             <input
               type="text"
+              value={heroSearch}
+              onChange={(e) => setHeroSearch(e.target.value)}
               placeholder="What do you need today?"
               style={{
                 flex: 1, padding: "15px 20px",
@@ -505,7 +565,7 @@ export default function HomePage() {
                 fontFamily: "var(--font-ui)", outline: "none", backdropFilter: "blur(10px)",
               }}
             />
-            <button style={{
+            <button type="submit" style={{
               padding: "15px 22px", background: "linear-gradient(135deg, #C9A84C, #F5D98B)",
               border: "none", borderRadius: "0 10px 10px 0",
               cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
@@ -514,9 +574,8 @@ export default function HomePage() {
                 <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
               </svg>
             </button>
-          </div>
+          </form>
 
-          {/* Quick filters — updated genre + mood lists */}
           <div className="hero-filters hero-filters-wrap" style={{ display: "flex", gap: "10px", flexWrap: "wrap", marginBottom: "28px", maxWidth: "500px" }}>
             <select style={{ ...controlStyle, flex: 1, minWidth: "120px" }}>
               <option>Mood / Feel</option>
@@ -529,13 +588,11 @@ export default function HomePage() {
             <input type="number" placeholder="BPM" style={{ ...controlStyle, width: "100px", flexShrink: 0 }} />
           </div>
 
-          {/* CTAs */}
           <div className="hero-ctas" style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "36px", flexWrap: "wrap" }}>
             <Link href="/store" style={{ padding: "14px 32px", fontSize: "0.82rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", textDecoration: "none", color: "#000", background: "linear-gradient(135deg, #C9A84C, #F5D98B)", borderRadius: "8px", fontFamily: "var(--font-ui)" }}>Browse Beats</Link>
             <Link href="/licensing" style={{ padding: "14px 32px", fontSize: "0.82rem", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", textDecoration: "none", color: "var(--gold)", border: "1px solid rgba(201,168,76,0.35)", borderRadius: "8px", fontFamily: "var(--font-ui)" }}>How It Works ▶</Link>
           </div>
 
-          {/* Genre tags */}
           <div>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "14px" }}>
               <span style={{ color: "rgba(245,240,232,0.65)", fontSize: "0.85rem", letterSpacing: "0.18em", textTransform: "uppercase", fontFamily: "var(--font-mono)", fontWeight: 600 }}>Browse by Genre</span>
@@ -555,18 +612,17 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── Last Played ── */}
-      {lastPlayed.length > 0 && (
+      {resolvedLastPlayed.length > 0 && (
         <section className="last-played-section section-padding" style={{ padding: "60px 48px 0", backgroundColor: "var(--bg-void)" }}>
           <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
             <div style={{ marginBottom: "24px" }}>
               <span style={{ color: "var(--gold)", fontSize: "0.82rem", fontFamily: "var(--font-mono)", letterSpacing: "0.22em", textTransform: "uppercase" }}>Pick Up Where You Left Off</span>
               <h2 style={{ color: "var(--text-primary)", fontSize: "clamp(1.6rem, 4vw, 2.2rem)", fontWeight: 800, fontFamily: "var(--font-ui)", letterSpacing: "-0.02em", marginTop: "8px" }}>Last Played</h2>
             </div>
-            <div className="last-played-scroll" style={{ display: "flex", gap: "16px", overflowX: "auto", paddingBottom: "8px" }}>
-              {lastPlayed.slice(0, LAST_PLAYED_COUNT).map((beat: any) => (
+            <div className="last-played-scroll" style={{ display: "flex", gap: "16px", overflowX: "auto", paddingBottom: "14px" }}>
+              {resolvedLastPlayed.map((beat: any) => (
                 <div key={beat.id} className="last-played-card" style={{ width: "230px", flexShrink: 0 }}>
-                  {renderBeatCard(beat)}
+                  {renderLastPlayedCard(beat)}
                 </div>
               ))}
             </div>
@@ -574,7 +630,6 @@ export default function HomePage() {
         </section>
       )}
 
-      {/* ── Featured Beats ── */}
       <section className="section-padding" style={{ padding: "80px 48px", backgroundColor: "var(--bg-void)" }}>
         <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
           <div className="featured-header" style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", flexWrap: "wrap", gap: "20px", marginBottom: "40px" }}>
@@ -601,10 +656,9 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── Learn More ── */}
-      <section className="learn-more-section" style={{ padding: "100px 48px", backgroundColor: "var(--bg-void)", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+      <section style={{ padding: "100px 48px", backgroundColor: "var(--bg-void)", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
         <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
-          <div className="learn-more-head" style={{ textAlign: "center", marginBottom: "64px" }}>
+          <div style={{ textAlign: "center", marginBottom: "64px" }}>
             <span style={{ display: "inline-block", color: "var(--gold)", fontSize: "0.72rem", fontFamily: "var(--font-mono)", letterSpacing: "0.28em", textTransform: "uppercase", marginBottom: "16px", padding: "6px 16px", border: "1px solid rgba(201,168,76,0.25)", borderRadius: "20px", backgroundColor: "rgba(201,168,76,0.05)" }}>
               Learn More
             </span>
@@ -619,7 +673,7 @@ export default function HomePage() {
               { title: "Frequently Asked Questions", desc: "Need clarity? Explore answers to our most frequently asked questions about licenses and services.", link: "/faq", cta: "Read FAQ", external: false },
               { title: "Contact Producer", desc: "Looking for something unique? Get in! Let's create a sound tailored to your vision.", link: "mailto:contact@seniormankp.com", cta: "Get in Touch", external: true },
             ].map((item) => (
-              <div key={item.title} className="learn-more-card" style={{ backgroundColor: "var(--bg-card)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: "16px", padding: "48px 36px", display: "flex", flexDirection: "column", position: "relative", overflow: "hidden" }}>
+              <div key={item.title} style={{ backgroundColor: "var(--bg-card)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: "16px", padding: "48px 36px", display: "flex", flexDirection: "column", position: "relative", overflow: "hidden" }}>
                 <div style={{ position: "absolute", top: 0, left: "36px", right: "36px", height: "1px", background: "linear-gradient(90deg, transparent, rgba(201,168,76,0.4), transparent)" }} />
                 <h3 style={{ color: "var(--text-primary)", fontSize: "1.25rem", fontWeight: 700, fontFamily: "var(--font-ui)", marginBottom: "16px", lineHeight: 1.3 }}>
                   {item.title}
@@ -642,7 +696,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── License Picker Modal ── */}
       {licenseBeat && (
         <div
           onClick={() => setLicenseBeat(null)}
@@ -735,7 +788,6 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* ── Share Modal ── */}
       {shareBeat && (
         <div onClick={() => setShareBeat(null)} style={{ position: "fixed", inset: 0, zIndex: 100, backgroundColor: "rgba(0,0,0,0.85)", backdropFilter: "blur(8px)", display: "flex", alignItems: "center", justifyContent: "center", padding: "24px" }}>
           <div onClick={(e) => e.stopPropagation()} style={{ backgroundColor: "var(--bg-card)", border: "1px solid rgba(201,168,76,0.25)", borderRadius: "12px", width: "100%", maxWidth: "420px", padding: "28px" }}>
@@ -756,17 +808,17 @@ export default function HomePage() {
               </div>
             </div>
             <div style={{ display: "flex", gap: "8px", marginBottom: "20px" }}>
-              <input readOnly value={`${typeof window !== "undefined" ? window.location.origin : ""}/beat/${shareBeat.slug}`}
+              <input readOnly value={`${typeof window !== "undefined" ? window.location.origin : ""}/store/beat/${shareBeat.slug}`}
                 style={{ flex: 1, padding: "10px 12px", backgroundColor: "var(--bg-elevated)", border: "1px solid var(--border-dim)", borderRadius: "4px", color: "var(--text-secondary)", fontSize: "0.72rem", fontFamily: "var(--font-mono)", outline: "none" }} />
-              <button onClick={() => navigator.clipboard.writeText(`${window.location.origin}/beat/${shareBeat.slug}`)}
+              <button onClick={() => navigator.clipboard.writeText(`${window.location.origin}/store/beat/${shareBeat.slug}`)}
                 style={{ padding: "10px 16px", background: "linear-gradient(135deg, #C9A84C, #F5D98B)", border: "none", borderRadius: "4px", color: "#000", fontSize: "0.68rem", fontWeight: 700, fontFamily: "var(--font-ui)", cursor: "pointer", letterSpacing: "0.08em", textTransform: "uppercase", whiteSpace: "nowrap" }}>
                 Copy
               </button>
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
               {[
-                { label: "Twitter / X", icon: "✕", url: `https://x.com/intent/tweet?text=Check out "${shareBeat.title}" by Senior Man KP&url=${typeof window !== "undefined" ? window.location.origin : ""}/beat/${shareBeat.slug}` },
-                { label: "WhatsApp", icon: "💬", url: `https://wa.me/?text=Check out "${shareBeat.title}" by Senior Man KP — ${typeof window !== "undefined" ? window.location.origin : ""}/beat/${shareBeat.slug}` },
+                { label: "Twitter / X", icon: "✕", url: `https://x.com/intent/tweet?text=Check out "${shareBeat.title}" by Senior Man KP&url=${typeof window !== "undefined" ? window.location.origin : ""}/store/beat/${shareBeat.slug}` },
+                { label: "WhatsApp", icon: "💬", url: `https://wa.me/?text=Check out "${shareBeat.title}" by Senior Man KP — ${typeof window !== "undefined" ? window.location.origin : ""}/store/beat/${shareBeat.slug}` },
                 { label: "Instagram", icon: "◉", url: "https://instagram.com" },
                 { label: "TikTok", icon: "♪", url: "https://tiktok.com" },
               ].map((s) => (
@@ -775,6 +827,69 @@ export default function HomePage() {
                 </a>
               ))}
             </div>
+          </div>
+        </div>
+      )}
+
+      {unavailableBeat && (
+        <div onClick={() => setUnavailableBeat(null)} style={{ position: "fixed", inset: 0, zIndex: 100, backgroundColor: "rgba(0,0,0,0.88)", backdropFilter: "blur(12px)", display: "flex", alignItems: "center", justifyContent: "center", padding: "24px" }}>
+          <div onClick={(e) => e.stopPropagation()} style={{ backgroundColor: "var(--bg-card)", border: "1px solid rgba(201,168,76,0.25)", borderRadius: "16px", width: "100%", maxWidth: "520px", padding: "32px", position: "relative", overflow: "hidden" }}>
+            <div style={{ position: "absolute", top: 0, left: "32px", right: "32px", height: "1px", background: "linear-gradient(90deg, transparent, rgba(201,168,76,0.4), transparent)" }} />
+
+            <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: "16px" }}>
+              <div>
+                <h3 style={{ color: "var(--text-primary)", fontSize: "1.15rem", fontWeight: 700, fontFamily: "var(--font-ui)", marginBottom: "6px" }}>
+                  {unavailableBeat.title} has been sold exclusively
+                </h3>
+                <p style={{ color: "rgba(245,240,232,0.6)", fontSize: "0.85rem", fontFamily: "var(--font-ui)" }}>
+                  This beat is no longer available in the store — but here's a few that sound similar.
+                </p>
+              </div>
+              <button
+                onClick={() => setUnavailableBeat(null)}
+                style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: "1.3rem", lineHeight: 1, flexShrink: 0, WebkitAppearance: "none" as any, outline: "none" }}
+              >✕</button>
+            </div>
+
+            {suggestedForUnavailable.length === 0 ? (
+              <p style={{ color: "var(--text-muted)", fontSize: "0.85rem", fontFamily: "var(--font-ui)", padding: "20px 0" }}>
+                No similar beats found right now — check the full store for more.
+              </p>
+            ) : (
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "12px" }}>
+                {suggestedForUnavailable.map((beat) => (
+                  <Link
+                    key={beat.id}
+                    href={`/store/beat/${beat.slug}`}
+                    onClick={() => setUnavailableBeat(null)}
+                    style={{ display: "flex", gap: "10px", padding: "10px", backgroundColor: "var(--bg-elevated)", borderRadius: "8px", textDecoration: "none" }}
+                  >
+                    <div style={{
+                      width: "52px", height: "52px", borderRadius: "6px", flexShrink: 0,
+                      background: beat.cover_url ? "none" : `linear-gradient(135deg, ${genreColor[beat.genre] ?? "#111"}, #0a0a0a)`,
+                      overflow: "hidden",
+                    }}>
+                      {beat.cover_url && <img src={beat.cover_url} alt={beat.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />}
+                    </div>
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{ color: "var(--text-primary)", fontSize: "0.85rem", fontWeight: 700, fontFamily: "var(--font-ui)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{beat.title}</div>
+                      <div style={{ color: "var(--gold)", fontSize: "0.68rem", fontFamily: "var(--font-ui)" }}>{beat.genre} · {beat.bpm} BPM</div>
+                      <div style={{ color: "var(--text-muted)", fontSize: "0.72rem", fontFamily: "var(--font-ui)", marginTop: "2px" }}>from ₦{Number(beat.basic_price).toLocaleString()}</div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
+
+            <Link href="/store" onClick={() => setUnavailableBeat(null)} style={{
+              display: "block", marginTop: "20px", textAlign: "center",
+              padding: "13px", background: "linear-gradient(135deg, #C9A84C, #F5D98B)",
+              borderRadius: "8px", textDecoration: "none", color: "#000",
+              fontSize: "0.78rem", fontWeight: 700, fontFamily: "var(--font-ui)",
+              letterSpacing: "0.08em", textTransform: "uppercase",
+            }}>
+              Browse Full Store
+            </Link>
           </div>
         </div>
       )}
