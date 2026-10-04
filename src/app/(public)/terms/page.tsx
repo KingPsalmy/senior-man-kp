@@ -52,7 +52,7 @@ export default function TermsPage() {
             },
             {
               title: "9. Contact",
-              body: "For questions regarding these terms: kingpsalmyofficial@gmail.com",
+              body: "For questions regarding these terms: contact@seniormankp.com",
             },
           ].map((section) => (
             <div key={section.title} style={{ marginBottom: "36px" }}>
