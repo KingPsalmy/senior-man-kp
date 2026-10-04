@@ -5,14 +5,14 @@ import { useState } from "react"
 
 // Set to false if your icon PNGs are already WHITE glyphs.
 // true  = icons are dark/black on a light or transparent background (inverts them to white)
-const ICONS_ARE_DARK = true
+const ICONS_ARE_DARK = false
 
 const socials = [
   { href: "https://instagram.com/kingpsalmy_", icon: "/instagram.png", label: "Instagram" },
   { href: "https://x.com/kingpsalmy_", icon: "/twitter_x.png", label: "X" },
-  { href: "https://youtube.com/@kingpsalmy_", icon: "/youtube.png", label: "YouTube" },
+  { href: "https://youtube.com/@kingpsalmy", icon: "/youtube.png", label: "YouTube" },
   { href: "https://tiktok.com/@kingpsalmy_", icon: "/tiktok.png", label: "TikTok" },
-  { href: "https://discord.gg/kingpsalmy", icon: "/discord.png", label: "Discord" },
+  { href: "https://discord.gg/uRmK38EgcD", icon: "/discord.png", label: "Discord" },
 ]
 
 const navLinks = [

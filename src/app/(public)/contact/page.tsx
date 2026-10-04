@@ -21,7 +21,7 @@ const contacts = [
   {
     icon: "/youtube.png",
     label: "YouTube",
-    value: "@kingpsalmy_",
+    value: "@kingpsalmy",
     cta: "Subscribe",
     href: "https://youtube.com/@kingpsalmy_",
   },
@@ -42,9 +42,9 @@ const contacts = [
   {
     icon: "/discord.png",
     label: "Discord",
-    value: "@kingpsalmy_",
+    value: "@Senior man, KP",
     cta: "Join",
-    href: "https://https://discord.com/channels/@seniormankp",
+    href: "https://discord.gg/uRmK38EgcD",
   },
 ]
 
