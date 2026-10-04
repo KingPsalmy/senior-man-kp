@@ -3,6 +3,8 @@
 import Navbar from "@/components/layout/Navbar"
 import Link from "next/link"
 
+
+
 const contacts = [
   {
     icon: "/mail.png",
