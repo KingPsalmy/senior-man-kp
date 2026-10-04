@@ -606,16 +606,16 @@ export default function HomePage() {
 
         <div className="hero-content" style={{ position: "relative", zIndex: 10, paddingLeft: "clamp(24px, 8vw, 140px)", paddingRight: "24px", maxWidth: "620px", width: "100%" }}>
           <h1 style={{ fontSize: "clamp(2.7rem, 3.6vw, 4.4rem)", lineHeight: 1.08, fontWeight: 800, letterSpacing: "-0.02em", marginBottom: "24px", fontFamily: "var(--font-ui)" }}>
-            <span style={{ color: "var(--text-primary)", display: "block", whiteSpace: "nowrap" }}>
-              Every Great Song
-            </span>
-            <span style={{ color: "var(--text-primary)", display: "block", whiteSpace: "nowrap" }}>
-              Starts With a Sound
-            </span>
-            <span style={{ display: "block", whiteSpace: "nowrap", fontStyle: "italic", background: "linear-gradient(135deg, #C9A84C, #F5D98B)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-              Find Yours Here
-            </span>
-          </h1>
+      <span style={{ color: "var(--text-primary)", display: "block", whiteSpace: "nowrap" }}>
+         Every Great Song
+        </span>
+      <span style={{ color: "var(--text-primary)", display: "block", whiteSpace: "nowrap" }}>
+         Starts With a Sound
+     </span>
+     <span style={{ display: "block", whiteSpace: "nowrap", fontStyle: "italic", background: "linear-gradient(135deg, #C9A84C, #F5D98B)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+         Find Yours Here
+       </span>
+    </h1>
 
           <div style={{ marginBottom: "28px" }}>
             <p className={subtitleVisible ? "hero-subtitle-visible" : "hero-subtitle-hidden"} style={{
