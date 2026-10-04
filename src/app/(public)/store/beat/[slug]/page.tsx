@@ -551,112 +551,116 @@ function StorePageInner() {
         </div>
       )}
 
-      {/* Share Modal (sized to match the homepage one) */}
-      {shareBeat && (
-        <div
+      {/* Share Modal */}
+{shareBeat && (
+  <div
+    className="sm-overlay"
+    onClick={() => setShareBeat(null)}
+    style={{
+      position: "fixed", inset: 0, zIndex: 100,
+      backgroundColor: "rgba(0,0,0,0.85)", backdropFilter: "blur(8px)",
+      display: "flex", alignItems: "center", justifyContent: "center", padding: "24px",
+    }}
+  >
+    <div
+      className="sm-box"
+      onClick={(e) => e.stopPropagation()}
+      style={{
+        backgroundColor: "var(--bg-card)",
+        border: "1px solid rgba(201,168,76,0.25)",
+        borderRadius: "12px", width: "100%", maxWidth: "420px",
+        padding: "28px", position: "relative", overflow: "hidden",
+      }}
+    >
+      <div className="sm-glow" style={{ position: "absolute", top: 0, left: "28px", right: "28px", height: "1px", background: "linear-gradient(90deg, transparent, rgba(201,168,76,0.4), transparent)" }} />
+
+      {/* Header */}
+      <div className="sm-head" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "20px" }}>
+        <h3 style={{ color: "var(--text-primary)", fontSize: "0.9rem", fontWeight: 700, fontFamily: "var(--font-ui)", margin: 0 }}>
+          Share Beat
+        </h3>
+        <button
           onClick={() => setShareBeat(null)}
+          style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: "1.1rem", lineHeight: 1, WebkitAppearance: "none" as any, outline: "none" }}
+        >✕</button>
+      </div>
+
+      {/* Beat preview */}
+      <div className="sm-preview" style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "24px", padding: "14px", backgroundColor: "var(--bg-elevated)", borderRadius: "8px" }}>
+        <div className="sm-cover" style={{
+          width: "44px", height: "44px", borderRadius: "4px", flexShrink: 0,
+          background: shareBeat.cover_url ? "none" : `linear-gradient(135deg, ${genreColor(shareBeat.genre)}, #0a0a0a)`,
+          overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center",
+        }}>
+          {shareBeat.cover_url
+            ? <img src={shareBeat.cover_url} alt={shareBeat.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+            : <span style={{ color: "rgba(255,255,255,0.3)", fontSize: "0.55rem", fontFamily: "var(--font-mono)" }}>{shareBeat.title.slice(0, 2).toUpperCase()}</span>
+          }
+        </div>
+        <div style={{ minWidth: 0, flex: 1 }}>
+          <div className="sm-name" style={{ color: "var(--text-primary)", fontSize: "0.85rem", fontWeight: 700, fontFamily: "var(--font-ui)", marginBottom: "2px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{shareBeat.title}</div>
+          <div className="sm-sub" style={{ color: "var(--gold)", fontSize: "0.7rem", fontFamily: "var(--font-ui)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{shareBeat.genre} • {shareBeat.bpm} BPM</div>
+        </div>
+      </div>
+
+      {/* Copy link */}
+      <div className="sm-copyrow" style={{ display: "flex", gap: "8px", marginBottom: "20px" }}>
+        <input
+          className="sm-input"
+          readOnly
+          value={`${typeof window !== "undefined" ? window.location.origin : ""}/beat/${shareBeat.slug}`}
           style={{
-            position: "fixed", inset: 0, zIndex: 100,
-            backgroundColor: "rgba(0,0,0,0.85)", backdropFilter: "blur(8px)",
-            display: "flex", alignItems: "center", justifyContent: "center", padding: "24px",
+            flex: 1, minWidth: 0, padding: "10px 12px",
+            backgroundColor: "var(--bg-elevated)",
+            border: "1px solid rgba(255,255,255,0.1)",
+            borderRadius: "4px", color: "var(--text-secondary)",
+            fontSize: "0.72rem", fontFamily: "var(--font-mono)", outline: "none",
           }}
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
+        />
+        <button
+          className="sm-copy"
+          onClick={() => navigator.clipboard.writeText(`${window.location.origin}/beat/${shareBeat.slug}`)}
+          style={{
+            flexShrink: 0, padding: "10px 16px",
+            background: "linear-gradient(135deg, #C9A84C, #F5D98B)",
+            border: "none", borderRadius: "4px",
+            color: "#000", fontSize: "0.68rem", fontWeight: 700,
+            fontFamily: "var(--font-ui)", cursor: "pointer",
+            letterSpacing: "0.08em", textTransform: "uppercase", whiteSpace: "nowrap",
+          }}
+        >Copy</button>
+      </div>
+
+      {/* Social links */}
+      <div className="sm-socials" style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: "10px" }}>
+        {[
+          { label: "Twitter / X", icon: "✕", url: `https://x.com/intent/tweet?text=Check out "${shareBeat.title}" by Senior Man KP&url=${typeof window !== "undefined" ? window.location.origin : ""}/beat/${shareBeat.slug}` },
+          { label: "WhatsApp", icon: "💬", url: `https://wa.me/?text=Check out "${shareBeat.title}" by Senior Man KP — ${typeof window !== "undefined" ? window.location.origin : ""}/beat/${shareBeat.slug}` },
+          { label: "Instagram", icon: "◉", url: "https://instagram.com" },
+          { label: "TikTok", icon: "♪", url: "https://tiktok.com" },
+        ].map((s) => (
+          <a
+            key={s.label} href={s.url} target="_blank" rel="noopener noreferrer"
+            className="sm-social"
             style={{
-              backgroundColor: "var(--bg-card)",
-              border: "1px solid rgba(201,168,76,0.25)",
-              borderRadius: "12px", width: "100%", maxWidth: "420px",
-              padding: "28px", position: "relative", overflow: "hidden",
+              display: "flex", alignItems: "center", gap: "8px",
+              padding: "10px 14px", minWidth: 0,
+              backgroundColor: "var(--bg-elevated)",
+              border: "1px solid rgba(255,255,255,0.08)",
+              borderRadius: "6px", textDecoration: "none",
+              color: "rgba(245,240,232,0.75)", fontSize: "0.72rem",
+              fontFamily: "var(--font-ui)", fontWeight: 500,
+              transition: "border-color 0.2s ease",
             }}
           >
-            <div style={{ position: "absolute", top: 0, left: "28px", right: "28px", height: "1px", background: "linear-gradient(90deg, transparent, rgba(201,168,76,0.4), transparent)" }} />
-
-            {/* Header */}
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "20px" }}>
-              <h3 style={{ color: "var(--text-primary)", fontSize: "0.9rem", fontWeight: 700, fontFamily: "var(--font-ui)", margin: 0 }}>
-                Share Beat
-              </h3>
-              <button
-                onClick={() => setShareBeat(null)}
-                style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: "1.1rem", lineHeight: 1, WebkitAppearance: "none" as any, outline: "none" }}
-              >✕</button>
-            </div>
-
-            {/* Beat preview */}
-            <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "24px", padding: "14px", backgroundColor: "var(--bg-elevated)", borderRadius: "8px" }}>
-              <div style={{
-                width: "44px", height: "44px", borderRadius: "4px", flexShrink: 0,
-                background: shareBeat.cover_url ? "none" : `linear-gradient(135deg, ${genreColor(shareBeat.genre)}, #0a0a0a)`,
-                overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center",
-              }}>
-                {shareBeat.cover_url
-                  ? <img src={shareBeat.cover_url} alt={shareBeat.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                  : <span style={{ color: "rgba(255,255,255,0.3)", fontSize: "0.55rem", fontFamily: "var(--font-mono)" }}>{shareBeat.title.slice(0, 2).toUpperCase()}</span>
-                }
-              </div>
-              <div style={{ minWidth: 0 }}>
-                <div style={{ color: "var(--text-primary)", fontSize: "0.85rem", fontWeight: 700, fontFamily: "var(--font-ui)", marginBottom: "2px" }}>{shareBeat.title}</div>
-                <div style={{ color: "var(--gold)", fontSize: "0.7rem", fontFamily: "var(--font-ui)" }}>{shareBeat.genre} • {shareBeat.bpm} BPM</div>
-              </div>
-            </div>
-
-            {/* Copy link */}
-            <div style={{ display: "flex", gap: "8px", marginBottom: "20px" }}>
-              <input
-                readOnly
-                value={`${typeof window !== "undefined" ? window.location.origin : ""}/beat/${shareBeat.slug}`}
-                style={{
-                  flex: 1, minWidth: 0, padding: "10px 12px",
-                  backgroundColor: "var(--bg-elevated)",
-                  border: "1px solid rgba(255,255,255,0.1)",
-                  borderRadius: "4px", color: "var(--text-secondary)",
-                  fontSize: "0.72rem", fontFamily: "var(--font-mono)", outline: "none",
-                }}
-              />
-              <button
-                onClick={() => navigator.clipboard.writeText(`${window.location.origin}/beat/${shareBeat.slug}`)}
-                style={{
-                  flexShrink: 0, padding: "10px 16px",
-                  background: "linear-gradient(135deg, #C9A84C, #F5D98B)",
-                  border: "none", borderRadius: "4px",
-                  color: "#000", fontSize: "0.68rem", fontWeight: 700,
-                  fontFamily: "var(--font-ui)", cursor: "pointer",
-                  letterSpacing: "0.08em", textTransform: "uppercase", whiteSpace: "nowrap",
-                }}
-              >Copy</button>
-            </div>
-
-            {/* Social links */}
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
-              {[
-                { label: "Twitter / X", icon: "✕", url: `https://x.com/intent/tweet?text=Check out "${shareBeat.title}" by Senior Man KP&url=${typeof window !== "undefined" ? window.location.origin : ""}/beat/${shareBeat.slug}` },
-                { label: "WhatsApp", icon: "💬", url: `https://wa.me/?text=Check out "${shareBeat.title}" by Senior Man KP — ${typeof window !== "undefined" ? window.location.origin : ""}/beat/${shareBeat.slug}` },
-                { label: "Instagram", icon: "◉", url: "https://instagram.com" },
-                { label: "TikTok", icon: "♪", url: "https://tiktok.com" },
-              ].map((s) => (
-                <a
-                  key={s.label} href={s.url} target="_blank" rel="noopener noreferrer"
-                  style={{
-                    display: "flex", alignItems: "center", gap: "8px",
-                    padding: "10px 14px",
-                    backgroundColor: "var(--bg-elevated)",
-                    border: "1px solid rgba(255,255,255,0.08)",
-                    borderRadius: "6px", textDecoration: "none",
-                    color: "rgba(245,240,232,0.75)", fontSize: "0.72rem",
-                    fontFamily: "var(--font-ui)", fontWeight: 500,
-                    whiteSpace: "nowrap",
-                    transition: "border-color 0.2s ease",
-                  }}
-                >
-                  <span style={{ fontSize: "0.85rem" }}>{s.icon}</span>{s.label}
-                </a>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
+            <span style={{ fontSize: "0.85rem", flexShrink: 0 }}>{s.icon}</span>
+            <span style={{ minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{s.label}</span>
+          </a>
+        ))}
+      </div>
+    </div>
+  </div>
+)}
       <style>{`
         @media (max-width: 1100px) { .beat-grid { grid-template-columns: repeat(3, 1fr) !important; } }
 
@@ -739,5 +743,4 @@ export default function StorePage() {
     </Suspense>
   )
 }
-
 
