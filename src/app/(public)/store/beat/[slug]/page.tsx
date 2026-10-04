@@ -661,6 +661,7 @@ function StorePageInner() {
     </div>
   </div>
 )}
+
       <style>{`
         @media (max-width: 1100px) { .beat-grid { grid-template-columns: repeat(3, 1fr) !important; } }
 
