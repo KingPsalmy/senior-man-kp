@@ -31,7 +31,7 @@ function saveHistory(history: PlayerBeat[]) {
 }
 
 function recordPlay(beat: PlayerBeat, history: PlayerBeat[]) {
-  const filtered = history.filter((b) => b.id !== beat.id)
+  const filtered = history.filter((b) => String(b.id) !== String(beat.id))
   const updated = [beat, ...filtered].slice(0, HISTORY_LIMIT)
   saveHistory(updated)
   return updated
@@ -59,7 +59,7 @@ type PlayerStore = {
   setProgress: (p: number) => void
   setDuration: (d: number) => void
   clearHistory: () => void
-  removeFromHistory: (beatId: number) => void
+  removeFromHistory: (beatId: string | number) => void
   hydrateHistory: () => void
 }
 
@@ -163,8 +163,9 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
     set({ lastPlayed: [] })
   },
 
+  // IDs are UUID strings at runtime, so compare as strings
   removeFromHistory: (beatId) => {
-    const updated = get().lastPlayed.filter((b) => b.id !== beatId)
+    const updated = get().lastPlayed.filter((b) => String(b.id) !== String(beatId))
     saveHistory(updated)
     set({ lastPlayed: updated })
   },

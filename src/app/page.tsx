@@ -180,10 +180,10 @@ export default function HomePage() {
     }
   }
 
+  // Beat IDs are UUID strings, so compare as strings (Number(uuid) is NaN)
   function handleRemoveLastPlayed(id: string | number) {
-    const numericId = Number(id)
-    setResolvedLastPlayed((prev) => prev.filter((b) => Number(b.id) !== numericId))
-    removeFromHistory(numericId)
+    setResolvedLastPlayed((prev) => prev.filter((b) => String(b.id) !== String(id)))
+    removeFromHistory(id)
   }
 
   function renderBeatCard(beat: any) {
@@ -193,7 +193,7 @@ export default function HomePage() {
         <div
           className="beat-cover"
           onClick={() => router.push(`/store/beat/${beat.slug}`)}
-          style={{ position: "relative", aspectRatio: "1", background: beat.cover_url ? "none" : `linear-gradient(135deg, ${genreColor[beat.genre] ?? "#111"} 0%, #0a0a0a 100%)`, backgroundColor: "#0a0a0a", cursor: "pointer" }}
+          style={{ position: "relative", aspectRatio: "1 / 0.9", background: beat.cover_url ? "none" : `linear-gradient(135deg, ${genreColor[beat.genre] ?? "#111"} 0%, #0a0a0a 100%)`, backgroundColor: "#0a0a0a", cursor: "pointer" }}
         >
           {beat.cover_url
             ? <img src={beat.cover_url} alt={beat.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
@@ -228,18 +228,18 @@ export default function HomePage() {
         <div
           className="beat-info"
           onClick={() => router.push(`/store/beat/${beat.slug}`)}
-          style={{ padding: "18px", cursor: "pointer" }}
+          style={{ padding: "15px", cursor: "pointer" }}
         >
-          <h3 className="beat-title" style={{ color: "var(--text-primary)", fontSize: "1.1rem", fontWeight: 700, fontFamily: "var(--font-ui)", marginBottom: "6px", lineHeight: 1.3 }}>{beat.title}</h3>
+          <h3 className="beat-title" style={{ color: "var(--text-primary)", fontSize: "1.05rem", fontWeight: 700, fontFamily: "var(--font-ui)", marginBottom: "5px", lineHeight: 1.3 }}>{beat.title}</h3>
           <Link
             href={`/store?genre=${encodeURIComponent(beat.genre)}`}
             onClick={(e) => e.stopPropagation()}
             className="beat-tag-link beat-genre"
-            style={{ color: "var(--gold)", fontSize: "0.85rem", fontFamily: "var(--font-ui)", fontWeight: 600, marginBottom: "10px", display: "inline-block", textDecoration: "none" }}
+            style={{ color: "var(--gold)", fontSize: "0.85rem", fontFamily: "var(--font-ui)", fontWeight: 600, marginBottom: "8px", display: "inline-block", textDecoration: "none" }}
           >
             {beat.genre}
           </Link>
-          <div className="beat-meta" style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "16px", flexWrap: "wrap" }}>
+          <div className="beat-meta" style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px", flexWrap: "wrap" }}>
             {beat.mood && (
               <span className="beat-mood" style={{ display: "contents" }}>
                 <Link
@@ -304,7 +304,7 @@ export default function HomePage() {
           className="beat-cover"
           onClick={() => beat.available && router.push(`/store/beat/${beat.slug}`)}
           style={{
-            position: "relative", aspectRatio: "1",
+            position: "relative", aspectRatio: "1 / 0.9",
             background: beat.cover_url ? "none" : `linear-gradient(135deg, ${genreColor[beat.genre] ?? "#111"} 0%, #0a0a0a 100%)`,
             backgroundColor: "#0a0a0a",
             cursor: beat.available ? "pointer" : "default",
@@ -329,8 +329,10 @@ export default function HomePage() {
           )}
 
           <button
+            className="beat-remove"
             onClick={(e) => { e.stopPropagation(); handleRemoveLastPlayed(beat.id) }}
             title="Remove from Last Played"
+            aria-label="Remove from Last Played"
             style={{
               position: "absolute", top: "8px", right: "8px",
               width: "24px", height: "24px", borderRadius: "50%",
@@ -370,12 +372,12 @@ export default function HomePage() {
           </button>
         </div>
 
-        <div className="beat-info" style={{ padding: "18px", opacity: beat.available ? 1 : 0.6 }}>
-          <h3 className="beat-title" style={{ color: "var(--text-primary)", fontSize: "1.1rem", fontWeight: 700, fontFamily: "var(--font-ui)", marginBottom: "6px", lineHeight: 1.3 }}>{beat.title}</h3>
-          <span className="beat-genre" style={{ color: "var(--gold)", fontSize: "0.85rem", fontFamily: "var(--font-ui)", fontWeight: 600, marginBottom: "10px", display: "inline-block" }}>
+        <div className="beat-info" style={{ padding: "15px", opacity: beat.available ? 1 : 0.6 }}>
+          <h3 className="beat-title" style={{ color: "var(--text-primary)", fontSize: "1.05rem", fontWeight: 700, fontFamily: "var(--font-ui)", marginBottom: "5px", lineHeight: 1.3 }}>{beat.title}</h3>
+          <span className="beat-genre" style={{ color: "var(--gold)", fontSize: "0.85rem", fontFamily: "var(--font-ui)", fontWeight: 600, marginBottom: "8px", display: "inline-block" }}>
             {beat.genre}
           </span>
-          <div className="beat-meta" style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "16px", flexWrap: "wrap" }}>
+          <div className="beat-meta" style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px", flexWrap: "wrap" }}>
             {beat.mood && (
               <span className="beat-mood" style={{ display: "contents" }}>
                 <span style={{ color: "var(--text-muted)", fontSize: "0.8rem", fontFamily: "var(--font-mono)" }}>{beat.mood}</span>
@@ -413,6 +415,9 @@ export default function HomePage() {
           animation: subtitleReveal 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
         .hero-subtitle-hidden { opacity: 0; }
+
+        /* Each headline line stays on one row */
+        .hero-content h1 span { white-space: nowrap; }
 
         .learn-more-cta {
           display: inline-flex;
@@ -477,6 +482,13 @@ export default function HomePage() {
         }
 
         @media (max-width: 768px) {
+          /* Hero headline scales with screen width so it never breaks */
+          .hero-content h1 {
+            font-size: clamp(1.5rem, 7.6vw, 2.2rem) !important;
+            line-height: 1.12 !important;
+            margin-bottom: 18px !important;
+          }
+
           .hero-search-wrap { max-width: 100% !important; }
           .hero-filters-wrap { max-width: 100% !important; }
           .hero-filters-wrap select,
@@ -485,7 +497,14 @@ export default function HomePage() {
             width: auto !important;
             min-width: 0 !important;
           }
-          .hero-ctas a { flex: 1 !important; text-align: center !important; }
+          .hero-ctas a {
+            flex: 1 !important;
+            text-align: center !important;
+            white-space: nowrap !important;
+            padding: 14px 10px !important;
+            font-size: 0.74rem !important;
+            letter-spacing: 0.08em !important;
+          }
 
           .featured-header {
             align-items: flex-start !important;
@@ -516,31 +535,32 @@ export default function HomePage() {
             flex-direction: column !important;
             border-radius: 12px !important;
           }
+          .beat-card .beat-cover { aspect-ratio: 1 / 0.84 !important; }
           .beat-card .beat-info {
-            padding: 11px 11px 12px !important;
+            padding: 9px 10px 11px !important;
             flex: 1 !important;
             display: flex !important;
             flex-direction: column !important;
           }
           .beat-card .beat-title {
-            font-size: 0.92rem !important;
+            font-size: 0.9rem !important;
             line-height: 1.25 !important;
-            margin-bottom: 4px !important;
+            margin-bottom: 3px !important;
             display: -webkit-box !important;
             -webkit-line-clamp: 2 !important;
             -webkit-box-orient: vertical !important;
             overflow: hidden !important;
           }
           .beat-card .beat-genre {
-            font-size: 0.76rem !important;
-            margin-bottom: 6px !important;
+            font-size: 0.74rem !important;
+            margin-bottom: 4px !important;
           }
           /* mood is hidden on phones so BPM + key fit on one line */
           .beat-card .beat-mood { display: none !important; }
           .beat-card .beat-meta {
             flex-wrap: nowrap !important;
             gap: 5px !important;
-            margin-bottom: 10px !important;
+            margin-bottom: 8px !important;
             overflow: hidden !important;
             white-space: nowrap !important;
           }
@@ -561,6 +581,10 @@ export default function HomePage() {
             font-size: 0.78rem !important;
           }
           .beat-card .beat-more { top: 8px !important; right: 10px !important; }
+          .beat-card .beat-remove {
+            width: 28px !important; height: 28px !important;
+            top: 6px !important; right: 6px !important;
+          }
           .beat-card .beat-badge {
             top: 8px !important; left: 8px !important;
             font-size: 0.54rem !important; padding: 3px 8px !important;
@@ -571,7 +595,7 @@ export default function HomePage() {
         @media (max-width: 380px) {
           .beat-card .beat-meta a,
           .beat-card .beat-meta span { font-size: 0.6rem !important; }
-          .beat-card .beat-title { font-size: 0.88rem !important; }
+          .beat-card .beat-title { font-size: 0.86rem !important; }
         }
       `}</style>
 
@@ -604,8 +628,8 @@ export default function HomePage() {
 
         <HeroParticles />
 
-        <div className="hero-content" style={{ position: "relative", zIndex: 10, paddingLeft: "clamp(24px, 8vw, 140px)", paddingRight: "24px", maxWidth: "620px", width: "100%" }}>
-          <h1 style={{ fontSize: "clamp(2.1rem, 6vw, 4.4rem)", lineHeight: 1.1, fontWeight: 800, letterSpacing: "-0.02em", marginBottom: "24px", fontFamily: "var(--font-ui)" }}>
+        <div className="hero-content" style={{ position: "relative", zIndex: 10, paddingLeft: "clamp(24px, 8vw, 140px)", paddingRight: "24px", maxWidth: "760px", width: "100%" }}>
+          <h1 style={{ fontSize: "clamp(2.1rem, 3.6vw, 3.4rem)", lineHeight: 1.1, fontWeight: 800, letterSpacing: "-0.02em", marginBottom: "24px", fontFamily: "var(--font-ui)" }}>
             <span style={{ color: "var(--text-primary)", display: "block" }}>Every Great Song</span>
             <span style={{ color: "var(--text-primary)", display: "block" }}>Starts With a Sound</span>
             <span style={{ display: "block", fontStyle: "italic", background: "linear-gradient(135deg, #C9A84C, #F5D98B)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
