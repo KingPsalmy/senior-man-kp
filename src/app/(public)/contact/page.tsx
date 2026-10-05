@@ -135,8 +135,8 @@ export default function ContactPage() {
                         width: "24px",
                         height: "24px",
                         objectFit: "contain",
-                        filter: "grayscale(1) invert(1)",
-                        opacity: 0.75,
+                        //filter: "grayscale(1) invert(1)",
+                        //opacity: 0.75,
                       }}
                     />
                   </div>
