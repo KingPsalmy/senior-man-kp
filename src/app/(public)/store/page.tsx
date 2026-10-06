@@ -284,9 +284,10 @@ function StorePageInner() {
                   >
                     {/* Cover */}
                     <div
+                      className="store-cover"
                       onClick={() => router.push(`/beat/${beat.slug}`)}
                       style={{
-                        position: "relative", aspectRatio: "1",
+                        position: "relative", aspectRatio: "1 / 0.9",
                         background: beat.cover_url ? "none" : `linear-gradient(135deg, ${genreColor(beat.genre)} 0%, #0a0a0a 100%)`,
                         backgroundColor: "#0a0a0a", cursor: "pointer",
                       }}
@@ -362,10 +363,10 @@ function StorePageInner() {
                     </div>
 
                     {/* Info */}
-                    <div className="store-info" style={{ padding: "16px" }}>
+                    <div className="store-info" style={{ padding: "14px" }}>
                       <div
                         onClick={() => router.push(`/beat/${beat.slug}`)}
-                        style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "6px", gap: "8px", cursor: "pointer" }}
+                        style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "5px", gap: "8px", cursor: "pointer" }}
                       >
                         <h3 className="store-title" style={{ color: "var(--text-primary)", fontSize: "1.05rem", fontWeight: 700, fontFamily: "var(--font-ui)", lineHeight: 1.3, flex: 1, margin: 0 }}>
                           {beat.title}
@@ -389,12 +390,12 @@ function StorePageInner() {
                       <Link
                         className="store-genre"
                         href={`/store?genre=${encodeURIComponent(beat.genre)}`}
-                        style={{ color: "var(--gold)", fontSize: "0.82rem", fontFamily: "var(--font-ui)", fontWeight: 600, marginBottom: "8px", display: "inline-block", textDecoration: "none" }}
+                        style={{ color: "var(--gold)", fontSize: "0.82rem", fontFamily: "var(--font-ui)", fontWeight: 600, marginBottom: "7px", display: "inline-block", textDecoration: "none" }}
                       >
                         {beat.genre}
                       </Link>
 
-                      <div className="store-meta" style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "14px", flexWrap: "wrap" }}>
+                      <div className="store-meta" style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "12px", flexWrap: "wrap" }}>
                         {beat.mood && (
                           <>
                             <Link href={`/store?mood=${encodeURIComponent(beat.mood)}`} style={{ color: "var(--text-muted)", fontSize: "0.78rem", fontFamily: "var(--font-mono)", textDecoration: "none" }}>
@@ -677,8 +678,11 @@ function StorePageInner() {
             border-radius: 12px !important;
           }
 
+          /* Slightly shorter cover on phones */
+          .store-cover { aspect-ratio: 1 / 0.84 !important; }
+
           .store-info {
-            padding: 10px 11px 12px !important;
+            padding: 9px 10px 11px !important;
             flex: 1 !important;
             display: flex !important;
             flex-direction: column !important;
@@ -695,12 +699,12 @@ function StorePageInner() {
           }
           .store-heart { font-size: 1rem !important; }
 
-          .store-genre { font-size: 0.74rem !important; margin-bottom: 5px !important; }
+          .store-genre { font-size: 0.74rem !important; margin-bottom: 4px !important; }
 
           /* Meta: all details kept, smaller, tight lines, no dots */
           .store-meta {
             gap: 1px 9px !important;
-            margin-bottom: 10px !important;
+            margin-bottom: 8px !important;
             line-height: 1.35 !important;
           }
           .store-meta a,
