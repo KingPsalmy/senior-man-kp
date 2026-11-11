@@ -1,4 +1,6 @@
 "use client"
+import { PUBLIC_MEDIA_CACHE_SECONDS } from "@/lib/public-media"
+import CoverImage from "@/components/ui/CoverImage"
 
 import AdminSidebar from "@/components/admin/AdminSidebar"
 
@@ -168,7 +170,7 @@ export default function AdminBeatsPage() {
   }
 
   async function uploadFile(file: File, bucket: string, path: string) {
-    const { error } = await supabase.storage.from(bucket).upload(path, file, { upsert: true })
+    const { error } = await supabase.storage.from(bucket).upload(path, file, { upsert: false, cacheControl: String(PUBLIC_MEDIA_CACHE_SECONDS) })
     if (error) throw error
     const { data } = supabase.storage.from(bucket).getPublicUrl(path)
     return data.publicUrl
@@ -373,7 +375,7 @@ export default function AdminBeatsPage() {
                       <div style={{ display: "flex", alignItems: "center", gap: "10px", minWidth: 0 }}>
                         <div style={{ width: "40px", height: "40px", borderRadius: "4px", flexShrink: 0, backgroundColor: "var(--bg-elevated)", overflow: "hidden" }}>
                           {beat.cover_url
-                            ? <img src={beat.cover_url} alt={beat.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                            ? <CoverImage sizes="(max-width: 600px) 80px, 160px" src={beat.cover_url} alt={beat.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                             : <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--text-muted)", fontSize: "0.7rem" }}>♪</div>
                           }
                         </div>
@@ -442,7 +444,7 @@ export default function AdminBeatsPage() {
                       <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "12px" }}>
                         <div className="admin-beat-cover" style={{ width: "56px", height: "56px", borderRadius: "6px", flexShrink: 0, backgroundColor: "var(--bg-elevated)", overflow: "hidden" }}>
                           {beat.cover_url
-                            ? <img src={beat.cover_url} alt={beat.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                            ? <CoverImage sizes="(max-width: 600px) 80px, 160px" src={beat.cover_url} alt={beat.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                             : <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--text-muted)", fontSize: "0.8rem" }}>♪</div>
                           }
                         </div>
@@ -731,7 +733,7 @@ export default function AdminBeatsPage() {
                   {editBeat.cover_url && !editFiles.cover && (
                     <div>
                       <label style={labelStyle}>Current Cover</label>
-                      <img src={editBeat.cover_url} alt="Current cover" style={{ width: "100%", aspectRatio: "1", objectFit: "cover", borderRadius: "6px", border: "1px solid var(--border-subtle)" }} />
+                      <CoverImage sizes="(max-width: 600px) 80px, 160px" src={editBeat.cover_url} alt="Current cover" style={{ width: "100%", aspectRatio: "1", objectFit: "cover", borderRadius: "6px", border: "1px solid var(--border-subtle)" }} />
                     </div>
                   )}
                   {editFiles.cover && (

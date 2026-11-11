@@ -1,4 +1,5 @@
 "use client"
+import { mediaAssets } from "@/lib/media-assets"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useEffect, useRef, useState } from "react"
@@ -59,7 +60,7 @@ export default function Navbar() {
         )}
         <div className="nav-container">
           <Link href="/beatstore" className="brand" aria-label="Senior Man KP Beat Store home">
-            <img src="/logo-white.png" alt="Senior Man KP" />
+            <img src={mediaAssets["logo-white"]} alt="Senior Man KP" />
             <span className="brand-wordmark">
               <small>THE</small>
               <strong>BEAT STORE</strong>

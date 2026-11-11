@@ -1,4 +1,5 @@
 "use client"
+import { mediaAssets } from "@/lib/media-assets"
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -23,9 +24,9 @@ import { fetchCatalog } from "@/lib/catalog-client"
 import { useFavoritesStore } from "@/store/favoritesStore"
 import { usePlayerStore } from "@/store/playerStore"
 const portraits = [
-  "/hero-pic-left.png",
-  "/hero-pic-left-2.png",
-  "/hero-pic-left-3.png",
+  mediaAssets["hero-pic-left"],
+  mediaAssets["hero-pic-left-2"],
+  mediaAssets["hero-pic-left-3"],
 ]
 export default function HomePage() {
   const router = useRouter()
@@ -83,7 +84,7 @@ export default function HomePage() {
       <section className="home-hero blended-hero">
         <div className="hero-studio-layer">
           <img
-            src="/hero-pic.png"
+            src={mediaAssets["hero-pic"]}
             alt="Senior Man KP producing in the studio"
             fetchPriority="high"
           />
@@ -95,6 +96,8 @@ export default function HomePage() {
             <img
               key={src}
               src={src}
+              fetchPriority={i === 0 ? "high" : "low"}
+              decoding="async"
               alt={i === portrait ? "Portrait of Senior Man KP" : ""}
               className={portrait === i ? "portrait-active" : ""}
               aria-hidden={i !== portrait}

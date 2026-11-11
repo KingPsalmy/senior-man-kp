@@ -1,4 +1,5 @@
 "use client"
+import CoverImage from "@/components/ui/CoverImage"
 
 import { useEffect, useRef, useState } from "react"
 import Link from "next/link"
@@ -239,7 +240,7 @@ export function BeatCard({
           tabIndex={-1}
         >
           {beat.cover_url ? (
-            <img src={beat.cover_url} alt="" loading="lazy" />
+            <CoverImage src={beat.cover_url} alt="" loading="lazy" />
           ) : (
             <div className="cover-placeholder">
               <Music2 size={36} />

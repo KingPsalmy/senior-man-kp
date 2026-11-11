@@ -1,4 +1,5 @@
 "use client"
+import CoverImage from "@/components/ui/CoverImage"
 import { useEffect, useState } from "react"
 import { useParams } from "next/navigation"
 import Link from "next/link"
@@ -98,7 +99,7 @@ export default function BeatDetailPage() {
             <section className="beat-detail-layout">
               <div className="detail-art">
                 {beat.cover_url ? (
-                  <img
+                  <CoverImage sizes="(max-width: 800px) 100vw, 560px" loading="eager"
                     src={beat.cover_url}
                     alt={beat.title + " cover artwork"}
                   />

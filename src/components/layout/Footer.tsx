@@ -1,4 +1,5 @@
 "use client"
+import { mediaAssets } from "@/lib/media-assets"
 import Link from "next/link"
 import { ArrowUpRight, ArrowRight } from "lucide-react"
 const socials = [
@@ -29,7 +30,7 @@ export default function Footer() {
         </div>
         <div className="footer-grid">
           <div className="footer-brand">
-            <img src="/logo-white.png" alt="Senior Man KP" />
+            <img src={mediaAssets["logo-white"]} alt="Senior Man KP" />
             <p>
               Original instrumentals with real feeling
               <br />

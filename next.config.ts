@@ -1,6 +1,13 @@
 import type { NextConfig } from "next"
+import { publicCoverPattern } from "./src/lib/public-media"
+const coverPattern = publicCoverPattern(process.env.NEXT_PUBLIC_SUPABASE_URL)
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  images: {
+    remotePatterns: coverPattern ? [coverPattern] : [],
+    maximumRedirects: 0,
+    minimumCacheTTL: 86400,
+  },
   async redirects() {
     return [
       { source: "/store", destination: "/beatstore/beats", permanent: true },
@@ -19,6 +26,7 @@ const nextConfig: NextConfig = {
         { key: "Strict-Transport-Security", value: "max-age=31536000" },
       ] },
       { source: "/api/:path*", headers: [{ key: "Cache-Control", value: "private, no-store" }] },
+      { source: "/media/:path*", headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }] },
       { source: "/download", headers: [{ key: "Cache-Control", value: "private, no-store" }] },
       { source: "/success", headers: [{ key: "Cache-Control", value: "private, no-store" }] },
     ]

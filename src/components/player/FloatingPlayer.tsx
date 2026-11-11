@@ -1,4 +1,5 @@
 "use client"
+import CoverImage from "@/components/ui/CoverImage"
 
 import { useEffect, useRef, useState } from "react"
 import { usePlayerStore } from "@/store/playerStore"
@@ -232,7 +233,7 @@ export default function FloatingPlayer() {
           <div className="fp-info">
             <div className="fp-cover">
               {beat.cover_url ? (
-                <img src={beat.cover_url} alt={beat.title} />
+                <CoverImage sizes="56px" src={beat.cover_url} alt={beat.title} />
               ) : (
                 <span>♪</span>
               )}

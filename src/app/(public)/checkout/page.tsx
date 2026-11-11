@@ -1,4 +1,5 @@
 "use client"
+import CoverImage from "@/components/ui/CoverImage"
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
@@ -363,7 +364,7 @@ export default function CheckoutPage() {
                         }}
                       >
                         {beat?.cover_url && (
-                          <img
+                          <CoverImage sizes="64px"
                             src={beat.cover_url}
                             alt={beat.title}
                             style={{

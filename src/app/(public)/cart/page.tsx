@@ -1,4 +1,5 @@
 "use client"
+import CoverImage from "@/components/ui/CoverImage"
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { ArrowUpRight, Trash2, ShoppingBag, Music2 } from "lucide-react"
@@ -90,7 +91,7 @@ export default function CartPage() {
                     className="cart-art"
                   >
                     {item.beats?.cover_url ? (
-                      <img src={item.beats.cover_url} alt="" />
+                      <CoverImage sizes="80px" src={item.beats.cover_url} alt="" />
                     ) : (
                       <Music2 />
                     )}

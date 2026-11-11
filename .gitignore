@@ -50,3 +50,4 @@ next-env.d.ts
 /audit-current.json
 /audit-production-current.json
 /security-preflight.json
+/.media-cache-backup/

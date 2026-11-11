@@ -13,7 +13,7 @@
 .stage-reveal {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, #070a0955, #070a09e0), url('/hero-pic-left-2.png') center / cover;
+  background: linear-gradient(180deg, #070a0955, #070a09e0), var(--stage-photo) center / cover;
   transform: scale(1.04);
   transition: transform 1.4s ease;
 }
@@ -90,7 +90,7 @@
 .stage-opening .stage-reveal { transform: scale(1); }
 @media (max-width: 600px) {
   .stage-reveal {
-    background-image: linear-gradient(180deg, #070a0926 15%, #070a0914 42%, #070a09eb 100%), url('/hero-pic-left-2.png');
+    background-image: linear-gradient(180deg, #070a0926 15%, #070a0914 42%, #070a09eb 100%), var(--stage-photo);
     background-position: 47% center;
   }
   .stage-curtain {

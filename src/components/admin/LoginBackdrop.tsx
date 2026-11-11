@@ -1,10 +1,11 @@
 "use client"
+import { mediaAssets } from "@/lib/media-assets"
 
 import { useEffect, useState } from "react"
 import { Pause, Play } from "lucide-react"
 import HeroParticles from "@/components/ui/HeroParticles"
 
-const portraits = ["/hero-pic-left.png", "/hero-pic-left-2.png", "/hero-pic-left-3.png"]
+const portraits = [mediaAssets["hero-pic-left"], mediaAssets["hero-pic-left-2"], mediaAssets["hero-pic-left-3"]]
 
 export default function LoginBackdrop() {
   const [portrait, setPortrait] = useState(0)

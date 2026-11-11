@@ -1,4 +1,5 @@
 "use client"
+import CoverImage from "@/components/ui/CoverImage"
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
@@ -67,7 +68,7 @@ export default function SimilarBeats({ beatId, title }: Props) {
                 position: "relative",
               }}>
                 {beat.cover_url && (
-                  <img src={beat.cover_url} alt={beat.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                  <CoverImage sizes="(max-width: 600px) 50vw, 250px" src={beat.cover_url} alt={beat.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                 )}
               </div>
               <div style={{ padding: "10px 12px" }}>

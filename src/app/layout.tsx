@@ -34,6 +34,7 @@ export default function RootLayout({
       data-scroll-behavior="smooth"
     >
       <head>
+        {process.env.NEXT_PUBLIC_SUPABASE_URL && <link rel="preconnect" href={new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).origin} />}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         <link

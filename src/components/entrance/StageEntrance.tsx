@@ -1,4 +1,5 @@
 "use client"
+import { mediaAssets } from "@/lib/media-assets"
 
 import { useEffect, useRef, useState } from "react"
 import Link from "next/link"
@@ -18,12 +19,12 @@ export default function StageEntrance() {
 
   return (
     <main className={"stage-entrance" + (opening ? " stage-opening" : "")}>
-      <div className="stage-reveal" aria-hidden="true" />
+      <div className="stage-reveal" aria-hidden="true" style={{ "--stage-photo": `url("${mediaAssets["hero-pic-left-2"]}")` } as React.CSSProperties} />
       <div className="stage-curtain stage-curtain-left" aria-hidden="true" />
       <div className="stage-curtain stage-curtain-right" aria-hidden="true" />
       <div className="stage-light" aria-hidden="true" />
       <div className="stage-invitation">
-        <h1><img src="/logo-white.png" alt="Senior Man KP" width="104" height="80" /></h1>
+        <h1><img src={mediaAssets["logo-white"]} alt="Senior Man KP" width="104" height="80" /></h1>
         <Link
           href="/beatstore"
           className="stage-enter"
