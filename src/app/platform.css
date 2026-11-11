@@ -2651,6 +2651,7 @@ button:disabled {
 }
 /* Studio workspace: readable dark surfaces across cards, forms and dialogs. */
 .admin-screen {
+  padding-left: 250px;
   color-scheme: dark;
   --bg-void: #0d1410;
   --bg-card: #17211b;
@@ -2767,10 +2768,10 @@ button:disabled {
   color: #ffc6bb;
 }
 .admin-screen .admin-main {
-  margin-left: 250px !important;
+  margin: 0 auto !important;
   padding: 45px 42px !important;
   min-width: 0;
-  width: calc(100% - 250px) !important;
+  width: 100% !important;
   max-width: 1600px;
 }
 .admin-screen h1 {
@@ -2858,9 +2859,9 @@ button:disabled {
   overflow: hidden;
   color-scheme: dark;
   display: grid !important;
-  grid-template-columns: minmax(0, 600px) minmax(320px, 420px);
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 420px);
   gap: clamp(40px, 7vw, 100px);
-  padding: 64px max(5vw, 24px) 100px !important;
+  padding: 80px max(5vw, 24px) !important;
   background:
     radial-gradient(ellipse at 20% 30%, #253523 0, transparent 60%), #101811 !important;
 }
@@ -2868,9 +2869,8 @@ button:disabled {
   position: relative;
   z-index: 2;
   max-width: 600px;
-  justify-self: start;
-  align-self: end;
-  padding-top: 160px;
+  justify-self: end;
+  align-self: center;
 }
 .login-intro h1 {
   font: 600 clamp(55px, 7vw, 100px)/0.94 var(--font-display);
@@ -2886,6 +2886,7 @@ button:disabled {
   margin-top: 45px;
 }
 .admin-login .login-card {
+  justify-self: end;
   z-index: 2;
   background: #17211bf5 !important;
   border: 1px solid #506153 !important;
@@ -3030,6 +3031,7 @@ button:disabled {
   }
   .admin-screen {
     display: block !important;
+    padding-left: 0;
   }
   .studio-sidebar {
     position: sticky;
@@ -3084,6 +3086,7 @@ button:disabled {
   .login-portrait-controls { left: 50%; transform: translateX(-50%); }
   .login-intro {
     justify-self: center;
+    padding-top: 160px;
     max-width: 420px;
     width: 100%;
   }
