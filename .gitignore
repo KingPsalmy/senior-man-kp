@@ -40,3 +40,13 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 .env.local
+
+/.npm-cache/
+/audit-before.json
+/audit-fix.txt
+/audit-production.json
+/audit-lint.json
+/audit-lint-full.json
+/audit-current.json
+/audit-production-current.json
+/security-preflight.json

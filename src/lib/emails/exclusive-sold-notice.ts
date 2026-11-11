@@ -1,11 +1,12 @@
+import { escapeHtml } from "@/lib/security"
 type ExclusiveSoldNoticeParams = {
   beatTitle: string
 }
 
 export function exclusiveSoldNoticeEmail({ beatTitle }: ExclusiveSoldNoticeParams) {
-  const storeUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/store`
+  const storeUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/beatstore/beats`
 
-  const subject = `${beatTitle} just sold exclusively`
+  const subject = `${escapeHtml(beatTitle)} just sold exclusively`
 
   const html = `
   <div style="background-color:#0a0a0a; padding:40px 20px; font-family:Arial, sans-serif;">
@@ -16,7 +17,7 @@ export function exclusiveSoldNoticeEmail({ beatTitle }: ExclusiveSoldNoticeParam
       </div>
       <div style="padding:32px;">
         <p style="color:#c9c9c9; font-size:14px; line-height:1.6; margin:0 0 16px;">
-          <strong style="color:#F5F0E8;">${beatTitle}</strong> just sold as an exclusive license, so it's now retired from the store.
+          <strong style="color:#F5F0E8;">${escapeHtml(beatTitle)}</strong> just sold as an exclusive license, so it's now retired from the store.
         </p>
         <p style="color:#c9c9c9; font-size:14px; line-height:1.6; margin:0 0 24px;">
           Your license is unaffected — everything you're entitled to still stands. Just didn't want you to be surprised if you went looking for it.

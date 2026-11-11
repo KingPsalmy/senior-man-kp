@@ -1,7 +1,10 @@
 "use client"
 
-import { useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import Navbar from "@/components/layout/Navbar"
+
+import PageIntro from "@/components/ui/PageIntro"
+import { Download, ArrowUpRight, Mail, Music2 } from "lucide-react"
 
 type Purchase = {
   id: string
@@ -39,17 +42,22 @@ const LICENSE_LABELS: Record<string, string> = {
 
 export default function MyDownloadsPage() {
   const [email, setEmail] = useState("")
+  const [reference, setReference] = useState("")
   const [submitted, setSubmitted] = useState(false)
   const [purchases, setPurchases] = useState<PurchaseWithFiles[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  async function handleLookup() {
+  const busy = useRef(false)
+  const autoLoaded = useRef(false)
+  const handleLookup = useCallback(async (email: string, reference: string) => {
+    if (busy.current) return
     if (!email.trim() || !email.includes("@")) {
-      setError("Please enter a valid email address.")
+      setError("Please enter a valid email address")
       return
     }
 
+    busy.current = true
     setLoading(true)
     setError(null)
 
@@ -57,12 +65,15 @@ export default function MyDownloadsPage() {
       const res = await fetch("/api/my-downloads/lookup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email.toLowerCase().trim() }),
+        body: JSON.stringify({
+          email: email.toLowerCase().trim(),
+          reference: reference.trim(),
+        }),
       })
       const data = await res.json()
 
       if (!res.ok || !data.success) {
-        setError(data.error ?? "Something went wrong. Please try again.")
+        setError(data.error ?? "Something went wrong Please try again")
         setLoading(false)
         return
       }
@@ -73,21 +84,42 @@ export default function MyDownloadsPage() {
           files: undefined,
           loading: false,
           error: undefined,
-        }))
+        })),
       )
       setSubmitted(true)
     } catch {
-      setError("Something went wrong. Please try again.")
+      setError("Something went wrong Please try again")
     } finally {
+      busy.current = false
       setLoading(false)
     }
-  }
+  }, [])
+
+  useEffect(() => {
+    if (autoLoaded.current) return
+    autoLoaded.current = true
+    const values = new URLSearchParams(window.location.hash.slice(1))
+    const buyer = values.get("email"),
+      receipt = values.get("reference")
+    if (buyer && receipt) {
+      window.history.replaceState(
+        null,
+        "",
+        window.location.pathname + window.location.search,
+      )
+      // The receipt fragment is client-only and must be consumed after hydration.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setEmail(buyer)
+      setReference(receipt)
+      void handleLookup(buyer, receipt)
+    }
+  }, [handleLookup])
 
   async function handleGetFiles(purchase: PurchaseWithFiles) {
     setPurchases((prev) =>
       prev.map((p) =>
-        p.id === purchase.id ? { ...p, loading: true, error: undefined } : p
-      )
+        p.id === purchase.id ? { ...p, loading: true, error: undefined } : p,
+      ),
     )
 
     try {
@@ -98,9 +130,13 @@ export default function MyDownloadsPage() {
         setPurchases((prev) =>
           prev.map((p) =>
             p.id === purchase.id
-              ? { ...p, loading: false, error: data.error ?? "Failed to load files" }
-              : p
-          )
+              ? {
+                  ...p,
+                  loading: false,
+                  error: data.error ?? "Failed to load files",
+                }
+              : p,
+          ),
         )
         return
       }
@@ -109,16 +145,20 @@ export default function MyDownloadsPage() {
         prev.map((p) =>
           p.id === purchase.id
             ? { ...p, loading: false, files: data.files }
-            : p
-        )
+            : p,
+        ),
       )
     } catch {
       setPurchases((prev) =>
         prev.map((p) =>
           p.id === purchase.id
-            ? { ...p, loading: false, error: "Failed to load files. Please try again." }
-            : p
-        )
+            ? {
+                ...p,
+                loading: false,
+                error: "Failed to load files Please try again",
+              }
+            : p,
+        ),
       )
     }
   }
@@ -127,16 +167,24 @@ export default function MyDownloadsPage() {
     setPurchases((prev) =>
       prev.map((p) =>
         p.id === purchase.id
-          ? { ...p, upgradeLoading: true, upgradeError: undefined, upgradeMessage: undefined }
-          : p
-      )
+          ? {
+              ...p,
+              upgradeLoading: true,
+              upgradeError: undefined,
+              upgradeMessage: undefined,
+            }
+          : p,
+      ),
     )
 
     try {
       const res = await fetch("/api/request-upgrade", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ purchase_id: purchase.id }),
+        body: JSON.stringify({
+          purchase_id: purchase.id,
+          download_token: purchase.download_token,
+        }),
       })
       const data = await res.json()
 
@@ -144,9 +192,14 @@ export default function MyDownloadsPage() {
         setPurchases((prev) =>
           prev.map((p) =>
             p.id === purchase.id
-              ? { ...p, upgradeLoading: false, upgradeError: data.error ?? "Something went wrong. Please try again." }
-              : p
-          )
+              ? {
+                  ...p,
+                  upgradeLoading: false,
+                  upgradeError:
+                    data.error ?? "Something went wrong Please try again",
+                }
+              : p,
+          ),
         )
         return
       }
@@ -154,207 +207,197 @@ export default function MyDownloadsPage() {
       setPurchases((prev) =>
         prev.map((p) =>
           p.id === purchase.id
-            ? { ...p, upgradeLoading: false, upgradeRequested: true, upgradeMessage: data.message }
-            : p
-        )
+            ? {
+                ...p,
+                upgradeLoading: false,
+                upgradeRequested: true,
+                upgradeMessage: data.message,
+              }
+            : p,
+        ),
       )
     } catch {
       setPurchases((prev) =>
         prev.map((p) =>
           p.id === purchase.id
-            ? { ...p, upgradeLoading: false, upgradeError: "Something went wrong. Please try again." }
-            : p
-        )
+            ? {
+                ...p,
+                upgradeLoading: false,
+                upgradeError: "Something went wrong Please try again",
+              }
+            : p,
+        ),
       )
     }
   }
 
   return (
-    <main style={{ backgroundColor: "var(--bg-void)", minHeight: "100vh", paddingBottom: "120px" }}>
+    <main>
       <Navbar />
-
-      <div style={{ maxWidth: "760px", margin: "0 auto", padding: "120px 24px 0" }}>
-        <div style={{ marginBottom: "48px", textAlign: "center" }}>
-          <span style={{ color: "var(--gold)", fontSize: "0.65rem", fontFamily: "var(--font-mono)", letterSpacing: "0.3em", textTransform: "uppercase", display: "block", marginBottom: "12px" }}>
-            Downloads
-          </span>
-          <h1 style={{ color: "var(--text-primary)", fontSize: "clamp(2rem, 5vw, 3rem)", fontWeight: 800, fontFamily: "var(--font-ui)", letterSpacing: "-0.03em", marginBottom: "16px" }}>
-            My Downloads
-          </h1>
-          <p style={{ color: "var(--text-muted)", fontSize: "0.88rem", fontFamily: "var(--font-ui)", lineHeight: 1.7 }}>
-            Enter the email address you used at checkout to access your purchases.
+      <PageIntro
+        eyebrow="Your personal collection"
+        title="Back to the music"
+        description="Open the link in your receipt email to return to your beats No account or password needed"
+      />
+      <div className="container section download-layout">
+        <aside className="surface-panel lookup-panel">
+          <Mail size={28} />
+          <h2>Find your purchase</h2>
+          <p className="muted">
+            Have an older receipt? Use the email and payment reference from that
+            order
           </p>
-        </div>
-
-        {/* Email lookup */}
-        {!submitted && (
-          <div style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-subtle)", borderRadius: "8px", padding: "32px" }}>
-            <div style={{ marginBottom: "16px" }}>
-              <label style={{ color: "var(--text-muted)", fontSize: "0.65rem", fontFamily: "var(--font-mono)", letterSpacing: "0.1em", textTransform: "uppercase", display: "block", marginBottom: "8px" }}>
-                Email Address
-              </label>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault()
+              void handleLookup(email, reference)
+            }}
+            className="stack-form"
+          >
+            <label>
+              Checkout email
               <input
                 type="email"
+                autoComplete="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleLookup()}
+                required
                 placeholder="you@example.com"
-                style={{ width: "100%", padding: "13px 16px", backgroundColor: "var(--bg-elevated)", border: "1px solid var(--border-dim)", borderRadius: "4px", color: "var(--text-primary)", fontSize: "0.88rem", fontFamily: "var(--font-ui)", outline: "none", boxSizing: "border-box" }}
               />
-            </div>
-
-            {error && (
-              <div style={{ backgroundColor: "rgba(255,100,100,0.1)", border: "1px solid rgba(255,100,100,0.3)", borderRadius: "6px", padding: "12px 16px", marginBottom: "16px" }}>
-                <p style={{ color: "#ff6464", fontSize: "0.75rem", fontFamily: "var(--font-ui)" }}>{error}</p>
-              </div>
-            )}
-
-            <button
-              onClick={handleLookup}
-              disabled={loading}
-              style={{ width: "100%", padding: "14px", background: loading ? "var(--bg-elevated)" : "linear-gradient(135deg, #C9A84C, #F5D98B)", border: "none", borderRadius: "4px", cursor: loading ? "not-allowed" : "pointer", color: loading ? "var(--text-muted)" : "#000", fontSize: "0.75rem", fontWeight: 800, fontFamily: "var(--font-ui)", letterSpacing: "0.12em", textTransform: "uppercase" }}
-            >
-              {loading ? "Looking up..." : "Find My Downloads"}
+            </label>
+            <label>
+              Payment reference
+              <input
+                value={reference}
+                onChange={(e) => setReference(e.target.value)}
+                required
+                placeholder="From your receipt"
+              />
+            </label>
+            <button className="button primary" disabled={loading}>
+              {loading ? "Finding your beats…" : "Find my beats"}
+              <ArrowUpRight size={18} />
             </button>
+          </form>
+          {error && (
+            <p className="notice error" role="alert">
+              {error}
+            </p>
+          )}
+          <a className="text-link" href="/contact">
+            Need help finding your receipt?
+          </a>
+        </aside>
+        <section aria-live="polite" aria-busy={loading}>
+          <div className="section-heading">
+            <div>
+              <span className="eyebrow">Ready when you are</span>
+              <h2>Your downloads</h2>
+            </div>
+            {submitted && (
+              <span className="muted">
+                {purchases.length} beat{purchases.length === 1 ? "" : "s"}
+              </span>
+            )}
           </div>
-        )}
-
-        {/* Purchase list */}
-        {submitted && (
-          <>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "24px" }}>
-              <p style={{ color: "var(--text-muted)", fontSize: "0.78rem", fontFamily: "var(--font-ui)" }}>
-                {purchases.length} purchase{purchases.length !== 1 ? "s" : ""} found for <span style={{ color: "var(--gold)" }}>{email}</span>
+          {!submitted ? (
+            <div className="empty-panel">
+              <Music2 size={38} />
+              <h3>
+                {loading
+                  ? "Opening your collection…"
+                  : "Your next session starts here"}
+              </h3>
+              <p>
+                Find your purchase to access the files included with your
+                license
               </p>
-              <button
-                onClick={() => { setSubmitted(false); setPurchases([]); setEmail(""); setError(null) }}
-                style={{ background: "none", border: "none", color: "var(--text-muted)", fontSize: "0.72rem", fontFamily: "var(--font-ui)", cursor: "pointer", textDecoration: "underline" }}
-              >
-                Use different email
-              </button>
             </div>
-
-            <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-              {purchases.map((purchase) => {
-                const isUpgradeEligible =
-                  purchase.license_type !== "exclusive" && !purchase.beat_is_exclusive_sold
-
-                return (
-                  <div key={purchase.id} style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-subtle)", borderRadius: "8px", padding: "24px" }}>
-                    <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: "16px", gap: "12px" }}>
-                      <div>
-                        <div style={{ color: "var(--text-primary)", fontSize: "0.95rem", fontWeight: 700, fontFamily: "var(--font-ui)", marginBottom: "6px" }}>
-                          {purchase.beat_title}
-                        </div>
-                        <div style={{ display: "flex", gap: "10px", alignItems: "center", flexWrap: "wrap" }}>
-                          <span style={{ backgroundColor: "rgba(201,168,76,0.12)", color: "var(--gold)", fontSize: "0.62rem", fontFamily: "var(--font-mono)", padding: "3px 10px", borderRadius: "2px", textTransform: "uppercase" }}>
-                            {LICENSE_LABELS[purchase.license_type] ?? purchase.license_type}
-                          </span>
-                          <span style={{ color: "var(--text-muted)", fontSize: "0.65rem", fontFamily: "var(--font-mono)" }}>
-                            ₦{purchase.amount_paid?.toLocaleString()}
-                          </span>
-                          <span style={{ color: "var(--text-muted)", fontSize: "0.65rem", fontFamily: "var(--font-mono)" }}>
-                            {new Date(purchase.created_at).toLocaleDateString("en-NG", { day: "numeric", month: "short", year: "numeric" })}
-                          </span>
-                        </div>
-                      </div>
-
-                      {!purchase.files && (
-                        <button
-                          onClick={() => handleGetFiles(purchase)}
-                          disabled={purchase.loading}
-                          style={{ padding: "10px 20px", background: purchase.loading ? "var(--bg-elevated)" : "linear-gradient(135deg, #C9A84C, #F5D98B)", border: "none", borderRadius: "4px", cursor: purchase.loading ? "not-allowed" : "pointer", color: purchase.loading ? "var(--text-muted)" : "#000", fontSize: "0.68rem", fontWeight: 700, fontFamily: "var(--font-ui)", letterSpacing: "0.1em", textTransform: "uppercase", flexShrink: 0 }}
-                        >
-                          {purchase.loading ? "Loading..." : "Get Files"}
-                        </button>
-                      )}
+          ) : purchases.length === 0 ? (
+            <div className="empty-panel">
+              <h3>No purchases found</h3>
+              <p>Check that the email and reference match your receipt</p>
+            </div>
+          ) : (
+            <div className="download-list">
+              {purchases.map((p) => (
+                <article key={p.id} className="surface-panel purchase-card">
+                  <div className="purchase-top">
+                    <div>
+                      <span className="eyebrow">
+                        {LICENSE_LABELS[p.license_type]} license
+                      </span>
+                      <h3>{p.beat_title || "Your beat"}</h3>
+                      <small className="muted">
+                        Purchased{" "}
+                        {new Date(p.created_at).toLocaleDateString("en-GB", {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                        })}
+                      </small>
                     </div>
-
-                    {purchase.error && (
-                      <div style={{ backgroundColor: "rgba(255,100,100,0.1)", border: "1px solid rgba(255,100,100,0.3)", borderRadius: "6px", padding: "10px 14px", marginBottom: "12px" }}>
-                        <p style={{ color: "#ff6464", fontSize: "0.72rem", fontFamily: "var(--font-ui)" }}>{purchase.error}</p>
-                      </div>
-                    )}
-
-                    {purchase.files && purchase.files.length > 0 && (
-                      <div style={{ borderTop: "1px solid var(--border-subtle)", paddingTop: "16px", display: "flex", flexDirection: "column", gap: "10px", marginBottom: isUpgradeEligible ? "16px" : 0 }}>
-                        {purchase.files.map((file) => (
-                          <a
-                            key={file.label}
-                            href={file.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 16px", backgroundColor: "var(--bg-elevated)", border: "1px solid var(--border-dim)", borderRadius: "6px", textDecoration: "none" }}
-                          >
-                            <span style={{ color: "var(--text-primary)", fontSize: "0.78rem", fontFamily: "var(--font-ui)", fontWeight: 600 }}>
-                              {file.label}
-                            </span>
-                            <span style={{ color: "var(--gold)", fontSize: "0.68rem", fontFamily: "var(--font-ui)", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase" }}>
-                              Download ↓
-                            </span>
-                          </a>
-                        ))}
-                        <p style={{ color: "var(--text-muted)", fontSize: "0.62rem", fontFamily: "var(--font-ui)", marginTop: "4px" }}>
-                          Download links are active for 1 hour. Refresh this page to generate new links.
-                        </p>
-                      </div>
-                    )}
-
-                    {/* Upgrade to Exclusive */}
-                    {isUpgradeEligible && (
-                      <div style={{ borderTop: "1px solid var(--border-subtle)", paddingTop: "16px" }}>
-                        {purchase.upgradeRequested ? (
-                          <div style={{ backgroundColor: "rgba(201,168,76,0.08)", border: "1px solid rgba(201,168,76,0.25)", borderRadius: "6px", padding: "12px 14px" }}>
-                            <p style={{ color: "var(--gold)", fontSize: "0.75rem", fontFamily: "var(--font-ui)" }}>
-                              {purchase.upgradeMessage ?? "Upgrade request sent — we'll be in touch."}
-                            </p>
-                          </div>
-                        ) : (
-                          <>
-                            <button
-                              onClick={() => handleRequestUpgrade(purchase)}
-                              disabled={purchase.upgradeLoading}
-                              style={{
-                                width: "100%",
-                                padding: "12px",
-                                background: "transparent",
-                                border: "1px solid var(--gold)",
-                                borderRadius: "4px",
-                                cursor: purchase.upgradeLoading ? "not-allowed" : "pointer",
-                                color: purchase.upgradeLoading ? "var(--text-muted)" : "var(--gold)",
-                                fontSize: "0.7rem",
-                                fontWeight: 700,
-                                fontFamily: "var(--font-ui)",
-                                letterSpacing: "0.1em",
-                                textTransform: "uppercase",
-                              }}
-                            >
-                              {purchase.upgradeLoading ? "Sending Request..." : "Upgrade to Exclusive"}
-                            </button>
-                            {purchase.upgradeError && (
-                              <p style={{ color: "#ff6464", fontSize: "0.7rem", fontFamily: "var(--font-ui)", marginTop: "8px" }}>
-                                {purchase.upgradeError}
-                              </p>
-                            )}
-                          </>
-                        )}
-                      </div>
-                    )}
+                    <Download size={24} />
                   </div>
-                )
-              })}
+                  {p.files ? (
+                    <div className="file-links">
+                      {p.files.map((file) => (
+                        <a
+                          className="button"
+                          key={file.label}
+                          href={file.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          {file.label}
+                          <Download size={16} />
+                        </a>
+                      ))}
+                      <button
+                        className="text-link"
+                        onClick={() => handleGetFiles(p)}
+                        disabled={p.loading}
+                      >
+                        {p.loading ? "Refreshing…" : "Refresh file links"}
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      className="button primary"
+                      onClick={() => handleGetFiles(p)}
+                      disabled={p.loading}
+                    >
+                      {p.loading ? "Preparing files…" : "Get my files"}
+                      <Download size={16} />
+                    </button>
+                  )}
+                  {p.error && <p className="notice error">{p.error}</p>}
+                  {p.license_type !== "exclusive" &&
+                    !p.beat_is_exclusive_sold && (
+                      <button
+                        className="text-link upgrade-link"
+                        onClick={() => handleRequestUpgrade(p)}
+                        disabled={p.upgradeLoading || p.upgradeRequested}
+                      >
+                        {p.upgradeLoading
+                          ? "Sending request…"
+                          : p.upgradeRequested
+                            ? "Upgrade request sent"
+                            : "Request a license upgrade"}
+                        <ArrowUpRight size={14} />
+                      </button>
+                    )}
+                  {p.upgradeMessage && (
+                    <p className="notice">{p.upgradeMessage}</p>
+                  )}
+                  {p.upgradeError && (
+                    <p className="notice error">{p.upgradeError}</p>
+                  )}
+                </article>
+              ))}
             </div>
-
-            <div style={{ marginTop: "40px", padding: "20px", backgroundColor: "var(--bg-card)", border: "1px solid var(--border-subtle)", borderRadius: "8px", textAlign: "center" }}>
-              <p style={{ color: "var(--text-muted)", fontSize: "0.78rem", fontFamily: "var(--font-ui)", lineHeight: 1.7 }}>
-                Can't find your purchase or having issues downloading?{" "}
-                <a href="mailto:contact@seniormankp.com" style={{ color: "var(--gold)" }}>
-                  contact@seniormankp.com
-                </a>
-              </p>
-            </div>
-          </>
-        )}
+          )}
+        </section>
       </div>
     </main>
   )

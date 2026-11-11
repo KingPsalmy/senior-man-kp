@@ -1,85 +1,40 @@
-import { NextRequest, NextResponse } from "next/server"
-import { createClient } from "@supabase/supabase-js"
+export { POST, PATCH, DELETE } from "../admin/beats/route"
+import { serviceClient } from "@/lib/admin"
+import { PUBLIC_BEAT_FIELDS } from "@/lib/catalog"
+import { errorResponse, isUuid, RequestError } from "@/lib/security"
 
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
-
-async function verifyAdmin(req: NextRequest) {
-  const authHeader = req.headers.get("authorization")
-  const token = authHeader?.replace("Bearer ", "")
-
-  if (!token) return false
-
-  const { data, error } = await supabaseAdmin.auth.getUser(token)
-  if (error || !data.user) return false
-
-  return true
-}
-
-export async function POST(req: NextRequest) {
-  const isAdmin = await verifyAdmin(req)
-  if (!isAdmin) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-  }
-
+export async function GET(req: Request) {
   try {
-    const body = await req.json()
-    const { error } = await supabaseAdmin.from("beats").insert(body)
-
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 400 })
+    const params = new URL(req.url).searchParams
+    let query = serviceClient()
+      .from("beats")
+      .select(PUBLIC_BEAT_FIELDS)
+      .eq("is_published", true)
+      .eq("is_exclusive_sold", false)
+      .order("created_at", { ascending: false })
+    for (const key of ["slug", "genre"] as const) {
+      const value = params.get(key)
+      if (value && value.length > 200) throw new RequestError("Invalid filter")
+      if (value) query = query.eq(key, value)
     }
-
-    return NextResponse.json({ success: true })
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message || "Server error" }, { status: 500 })
-  }
-}
-
-export async function PATCH(req: NextRequest) {
-  const isAdmin = await verifyAdmin(req)
-  if (!isAdmin) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-  }
-
-  try {
-    const { id, ...updates } = await req.json()
-    const { error } = await supabaseAdmin.from("beats").update(updates).eq("id", id)
-
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 400 })
+    if (params.has("ids")) {
+      const ids = params.get("ids")!.split(",")
+      if (ids.length > 50 || !ids.every(isUuid))
+        throw new RequestError("Invalid beat IDs")
+      query = query.in("id", ids)
     }
-
-    return NextResponse.json({ success: true })
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message || "Server error" }, { status: 500 })
-  }
-}
-
-export async function DELETE(req: NextRequest) {
-  const isAdmin = await verifyAdmin(req)
-  if (!isAdmin) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-  }
-
-  try {
-    const { searchParams } = new URL(req.url)
-    const id = searchParams.get("id")
-
-    if (!id) {
-      return NextResponse.json({ error: "Missing id" }, { status: 400 })
+    const exclude = params.get("exclude")
+    if (exclude) {
+      if (!isUuid(exclude)) throw new RequestError("Invalid beat ID")
+      query = query.neq("id", exclude)
     }
-
-    const { error } = await supabaseAdmin.from("beats").delete().eq("id", id)
-
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 400 })
-    }
-
-    return NextResponse.json({ success: true })
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message || "Server error" }, { status: 500 })
+    const limit = Number(params.get("limit") || 1000)
+    if (!Number.isInteger(limit) || limit < 1 || limit > 1000)
+      throw new RequestError("Invalid limit")
+    const { data, error } = await query.limit(limit)
+    if (error) throw error
+    return Response.json({ beats: data })
+  } catch (error) {
+    return errorResponse(error)
   }
 }

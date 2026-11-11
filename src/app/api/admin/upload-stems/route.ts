@@ -1,12 +1,8 @@
+import { requireAdmin } from "@/lib/admin"
+import { errorResponse, readJson, RequestError } from "@/lib/security"
 import { NextRequest, NextResponse } from "next/server"
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3"
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner"
-import { createClient } from "@supabase/supabase-js"
-
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
 
 const r2 = new S3Client({
   region: "auto",
@@ -19,35 +15,17 @@ const r2 = new S3Client({
   },
 })
 
-async function verifyAdmin(req: NextRequest) {
-  const authHeader = req.headers.get("authorization")
-  const token = authHeader?.replace("Bearer ", "")
-  if (!token) return false
-
-  const { data, error } = await supabaseAdmin.auth.getUser(token)
-  if (error || !data.user?.email) return false
-
-  const { data: adminRow } = await supabaseAdmin
-    .from("admin_users")
-    .select("id")
-    .eq("email", data.user.email)
-    .maybeSingle()
-
-  return !!adminRow
-}
 
 export async function POST(req: NextRequest) {
-  const isAdmin = await verifyAdmin(req)
-  if (!isAdmin) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-  }
-
   try {
-    const { path, contentType } = await req.json()
+    await requireAdmin(req)
+    const { path, contentType } = await readJson(req)
 
-    if (!path) {
-      return NextResponse.json({ error: "Missing path" }, { status: 400 })
+    if (typeof path !== "string" || path.length > 250 || !/^(wavs|stems)\/[a-zA-Z0-9_ .()-]+\.(wav|zip)$/i.test(path) || path.includes("..")) {
+      return NextResponse.json({ error: "Invalid WAV or stems path" }, { status: 400 })
     }
+
+    if (contentType !== undefined && (typeof contentType !== "string" || !["audio/wav", "audio/x-wav", "audio/wave", "application/zip", "application/x-zip-compressed", "application/octet-stream"].includes(contentType))) throw new RequestError("Invalid file type")
 
     const command = new PutObjectCommand({
       Bucket: process.env.R2_BUCKET_NAME!,
@@ -61,6 +39,6 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ success: true, signedUrl, fileUrl })
   } catch (err: any) {
-    return NextResponse.json({ error: err.message || "Failed to generate upload URL" }, { status: 500 })
+    return errorResponse(err)
   }
 }

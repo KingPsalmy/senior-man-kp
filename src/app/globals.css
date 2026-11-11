@@ -1,4 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,700;1,800;1,900&family=Barlow+Condensed:wght@500;600;700;800;900&family=JetBrains+Mono:wght@300;400;500&display=swap');
 @import "tailwindcss";
 
 @theme {
@@ -27,7 +26,7 @@
   --border-gold-bright: rgba(201, 168, 76, 0.5);
   --text-primary: #F5F0E8;
   --text-secondary: rgba(245, 240, 232, 0.6);
-  --text-muted: rgba(245, 240, 232, 0.35);
+  --text-muted: rgba(245, 240, 232, 0.62);
   --font-serif: 'DM Serif Display', serif;
   --font-display: 'Barlow Condensed', sans-serif;
   --font-ui: 'Barlow', sans-serif;
@@ -373,3 +372,18 @@ body {
 .wave-bar-3 { animation: wave-bar 0.8s ease-in-out infinite; animation-delay: 0.3s; }
 .wave-bar-4 { animation: wave-bar 0.8s ease-in-out infinite; animation-delay: 0.45s; }
 
+
+/* Keyboard access, legibility and touch behavior retain the store palette. */
+:focus-visible { outline: 2px solid var(--gold) !important; outline-offset: 4px; }
+button:disabled { cursor: not-allowed; opacity: 0.65; }
+button, a, input, select, textarea { -webkit-tap-highlight-color: rgba(201,168,76,0.18); }
+input, select, textarea { color-scheme: dark; }
+.skip-link { position: fixed; top: 8px; left: 16px; z-index: 1000; padding: 12px 20px; background: var(--gold); color: #000; border-radius: 6px; transform: translateY(-160%); }
+.skip-link:focus { transform: translateY(0); }
+@media (max-width: 600px) {
+  input, select, textarea { font-size: 16px !important; }
+  .checkout-grid > * { min-width: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+}

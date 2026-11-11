@@ -1,3 +1,4 @@
+import { escapeHtml } from "@/lib/security"
 type CartItem = {
   title: string
   license_type: string
@@ -18,8 +19,8 @@ export function abandonedCartReminderEmail({ items, total }: AbandonedCartRemind
 
   const itemsHtml = items.map((item) => `
     <tr>
-      <td style="color:#F5F0E8; font-size:13px; padding:8px 0;">${item.title}</td>
-      <td style="color:#8a8a8a; font-size:12px; padding:8px 0; text-transform:uppercase;">${item.license_type}</td>
+      <td style="color:#F5F0E8; font-size:13px; padding:8px 0;">${escapeHtml(item.title)}</td>
+      <td style="color:#8a8a8a; font-size:12px; padding:8px 0; text-transform:uppercase;">${escapeHtml(item.license_type)}</td>
       <td style="color:#F5F0E8; font-size:13px; padding:8px 0; text-align:right;">₦${item.price.toLocaleString()}</td>
     </tr>
   `).join("")

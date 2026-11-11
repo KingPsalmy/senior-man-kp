@@ -1,8 +1,9 @@
 import { create } from "zustand"
 
 export type PlayerBeat = {
-  id: number
+  id: string | number
   title: string
+  slug?: string
   genre: string
   bpm: number
   preview_url?: string | null
@@ -17,7 +18,18 @@ function loadHistory(): PlayerBeat[] {
   if (typeof window === "undefined") return []
   try {
     const raw = localStorage.getItem(HISTORY_KEY)
-    return raw ? JSON.parse(raw) : []
+    const parsed: unknown = raw ? JSON.parse(raw) : []
+    return Array.isArray(parsed)
+      ? parsed
+          .filter(
+            (beat): beat is PlayerBeat =>
+              !!beat &&
+              typeof beat === "object" &&
+              (typeof beat.id === "string" || typeof beat.id === "number") &&
+              typeof beat.title === "string",
+          )
+          .slice(0, HISTORY_LIMIT)
+      : []
   } catch {
     return []
   }
@@ -37,15 +49,34 @@ function recordPlay(beat: PlayerBeat, history: PlayerBeat[]) {
   return updated
 }
 
+export function shuffleBeats(beats: PlayerBeat[]): PlayerBeat[] {
+  const shuffled = [
+    ...new Map(
+      beats.filter((b) => b.preview_url).map((b) => [String(b.id), b]),
+    ).values(),
+  ]
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+  }
+  return shuffled
+}
+
 type PlayerStore = {
   currentBeat: PlayerBeat | null
   isPlaying: boolean
+  autoplayBlocked: boolean
+  playbackError: string | null
+  startRadio: (beats: PlayerBeat[]) => void
+  resume: () => void
+  playbackBlocked: () => void
+  playbackFailed: () => void
   queue: PlayerBeat[]
   currentIndex: number
   volume: number
   progress: number
   duration: number
-  lastBeatId: number | null
+  lastBeatId: string | number | null
   lastPlayed: PlayerBeat[]
   hasHydratedHistory: boolean
   setQueue: (beats: PlayerBeat[]) => void
@@ -66,6 +97,8 @@ type PlayerStore = {
 export const usePlayerStore = create<PlayerStore>((set, get) => ({
   currentBeat: null,
   isPlaying: false,
+  autoplayBlocked: false,
+  playbackError: null,
   queue: [],
   currentIndex: 0,
   volume: 0.8,
@@ -75,39 +108,98 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
   lastPlayed: [],
   hasHydratedHistory: false,
 
-  setQueue: (beats) => {
-    const shuffled = [...beats].sort(() => Math.random() - 0.5)
-    set({ queue: shuffled, currentIndex: 0, currentBeat: shuffled[0] })
+  startRadio: (beats) => {
+    // A route transition, a repeated response, or an intentional pause must never
+    // choose a new track or reset the current audio position.
+    if (get().currentBeat) return
+    const queue = shuffleBeats(beats)
+    if (!queue.length) return
+    set({
+      queue,
+      currentIndex: 0,
+      currentBeat: queue[0],
+      isPlaying: true,
+      autoplayBlocked: false,
+      playbackError: null,
+      progress: 0,
+      lastPlayed: recordPlay(queue[0], get().lastPlayed),
+    })
   },
+  setQueue: (beats) => {
+    const queue = shuffleBeats(beats)
+    const index = queue.findIndex(
+      (b) => String(b.id) === String(get().currentBeat?.id),
+    )
+    set({ queue, currentIndex: index >= 0 ? index : -1 })
+  },
+  resume: () => {
+    if (get().currentBeat)
+      set({ isPlaying: true, autoplayBlocked: false, playbackError: null })
+  },
+  playbackBlocked: () =>
+    set({ isPlaying: false, autoplayBlocked: true, playbackError: null }),
+  playbackFailed: () =>
+    set({
+      isPlaying: false,
+      autoplayBlocked: false,
+      playbackError: "This preview could not be loaded — try another beat",
+    }),
 
   play: (beat) => {
     const { queue, currentBeat, lastPlayed } = get()
-    const index = queue.findIndex((b) => b.id === beat.id)
+    if (
+      String(currentBeat?.id) === String(beat.id) &&
+      currentBeat?.preview_url === beat.preview_url
+    ) {
+      set({ isPlaying: true, autoplayBlocked: false, playbackError: null })
+      return
+    }
+    const index = queue.findIndex((b) => String(b.id) === String(beat.id))
     set({
       currentBeat: beat,
       isPlaying: true,
-      currentIndex: index >= 0 ? index : 0,
+      autoplayBlocked: false,
+      playbackError: null,
+      currentIndex: index >= 0 ? index : -1,
       progress: 0,
       lastBeatId: currentBeat?.id ?? null,
       lastPlayed: recordPlay(beat, lastPlayed),
     })
   },
 
-  pause: () => set({ isPlaying: false }),
+  pause: () => set({ isPlaying: false, autoplayBlocked: false }),
 
   toggle: () => {
     const { isPlaying } = get()
-    set({ isPlaying: !isPlaying })
+    if (isPlaying) get().pause()
+    else get().resume()
   },
 
-  restart: () => set({ progress: 0, isPlaying: true }),
+  restart: () =>
+    set({
+      progress: 0,
+      isPlaying: true,
+      autoplayBlocked: false,
+      playbackError: null,
+    }),
 
   next: () => {
-    const { queue, currentIndex, currentBeat, lastPlayed } = get()
+    let { queue } = get()
+    const { currentIndex } = get()
+    const { currentBeat, lastPlayed } = get()
     if (!queue.length) return
-    const nextIndex = (currentIndex + 1) % queue.length
+    let nextIndex = currentIndex + 1
+    if (nextIndex >= queue.length) {
+      queue = shuffleBeats(queue)
+      if (queue.length > 1 && String(queue[0].id) === String(currentBeat?.id))
+        [queue[0], queue[1]] = [queue[1], queue[0]]
+      nextIndex = 0
+    }
     const nextBeat = queue[nextIndex]
     set({
+      queue,
+      autoplayBlocked: false,
+      playbackError: null,
       currentIndex: nextIndex,
       currentBeat: nextBeat,
       isPlaying: true,
@@ -118,11 +210,18 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
   },
 
   prev: () => {
-    const { queue, currentIndex, currentBeat, progress, lastBeatId, lastPlayed } = get()
+    const {
+      queue,
+      currentIndex,
+      currentBeat,
+      progress,
+      lastBeatId,
+      lastPlayed,
+    } = get()
     if (!queue.length) return
 
     if (progress > 3) {
-      set({ progress: 0, isPlaying: true })
+      get().restart()
       return
     }
 
@@ -131,6 +230,8 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
       if (lastIndex >= 0) {
         const targetBeat = queue[lastIndex]
         set({
+          autoplayBlocked: false,
+          playbackError: null,
           currentIndex: lastIndex,
           currentBeat: targetBeat,
           isPlaying: true,
@@ -142,9 +243,12 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
       }
     }
 
-    const prevIndex = (currentIndex - 1 + queue.length) % queue.length
+    const prevIndex =
+      (Math.max(0, currentIndex) - 1 + queue.length) % queue.length
     const prevBeat = queue[prevIndex]
     set({
+      autoplayBlocked: false,
+      playbackError: null,
       currentIndex: prevIndex,
       currentBeat: prevBeat,
       isPlaying: true,
@@ -165,7 +269,9 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
 
   // IDs are UUID strings at runtime, so compare as strings
   removeFromHistory: (beatId) => {
-    const updated = get().lastPlayed.filter((b) => String(b.id) !== String(beatId))
+    const updated = get().lastPlayed.filter(
+      (b) => String(b.id) !== String(beatId),
+    )
     saveHistory(updated)
     set({ lastPlayed: updated })
   },

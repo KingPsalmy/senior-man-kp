@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
 import "./globals.css"
-import Footer from "@/components/layout/Footer"
-import PlayerWrapper from "@/components/player/PlayerWrapper"
+import SiteChrome from "@/components/layout/SiteChrome"
+import "./platform.css"
 
 export const metadata: Metadata = {
   title: "Senior Man KP — Official Beat Store",
@@ -44,8 +44,8 @@ export default function RootLayout({
       </head>
       <body>
         {children}
-        <PlayerWrapper />
-        <Footer />
+        <SiteChrome />
+
       </body>
     </html>
   )

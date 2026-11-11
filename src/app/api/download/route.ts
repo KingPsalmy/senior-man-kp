@@ -1,3 +1,4 @@
+import { isUuid } from "@/lib/security"
 import { NextRequest, NextResponse } from "next/server"
 import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3"
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner"
@@ -30,7 +31,7 @@ function extractR2Key(fileUrl: string | null): string | null {
 export async function GET(req: NextRequest) {
   const token = req.nextUrl.searchParams.get("token")
 
-  if (!token) {
+  if (!isUuid(token)) {
     return NextResponse.json(
       { error: "Missing download token" },
       { status: 400 }
@@ -51,6 +52,12 @@ export async function GET(req: NextRequest) {
       { status: 404 }
     )
   }
+
+  if (purchase.download_expires_at && (!Number.isFinite(Date.parse(purchase.download_expires_at)) || Date.parse(purchase.download_expires_at) <= Date.now())) {
+    return NextResponse.json({ error: "Download link has expired" }, { status: 410 })
+  }
+
+  if (!["basic", "premium", "unlimited", "exclusive"].includes(purchase.license_type)) return NextResponse.json({ error: "Invalid license" }, { status: 403 })
 
   // Fetch the beat's actual R2 file URLs
   const { data: beat, error: beatError } = await supabase

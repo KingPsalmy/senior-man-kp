@@ -1,3 +1,5 @@
+import { requireAdmin } from "@/lib/admin"
+import { errorResponse, readJson, isUuid, validReference } from "@/lib/security"
 import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@supabase/supabase-js"
 import { resend } from "@/lib/resend"
@@ -8,34 +10,14 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
-async function verifyAdmin(req: NextRequest) {
-  const authHeader = req.headers.get("authorization")
-  const token = authHeader?.replace("Bearer ", "")
-  if (!token) return false
-
-  const { data, error } = await supabase.auth.getUser(token)
-  if (error || !data.user?.email) return false
-
-  const { data: adminRow } = await supabase
-    .from("admin_users")
-    .select("id")
-    .eq("email", data.user.email)
-    .maybeSingle()
-
-  return !!adminRow
-}
 
 export async function POST(req: NextRequest) {
-  const isAdmin = await verifyAdmin(req)
-  if (!isAdmin) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-  }
-
   try {
-    const { paystack_reference, beat_id } = await req.json()
+    await requireAdmin(req)
+    const { paystack_reference, beat_id, refund_confirmed } = await readJson(req)
 
-    if (!paystack_reference || !beat_id) {
-      return NextResponse.json({ error: "Missing paystack_reference or beat_id" }, { status: 400 })
+    if (!validReference(paystack_reference) || !isUuid(beat_id) || refund_confirmed !== true) {
+      return NextResponse.json({ error: "Confirm the refund was completed in Paystack and provide valid purchase details." }, { status: 400 })
     }
 
     const { data: purchase, error: fetchError } = await supabase
@@ -49,27 +31,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Purchase not found" }, { status: 404 })
     }
 
-    if (purchase.payment_status === "refunded") {
-      return NextResponse.json({ error: "Already refunded" }, { status: 400 })
+    if (purchase.payment_status !== "success") {
+      return NextResponse.json({ error: "Only a successful purchase can be marked refunded" }, { status: 400 })
     }
 
-    const { error: updateError } = await supabase
-      .from("purchases")
-      .update({ payment_status: "refunded" })
-      .eq("id", purchase.id)
-
-    if (updateError) {
-      console.error("Refund update failed:", updateError)
-      return NextResponse.json({ error: "Failed to mark refund" }, { status: 500 })
-    }
-
-    // If this was an exclusive purchase, restore the beat to the store
-    if (purchase.license_type === "exclusive") {
-      await supabase
-        .from("beats")
-        .update({ is_exclusive_sold: false, is_published: true })
-        .eq("id", purchase.beat_id)
-    }
+    const { data: recorded, error: updateError } = await supabase.rpc("record_completed_refund", { p_reference: paystack_reference, p_beat_id: beat_id })
+    if (updateError) throw updateError
+    if (!recorded) return NextResponse.json({ error: "This refund was already recorded or the purchase is not eligible." }, { status: 409 })
 
     try {
       const { subject, html } = refundConfirmationEmail({
@@ -90,6 +58,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: true })
   } catch (err) {
     console.error("[admin refund error]", err)
-    return NextResponse.json({ error: "Server error" }, { status: 500 })
+    return errorResponse(err)
   }
 }

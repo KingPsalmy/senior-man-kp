@@ -1,5 +1,7 @@
 "use client"
 
+import AdminSidebar from "@/components/admin/AdminSidebar"
+
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase/client"
@@ -13,13 +15,6 @@ type Customer = {
   lastPurchase: string
 }
 
-const navItems = [
-  { icon: "⊞", label: "Dashboard", href: "/admin/dashboard" },
-  { icon: "♪", label: "Beats", href: "/admin/dashboard/beats" },
-  { icon: "💳", label: "Purchases", href: "/admin/dashboard/purchases" },
-  { icon: "👤", label: "Customers", href: "/admin/dashboard/customers", active: true },
-  { icon: "⚙", label: "Settings", href: "/admin/dashboard/settings" },
-]
 
 export default function CustomersPage() {
   const router = useRouter()
@@ -118,39 +113,10 @@ export default function CustomersPage() {
   }
 
   return (
-    <main style={{ minHeight: "100vh", backgroundColor: "var(--bg-void)", display: "flex" }}>
+    <main className="admin-screen" style={{ minHeight: "100vh", backgroundColor: "var(--bg-void)", display: "flex" }}>
 
       {/* Sidebar (desktop: left rail — mobile: bottom tab bar, styled via globals.css) */}
-      <aside className="admin-sidebar" style={{
-        width: "220px", flexShrink: 0,
-        backgroundColor: "var(--bg-deep)",
-        borderRight: "1px solid var(--border-subtle)",
-        display: "flex", flexDirection: "column",
-        padding: "24px 0",
-        position: "fixed", top: 0, left: 0, bottom: 0, zIndex: 40,
-      }}>
-        <div style={{ padding: "0 24px 24px", borderBottom: "1px solid var(--border-subtle)" }}>
-          <div style={{ color: "var(--text-muted)", fontSize: "0.6rem", letterSpacing: "0.3em", textTransform: "uppercase", fontFamily: "var(--font-mono)", marginBottom: "4px" }}>Senior Man</div>
-          <div style={{ background: "linear-gradient(135deg, #C9A84C, #F5D98B)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", fontSize: "1.8rem", fontWeight: 800, fontFamily: "var(--font-ui)", lineHeight: 1 }}>KP</div>
-        </div>
-        <nav style={{ flex: 1, padding: "16px 0" }}>
-          {navItems.map((item) => (
-            <Link key={item.label} href={item.href} style={{
-              display: "flex", alignItems: "center", gap: "12px",
-              padding: "11px 24px", textDecoration: "none",
-              color: (item as any).active ? "var(--gold)" : "var(--text-secondary)",
-              fontSize: "0.9rem", fontFamily: "var(--font-ui)", fontWeight: 500,
-              backgroundColor: (item as any).active ? "rgba(201,168,76,0.06)" : "transparent",
-              borderRight: (item as any).active ? "2px solid var(--gold)" : "2px solid transparent",
-            }}>
-              <span>{item.icon}</span>{item.label}
-            </Link>
-          ))}
-          <button onClick={handleLogout} style={{ width: "100%", display: "flex", alignItems: "center", gap: "12px", padding: "11px 24px", background: "none", border: "none", color: "var(--text-muted)", fontSize: "0.9rem", fontFamily: "var(--font-ui)", cursor: "pointer" }}>
-            <span>→</span> Logout
-          </button>
-        </nav>
-      </aside>
+      <AdminSidebar />
 
       {/* Main */}
       <div className="admin-main" style={{ marginLeft: "220px", flex: 1, padding: "32px", minWidth: 0 }}>

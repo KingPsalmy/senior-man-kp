@@ -1,171 +1,136 @@
 "use client"
-
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { useState, useEffect } from "react"
+import { useEffect, useRef, useState } from "react"
+import { ArrowUpRight, Heart, Menu, ShoppingBag, X } from "lucide-react"
 import { refreshCartCount } from "@/lib/cart"
 import { useCartStore } from "@/store/cartStore"
-
+import { useFavoritesStore } from "@/store/favoritesStore"
 const links = [
-  { href: "/store", label: "Store" },
+  { href: "/beatstore/beats", label: "Discover beats" },
   { href: "/licensing", label: "Licensing" },
-  { href: "/faq", label: "FAQ" },
-  { href: "/contact", label: "Contact" },
+  { href: "/my-downloads", label: "My downloads" },
 ]
-
 export default function Navbar() {
-  const pathname = usePathname()
-  const [menuOpen, setMenuOpen] = useState(false)
-  const cartCount = useCartStore((state) => state.count)
-
+  const path = usePathname()
+  const [menuPath, setMenuPath] = useState<string | null>(null)
+  const open = menuPath === path
+  const button = useRef<HTMLButtonElement>(null)
+  const count = useCartStore((s) => s.count)
+  const savedError = useFavoritesStore((s) => s.error)
   useEffect(() => {
     refreshCartCount().catch(() => {})
   }, [])
-
   useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth > 768) setMenuOpen(false)
+    if (!open) return
+    const close = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setMenuPath(null)
+        button.current?.focus()
+      }
     }
-    window.addEventListener("resize", handleResize)
-    return () => window.removeEventListener("resize", handleResize)
-  }, [])
-
-  useEffect(() => {
-    setMenuOpen(false)
-  }, [pathname])
-
-  const cartLabel = cartCount === 0 ? "0 Items" : `${cartCount} Item${cartCount !== 1 ? "s" : ""}`
-
+    const resize = () => {
+      if (window.innerWidth > 900) setMenuPath(null)
+    }
+    window.addEventListener("keydown", close)
+    window.addEventListener("resize", resize)
+    return () => {
+      window.removeEventListener("keydown", close)
+      window.removeEventListener("resize", resize)
+    }
+  }, [open])
   return (
     <>
-      <header style={{
-        position: "fixed", top: 0, left: 0, right: 0, zIndex: 50,
-        background: "rgba(2,2,2,0.88)",
-        backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)",
-        borderBottom: "1px solid rgba(255,255,255,0.06)",
-        height: "76px",
-      }}>
-        <div style={{
-          display: "flex", alignItems: "center", justifyContent: "space-between",
-          height: "100%", padding: "0 40px", maxWidth: "1400px", margin: "0 auto",
-        }}>
-          <Link href="/" style={{ textDecoration: "none", flexShrink: 0 }}>
-            <img src="/logo-white.png" alt="Senior Man KP"
-              style={{ height: "62px", width: "auto", objectFit: "contain" }} />
+      <a href="#main-content" className="skip-link">
+        Skip to content
+      </a>
+      <header className="site-header">
+        {savedError && (
+          <div className="nav-notice" role="alert">
+            <span>{savedError}</span>
+            <button
+              type="button"
+              aria-label="Dismiss saved beats error"
+              onClick={() => useFavoritesStore.getState().clearError()}
+            >
+              <X size={18} />
+            </button>
+          </div>
+        )}
+        <div className="nav-container">
+          <Link href="/beatstore" className="brand" aria-label="Senior Man KP Beat Store home">
+            <img src="/logo-white.png" alt="Senior Man KP" />
+            <span className="brand-wordmark">
+              <small>THE</small>
+              <strong>BEAT STORE</strong>
+            </span>
           </Link>
-
-          <nav className="desktop-nav" style={{ display: "flex", gap: "48px", alignItems: "center" }}>
+          <nav className="nav-links" aria-label="Main navigation">
             {links.map((link) => (
-              <Link key={link.href} href={link.href} style={{
-                fontFamily: "var(--font-ui)",
-                fontSize: "1rem",
-                letterSpacing: "0.14em",
-                textTransform: "uppercase",
-                textDecoration: "none",
-                fontWeight: 700,
-                color: pathname === link.href ? "var(--gold)" : "rgba(245,240,232,0.75)",
-                transition: "color 0.2s ease",
-              }}>
+              <Link
+                key={link.href}
+                href={link.href}
+                aria-current={path.startsWith(link.href) ? "page" : undefined}
+              >
                 {link.label}
               </Link>
             ))}
           </nav>
-
-          <div className="desktop-nav" style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-            <Link href="/favorites" title="Saved Beats" style={{
-              width: "44px", height: "44px", borderRadius: "50%",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              backgroundColor: pathname === "/favorites" ? "rgba(201,168,76,0.12)" : "rgba(255,255,255,0.05)",
-              border: `1px solid ${pathname === "/favorites" ? "rgba(201,168,76,0.4)" : "rgba(255,255,255,0.1)"}`,
-              color: pathname === "/favorites" ? "var(--gold)" : "rgba(245,240,232,0.6)",
-              fontSize: "1.1rem", textDecoration: "none",
-              transition: "all 0.2s ease",
-            }}>
-              ♡
+          <div className="nav-actions">
+            <Link
+              href="/favorites"
+              className="icon-button nav-saved"
+              aria-label="Saved beats"
+            >
+              <Heart size={20} />
             </Link>
-
-            <Link href="/cart" style={{
-              display: "flex", alignItems: "center", gap: "9px",
-              background: "linear-gradient(135deg, #C9A84C, #F5D98B)",
-              border: "none", borderRadius: "6px",
-              padding: "12px 24px", cursor: "pointer",
-              fontFamily: "var(--font-ui)", fontWeight: 700,
-              fontSize: "0.88rem", letterSpacing: "0.1em",
-              textTransform: "uppercase", color: "#000", textDecoration: "none",
-            }}>
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="8" cy="21" r="1" /><circle cx="19" cy="21" r="1" />
-                <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" />
-              </svg>
-              {cartLabel}
+            <Link
+              href="/cart"
+              className="nav-cart"
+              aria-label={"Cart, " + count + " items"}
+            >
+              <ShoppingBag size={18} />
+              <span>Cart</span>
+              <b>{count}</b>
             </Link>
+            <button
+              ref={button}
+              className="icon-button menu-toggle"
+              aria-label={open ? "Close menu" : "Open menu"}
+              aria-controls="mobile-navigation"
+              aria-expanded={open}
+              onClick={() => setMenuPath(open ? null : path)}
+            >
+              {open ? <X /> : <Menu />}
+            </button>
           </div>
-
-          <button className="mobile-menu-btn" onClick={() => setMenuOpen(!menuOpen)} style={{
-            background: "none", border: "none", cursor: "pointer", padding: "8px",
-            display: "none", flexDirection: "column", justifyContent: "center",
-            alignItems: "center", width: "40px", height: "40px", position: "relative",
-          }}>
-            <span style={{ display: "block", width: "24px", height: "2px", backgroundColor: "var(--text-primary)", position: "absolute", transition: "all 0.25s ease", transform: menuOpen ? "rotate(45deg)" : "translateY(-6px)" }} />
-            <span style={{ display: "block", width: "24px", height: "2px", backgroundColor: "var(--text-primary)", position: "absolute", transition: "all 0.25s ease", opacity: menuOpen ? 0 : 1 }} />
-            <span style={{ display: "block", width: "24px", height: "2px", backgroundColor: "var(--text-primary)", position: "absolute", transition: "all 0.25s ease", transform: menuOpen ? "rotate(-45deg)" : "translateY(6px)" }} />
-          </button>
         </div>
       </header>
-
-      {menuOpen && (
-        <div style={{
-          position: "fixed", top: "76px", left: "12px", right: "12px", zIndex: 49,
-          backgroundColor: "#0c0c0c",
-          border: "1px solid rgba(255,255,255,0.08)",
-          borderRadius: "0 0 14px 14px",
-          boxShadow: "0 16px 32px rgba(0,0,0,0.5)",
-          padding: "20px 22px", display: "flex", flexDirection: "column", gap: "4px",
-        }}>
-          {links.map((link) => (
-            <Link key={link.href} href={link.href} onClick={() => setMenuOpen(false)} style={{
-              fontFamily: "var(--font-ui)", fontSize: "0.95rem", fontWeight: 700,
-              textDecoration: "none", letterSpacing: "0.08em", textTransform: "uppercase",
-              color: pathname === link.href ? "var(--gold)" : "var(--text-primary)",
-              padding: "11px 4px",
-              borderBottom: "1px solid rgba(255,255,255,0.05)",
-            }}>
+      {open && (
+        <nav
+          className="mobile-navigation"
+          id="mobile-navigation"
+          aria-label="Mobile navigation"
+        >
+          {[
+            ...links,
+            { href: "/favorites", label: "Saved beats" },
+            { href: "/faq", label: "Help & FAQs" },
+            { href: "/contact", label: "Contact the producer" },
+          ].map((link) => (
+            <Link
+              href={link.href}
+              key={link.href}
+              onClick={() => setMenuPath(null)}
+              aria-current={path === link.href ? "page" : undefined}
+            >
               {link.label}
+              <ArrowUpRight size={18} />
             </Link>
           ))}
-          <Link href="/favorites" onClick={() => setMenuOpen(false)} style={{
-            fontFamily: "var(--font-ui)", fontSize: "0.95rem", fontWeight: 700,
-            textDecoration: "none", letterSpacing: "0.08em", textTransform: "uppercase",
-            color: pathname === "/favorites" ? "var(--gold)" : "var(--text-primary)",
-            padding: "11px 4px",
-          }}>
-            ♡ Saved Beats
-          </Link>
-          <Link href="/cart" onClick={() => setMenuOpen(false)} style={{
-            display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",
-            background: "linear-gradient(135deg, #C9A84C, #F5D98B)",
-            borderRadius: "6px", padding: "13px 16px", marginTop: "10px",
-            fontFamily: "var(--font-ui)", fontWeight: 700,
-            fontSize: "0.82rem", letterSpacing: "0.08em",
-            textTransform: "uppercase", color: "#000",
-            textDecoration: "none", width: "100%",
-          }}>
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="8" cy="21" r="1" /><circle cx="19" cy="21" r="1" />
-              <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" />
-            </svg>
-            {cartLabel}
-          </Link>
-        </div>
+        </nav>
       )}
-
-      <style>{`
-        @media (max-width: 900px) {
-          .desktop-nav { display: none !important; }
-          .mobile-menu-btn { display: flex !important; }
-        }
-      `}</style>
+      <span id="main-content" tabIndex={-1} />
     </>
   )
 }
-

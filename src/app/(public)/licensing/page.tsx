@@ -1,7 +1,9 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import Link from "next/link"
+import PageIntro from "@/components/ui/PageIntro"
+import { Check, ArrowUpRight, X } from "lucide-react"
 import Navbar from "@/components/layout/Navbar"
 
 const licenses = [
@@ -20,9 +22,9 @@ const licenses = [
       "Live performances",
     ],
     bulkDeal: "Buy 3 Beats, Get 1 FREE" as string | null,
-    ctaStyle: "outline", 
+    ctaStyle: "outline",
   },
-  
+
   {
     type: "premium",
     name: "Premium License",
@@ -38,7 +40,7 @@ const licenses = [
       "Online commercial promotion",
       "Live performances",
     ],
-   
+
     bulkDeal: "Buy 3 Beats, Get 1 Basic Beat FREE" as string | null,
     ctaStyle: "filled",
   },
@@ -58,7 +60,7 @@ const licenses = [
       "Physical distribution",
       "Live performances",
     ],
-    
+
     bulkDeal: "Buy 3 Beats, Get 1 Unlimited Beat FREE" as string | null,
     ctaStyle: "outline",
   },
@@ -78,7 +80,7 @@ const licenses = [
       "Direct producer access",
       "Beat modifications & collaboration",
     ],
-   
+
     bulkDeal: "Buy 3 Exclusives, Get 1 Exclusive FREE" as string | null,
     ctaStyle: "gold",
   },
@@ -238,235 +240,130 @@ GOVERNING LAW
 This Agreement shall be governed by and construed in accordance with the laws of the Federal Republic of Nigeria.`,
 }
 
-export default function LicensingPage() {
-  const [modalLicense, setModalLicense] = useState<string | null>(null)
-
+function Agreement({ type, onClose }: { type: string; onClose: () => void }) {
+  const dialog = useRef<HTMLDialogElement>(null)
+  useEffect(() => {
+    const d = dialog.current
+    d?.showModal()
+    const overflow = document.body.style.overflow
+    document.body.style.overflow = "hidden"
+    return () => {
+      d?.close()
+      document.body.style.overflow = overflow
+    }
+  }, [])
   return (
-    <main style={{ backgroundColor: "var(--bg-void)", minHeight: "100vh" }}>
+    <dialog
+      ref={dialog}
+      className="kp-dialog agreement-dialog"
+      onCancel={onClose}
+      onClick={(e) => {
+        if (e.target === dialog.current) onClose()
+      }}
+      aria-labelledby="agreement-title"
+    >
+      <div className="dialog-top">
+        <h2 id="agreement-title">{type} license agreement</h2>
+        <button
+          className="icon-button"
+          aria-label="Close agreement"
+          onClick={onClose}
+        >
+          <X />
+        </button>
+      </div>
+      <pre>{licenseTexts[type]}</pre>
+    </dialog>
+  )
+}
+export default function LicensingPage() {
+  const [selected, setSelected] = useState<string | null>(null)
+  return (
+    <main>
       <Navbar />
-
-      {/* Hero */}
-      <section
-        className="license-hero"
-        style={{
-          padding: "160px 48px 120px",
-          textAlign: "center",
-          borderBottom: "1px solid var(--border-subtle)",
-        }}
-      >
-        <span style={{
-          display: "inline-block",
-          color: "var(--gold)", fontSize: "0.85rem", fontFamily: "var(--font-mono)",
-          letterSpacing: "0.32em", textTransform: "uppercase",
-          marginBottom: "20px",
-          padding: "8px 20px",
-          border: "1px solid rgba(201,168,76,0.3)",
-          borderRadius: "24px",
-          backgroundColor: "rgba(201,168,76,0.06)",
-        }}>
-          Licensing
-        </span>
-        <h1 style={{
-          color: "var(--text-primary)", marginTop: "0", marginBottom: "28px",
-          fontSize: "clamp(2.6rem, 5vw, 4.5rem)", fontWeight: 800,
-          fontFamily: "var(--font-ui)", letterSpacing: "-0.03em", lineHeight: 1.08,
-        }}>
-          Clear Licensing.
-          <br />
-          <span style={{ background: "linear-gradient(135deg, #C9A84C, #F5D98B)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-            Real Ownership.
-          </span>
-        </h1>
-        <p style={{ color: "rgba(245,240,232,0.65)", fontSize: "1.2rem", lineHeight: 1.8, maxWidth: "680px", margin: "0 auto 44px", fontFamily: "var(--font-ui)" }}>
-          Four tiers designed for every stage of your career — from your first single to your biggest commercial release.
-        </p>
-        <div style={{ display: "flex", justifyContent: "center", gap: "16px", flexWrap: "wrap" }}>
-          <Link href="/store" style={{ padding: "17px 36px", background: "linear-gradient(135deg, #C9A84C, #F5D98B)", color: "#000", textDecoration: "none", borderRadius: "8px", fontSize: "0.92rem", fontWeight: 700, fontFamily: "var(--font-ui)", letterSpacing: "0.1em", textTransform: "uppercase" }}>
-            Browse Store
-          </Link>
-          <Link href="/faq" style={{ padding: "17px 36px", border: "1px solid rgba(201,168,76,0.35)", color: "var(--gold)", textDecoration: "none", borderRadius: "8px", fontSize: "0.92rem", fontWeight: 700, fontFamily: "var(--font-ui)", letterSpacing: "0.1em", textTransform: "uppercase" }}>
-            View FAQ
-          </Link>
-        </div>
-      </section>
-
-      {/* License Cards */}
-      <section className="license-section" style={{ padding: "100px 32px" }}>
-        <div style={{ maxWidth: "1500px", margin: "0 auto" }}>
-          <div className="license-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "28px", alignItems: "start" }}>
-            {licenses.map((item) => (
-              <div
-                key={item.type}
-                style={{
-                  backgroundColor: item.popular ? "rgba(201,168,76,0.05)" : "var(--bg-card)",
-                  border: `1px solid ${item.popular ? "rgba(201,168,76,0.4)" : "var(--border-subtle)"}`,
-                  borderRadius: "16px", padding: "40px", position: "relative",
-                }}
-              >
-                {item.tag && (
-                  <div style={{
-                    position: "absolute", top: "-18px", left: "50%", transform: "translateX(-50%)",
-                    backgroundColor: item.type === "unlimited" ? "var(--bg-elevated)" : "var(--gold)",
-                    color: item.type === "unlimited" ? "var(--gold)" : "#000",
-                    border: item.type === "unlimited" ? "1px solid var(--gold)" : "none",
-                    fontSize: "0.72rem", fontWeight: 700, padding: "7px 20px", borderRadius: "20px",
-                    fontFamily: "var(--font-mono)", letterSpacing: "0.14em", whiteSpace: "nowrap",
-                  }}>
-                    {item.tag}
-                  </div>
-                )}
-
-                <div style={{ color: "var(--text-muted)", fontSize: "0.8rem", letterSpacing: "0.15em", textTransform: "uppercase", fontFamily: "var(--font-mono)", marginBottom: "16px", fontWeight: 600 }}>
-                  {item.name}
-                </div>
-
-                <div style={{ color: item.popular ? "var(--gold)" : "var(--text-primary)", fontSize: "2.6rem", fontWeight: 800, fontFamily: "var(--font-ui)", letterSpacing: "-0.03em", marginBottom: "32px" }}>
-                  {item.price}
-                </div>
-
-                <div style={{ marginBottom: "24px" }}>
-                  <div style={{ color: "var(--text-muted)", fontSize: "0.75rem", letterSpacing: "0.12em", textTransform: "uppercase", fontFamily: "var(--font-mono)", marginBottom: "14px", fontWeight: 600 }}>Included</div>
-                  <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
-                    {item.features.map((feature) => (
-                      <div key={feature} style={{ display: "flex", gap: "10px", alignItems: "flex-start" }}>
-                        <span style={{ color: "var(--gold)", marginTop: "2px", flexShrink: 0, fontSize: "1.05rem" }}>✓</span>
-                        <span style={{ color: "rgba(245,240,232,0.85)", fontSize: "1rem", lineHeight: 1.5, fontFamily: "var(--font-ui)" }}>{feature}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <button
-                  onClick={() => setModalLicense(item.type)}
-                  style={{
-                    width: "100%", padding: "16px", marginBottom: "12px",
-                    borderRadius: "8px", cursor: "pointer",
-                    border: "1px solid var(--gold)", backgroundColor: "transparent",
-                    color: "var(--gold)", fontSize: "0.9rem", fontWeight: 700,
-                    fontFamily: "var(--font-ui)", letterSpacing: "0.1em", textTransform: "uppercase",
-                  }}>
-                  Read License
-                </button>
-
-                {item.type === "exclusive" ? (
-                  <a
-                    href="mailto:contact@seniormankp.com?subject=Exclusive License Inquiry"
-                    style={{
-                      display: "block", width: "100%", padding: "16px",
-                      background: "linear-gradient(135deg, #C9A84C, #F5D98B)",
-                      borderRadius: "8px", color: "#000", textDecoration: "none",
-                      textAlign: "center", fontSize: "0.9rem", fontWeight: 700,
-                      fontFamily: "var(--font-ui)", letterSpacing: "0.1em",
-                      textTransform: "uppercase", boxSizing: "border-box",
-                    }}>
-                    Contact Producer
-                  </a>
-                ) : (
-                  <Link
-                    href="/store"
-                    style={{
-                      display: "block", width: "100%", padding: "16px",
-                      border: "1px solid var(--border-dim)", borderRadius: "8px",
-                      color: "rgba(245,240,232,0.85)", textDecoration: "none",
-                      textAlign: "center", fontSize: "0.9rem", fontWeight: 700,
-                      fontFamily: "var(--font-ui)", letterSpacing: "0.1em",
-                      textTransform: "uppercase", boxSizing: "border-box",
-                    }}>
-                    Browse Store
-                  </Link>
-                )}
-
-                {item.bulkDeal && (
-                  <div style={{ marginTop: "24px", padding: "18px", backgroundColor: "var(--bg-elevated)", borderRadius: "10px", textAlign: "center" }}>
-                    <div style={{ color: "var(--text-muted)", fontSize: "0.68rem", letterSpacing: "0.1em", textTransform: "uppercase", fontFamily: "var(--font-mono)", marginBottom: "8px", fontWeight: 600 }}>Bundle Deal</div>
-                    <div style={{ color: "var(--gold)", fontSize: "0.92rem", fontWeight: 700, fontFamily: "var(--font-ui)", lineHeight: 1.5 }}>{item.bulkDeal}</div>
-                  </div>
+      <PageIntro
+        title="Your sound Your license"
+        description="From a first release to an exclusive record Compare your options and read the full terms before you buy"
+      />
+      <section className="container section licensing-content">
+        <div className="plans-grid">
+          {licenses.map((plan, i) => (
+            <article
+              className={"plan-card " + (plan.popular ? "recommended" : "")}
+              key={plan.type}
+            >
+              <div className="plan-top">
+                <span className="eyebrow">
+                  0{i + 1} / {plan.type}
+                </span>
+                {plan.popular && (
+                  <span className="plan-badge">Artist favorite</span>
                 )}
               </div>
-            ))}
+              <h2>{plan.name.replace(" License", "")}</h2>
+              <p className="plan-price">
+                {plan.price}
+                <small>standard price / beat</small>
+              </p>
+              <p className="plan-caption">
+                {
+                  [
+                    "Start your next release",
+                    "Make room for your sound",
+                    "Take your music further",
+                    "Make this one yours",
+                  ][i]
+                }
+              </p>
+              <ul>
+                {plan.features.map((feature) => (
+                  <li key={feature}>
+                    <Check size={15} />
+                    {feature}
+                  </li>
+                ))}
+              </ul>
+              <Link
+                href="/beatstore/beats"
+                className={
+                  "button full-width " + (plan.popular ? "primary" : "")
+                }
+              >
+                Find your beat
+                <ArrowUpRight size={16} />
+              </Link>
+              <button
+                className="text-link"
+                onClick={() => setSelected(plan.type)}
+              >
+                Read full agreement
+                <ArrowUpRight size={14} />
+              </button>
+            </article>
+          ))}
+        </div>
+        <p className="muted pricing-note">
+          Prices may vary by beat Your selected beat’s price is shown before
+          checkout The full license agreement defines your usage rights
+        </p>
+        <div className="bundle-banner">
+          <div>
+            <span className="eyebrow">A little more room to create</span>
+            <h2>Three beats One less to pay for</h2>
+            <p>
+              Add 3 beats in the same license tier The lowest-priced beat is
+              free, automatically
+            </p>
           </div>
+          <Link className="button primary" href="/beatstore/beats">
+            Build your bundle
+            <ArrowUpRight size={18} />
+          </Link>
         </div>
       </section>
-
-      {/* FAQ CTA */}
-      <section
-        className="license-faq"
-        style={{ padding: "140px 48px", borderTop: "1px solid var(--border-subtle)", backgroundColor: "var(--bg-deep)" }}
-      >
-        <div style={{ maxWidth: "900px", margin: "0 auto", textAlign: "center" }}>
-          <span style={{
-            display: "inline-block",
-            color: "var(--gold)", fontSize: "0.85rem", fontFamily: "var(--font-mono)",
-            letterSpacing: "0.28em", textTransform: "uppercase",
-            marginBottom: "20px",
-            padding: "8px 20px",
-            border: "1px solid rgba(201,168,76,0.3)",
-            borderRadius: "24px",
-            backgroundColor: "rgba(201,168,76,0.06)",
-          }}>
-            Need Help?
-          </span>
-          <h2 style={{
-            color: "var(--text-primary)", marginTop: "0", marginBottom: "28px",
-            fontSize: "clamp(2.2rem, 4vw, 3.4rem)", fontWeight: 800,
-            fontFamily: "var(--font-ui)", letterSpacing: "-0.02em", lineHeight: 1.1,
-          }}>
-            Still Have Questions?
-          </h2>
-          <p style={{ color: "rgba(245,240,232,0.65)", fontSize: "1.15rem", lineHeight: 1.85, fontFamily: "var(--font-ui)", marginBottom: "44px", maxWidth: "640px", margin: "0 auto 44px" }}>
-            Visit the FAQ page or contact the producer directly for custom licensing, collaborations, and exclusive negotiations.
-          </p>
-          <div style={{ display: "flex", justifyContent: "center", gap: "16px", flexWrap: "wrap" }}>
-            <Link href="/faq" style={{ padding: "17px 36px", background: "linear-gradient(135deg, #C9A84C, #F5D98B)", color: "#000", textDecoration: "none", borderRadius: "8px", fontSize: "0.92rem", fontWeight: 700, fontFamily: "var(--font-ui)", letterSpacing: "0.1em", textTransform: "uppercase" }}>
-              Visit FAQ
-            </Link>
-            <a href="mailto:contact@seniormankp.com" style={{ padding: "17px 36px", border: "1px solid rgba(201,168,76,0.35)", color: "var(--gold)", textDecoration: "none", borderRadius: "8px", fontSize: "0.92rem", fontWeight: 700, fontFamily: "var(--font-ui)", letterSpacing: "0.1em", textTransform: "uppercase" }}>
-              Contact Producer
-            </a>
-          </div>
-        </div>
-      </section>
-
-      {/* License Modal */}
-      {modalLicense && (
-        <div style={{ position: "fixed", inset: 0, zIndex: 100, backgroundColor: "rgba(0,0,0,0.92)", backdropFilter: "blur(8px)", display: "flex", alignItems: "center", justifyContent: "center", padding: "24px" }}>
-          <div style={{ backgroundColor: "var(--bg-card)", border: "1px solid rgba(201,168,76,0.25)", borderRadius: "12px", width: "100%", maxWidth: "720px", maxHeight: "82vh", overflow: "hidden", display: "flex", flexDirection: "column" }}>
-            <div style={{ padding: "24px 32px", borderBottom: "1px solid var(--border-subtle)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              <h3 style={{ color: "var(--text-primary)", fontFamily: "var(--font-ui)" }}>
-                {licenses.find((l) => l.type === modalLicense)?.name} Agreement
-              </h3>
-              <button onClick={() => setModalLicense(null)} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: "1.3rem", lineHeight: 1 }}>✕</button>
-            </div>
-            <div style={{ padding: "28px 32px", overflowY: "auto", flex: 1 }}>
-              <pre style={{ whiteSpace: "pre-wrap", wordBreak: "break-word", color: "var(--text-secondary)", fontSize: "0.9rem", lineHeight: 1.9, fontFamily: "var(--font-ui)" }}>
-                {licenseTexts[modalLicense]}
-              </pre>
-            </div>
-          </div>
-        </div>
+      {selected && (
+        <Agreement type={selected} onClose={() => setSelected(null)} />
       )}
-
-      <style>{`
-        @media (max-width: 1100px) {
-          .license-grid {
-            grid-template-columns: repeat(2, 1fr) !important;
-          }
-        }
-        @media (max-width: 768px) {
-          .license-hero {
-            padding: 120px 20px 70px !important;
-          }
-          .license-section {
-            padding: 60px 20px !important;
-          }
-          .license-grid {
-            grid-template-columns: 1fr !important;
-          }
-          .license-faq {
-            padding: 80px 20px !important;
-          }
-        }
-      `}</style>
     </main>
   )
 }

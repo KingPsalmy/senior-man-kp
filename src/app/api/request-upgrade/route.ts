@@ -1,3 +1,5 @@
+import { errorResponse, readJson, isUuid, RequestError } from "@/lib/security"
+import { rateLimit } from "@/lib/rate-limit"
 import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@supabase/supabase-js"
 import { resend } from "@/lib/resend"
@@ -17,7 +19,9 @@ const LICENSE_PRICES: Record<string, number> = {
 
 export async function POST(req: NextRequest) {
   try {
-    const { purchase_id } = await req.json()
+    const { purchase_id, download_token } = await readJson(req)
+    if (!isUuid(purchase_id) || !isUuid(download_token)) throw new RequestError("Invalid purchase credentials", 401)
+    await rateLimit(req, "upgrade", 5)
 
     if (!purchase_id) {
       return NextResponse.json({ error: "Missing purchase_id" }, { status: 400 })
@@ -28,12 +32,15 @@ export async function POST(req: NextRequest) {
       .from("purchases")
       .select("*, beats(title, is_exclusive_sold)")
       .eq("id", purchase_id)
+      .eq("download_token", download_token)
       .eq("payment_status", "success")
       .single()
 
     if (purchaseError || !purchase) {
       return NextResponse.json({ error: "Purchase not found" }, { status: 404 })
     }
+
+    if (purchase.download_expires_at && (!Number.isFinite(Date.parse(purchase.download_expires_at)) || Date.parse(purchase.download_expires_at) <= Date.now())) throw new RequestError("Download link has expired", 410)
 
     const { beat_id, customer_email, license_type: current_license_type, beats: beat } = purchase
 
@@ -94,6 +101,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: true, priceDifference })
   } catch (err) {
     console.error("[request-upgrade error]", err)
-    return NextResponse.json({ error: "Server error" }, { status: 500 })
+    return errorResponse(err)
   }
 }

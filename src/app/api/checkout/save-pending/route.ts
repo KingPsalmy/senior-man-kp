@@ -1,46 +1,49 @@
-import { NextRequest, NextResponse } from "next/server"
-import { createClient } from "@supabase/supabase-js"
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
-
-export async function POST(req: NextRequest) {
+import { guestSession, requireSameOrigin } from "@/lib/guest-session"
+import { serviceClient } from "@/lib/admin"
+import { priceCart } from "@/lib/checkout"
+import { errorResponse, normalizeEmail, readJson } from "@/lib/security"
+import { rateLimit } from "@/lib/rate-limit"
+export async function POST(req: Request) {
   try {
-    const { guest_id, email, items, subtotal, discount, total } = await req.json()
-
-    if (!guest_id || !email || !items || items.length === 0) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
-    }
-
-    const { data: existing } = await supabase
+    requireSameOrigin(req)
+    const session = guestSession(req)
+    const body = await readJson(req)
+    const email = normalizeEmail(body.email)
+    await rateLimit(req, "save-pending", 20)
+    const cart = await priceCart(body.items)
+    const db = serviceClient()
+    const { data: existing, error: lookupError } = await db
       .from("orders")
       .select("id")
-      .eq("guest_id", guest_id)
+      .eq("guest_id", session.id)
+      .eq("email", email)
       .eq("status", "pending")
+      .limit(1)
       .maybeSingle()
-
-    if (existing) {
-      await supabase
-        .from("orders")
-        .update({ email, items, subtotal, discount, total, reminded_at: null })
-        .eq("id", existing.id)
-    } else {
-      await supabase.from("orders").insert({
-        guest_id,
-        email,
-        items,
-        subtotal,
-        discount,
-        total,
-        status: "pending",
-      })
+    if (lookupError) throw lookupError
+    const record = {
+      email,
+      items: cart.items,
+      subtotal: cart.subtotal,
+      discount: cart.discount,
+      total: cart.total,
     }
-
-    return NextResponse.json({ success: true })
-  } catch (err) {
-    console.error("[save-pending error]", err)
-    return NextResponse.json({ error: "Server error" }, { status: 500 })
+    const { error } = existing
+      ? await db.from("orders").update(record).eq("id", existing.id)
+      : await db
+          .from("orders")
+          .insert({
+            ...record,
+            guest_id: session.id,
+            paystack_reference: "PENDING-" + crypto.randomUUID(),
+            status: "pending",
+          })
+    if (error) throw error
+    return Response.json(
+      { success: true },
+      { headers: session.cookie ? { "Set-Cookie": session.cookie } : {} },
+    )
+  } catch (error) {
+    return errorResponse(error)
   }
 }

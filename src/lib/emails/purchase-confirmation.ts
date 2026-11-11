@@ -1,3 +1,4 @@
+import { escapeHtml } from "@/lib/security"
 type SuggestedBeat = {
   title: string
   slug: string
@@ -24,16 +25,16 @@ export function purchaseConfirmationEmail({
   const downloadUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/download?token=${downloadToken}`
   const licenseLabel = licenseType.charAt(0).toUpperCase() + licenseType.slice(1)
 
-  const subject = `Your beat is ready — ${beatTitle} 🎧`
+  const subject = `Your beat is ready — ${escapeHtml(beatTitle)} 🎧`
 
   const suggestionsHtml = suggestedBeats.length > 0 ? `
     <div style="padding:28px 32px; border-top:1px solid #262626;">
       <p style="color:#8a8a8a; font-size:11px; letter-spacing:1.5px; text-transform:uppercase; margin:0 0 16px;">You Might Also Like</p>
       ${suggestedBeats.map((beat) => `
-        <a href="${process.env.NEXT_PUBLIC_SITE_URL}/beat/${beat.slug}" style="display:flex; align-items:center; gap:14px; text-decoration:none; margin-bottom:14px;">
-          ${beat.coverUrl ? `<img src="${beat.coverUrl}" width="52" height="52" style="border-radius:6px; object-fit:cover; flex-shrink:0;" />` : `<div style="width:52px; height:52px; border-radius:6px; background:#262626; flex-shrink:0;"></div>`}
+        <a href="${process.env.NEXT_PUBLIC_SITE_URL}/beatstore/${beat.slug}" style="display:flex; align-items:center; gap:14px; text-decoration:none; margin-bottom:14px;">
+          ${beat.coverUrl ? `<img src="${escapeHtml(beat.coverUrl)}" width="52" height="52" style="border-radius:6px; object-fit:cover; flex-shrink:0;" />` : `<div style="width:52px; height:52px; border-radius:6px; background:#262626; flex-shrink:0;"></div>`}
           <div style="flex:1;">
-            <p style="color:#F5F0E8; font-size:13px; font-weight:600; margin:0 0 2px;">${beat.title}</p>
+            <p style="color:#F5F0E8; font-size:13px; font-weight:600; margin:0 0 2px;">${escapeHtml(beat.title)}</p>
             <p style="color:#C9A84C; font-size:12px; margin:0;">from ₦${beat.price.toLocaleString()}</p>
           </div>
         </a>
@@ -50,16 +51,16 @@ export function purchaseConfirmationEmail({
       </div>
       <div style="padding:32px;">
         <p style="color:#c9c9c9; font-size:14px; line-height:1.6; margin:0 0 24px;">
-          <strong style="color:#F5F0E8;">${beatTitle}</strong> is yours under the ${licenseLabel} License. Your files are ready whenever you are.
+          <strong style="color:#F5F0E8;">${escapeHtml(beatTitle)}</strong> is yours under the ${escapeHtml(licenseLabel)} License. Your files are ready whenever you are.
         </p>
         <table style="width:100%; border-collapse:collapse; margin-bottom:24px;">
           <tr>
             <td style="color:#8a8a8a; font-size:13px; padding:6px 0;">Beat</td>
-            <td style="color:#F5F0E8; font-size:13px; padding:6px 0; text-align:right;">${beatTitle}</td>
+            <td style="color:#F5F0E8; font-size:13px; padding:6px 0; text-align:right;">${escapeHtml(beatTitle)}</td>
           </tr>
           <tr>
             <td style="color:#8a8a8a; font-size:13px; padding:6px 0;">License</td>
-            <td style="color:#F5F0E8; font-size:13px; padding:6px 0; text-align:right;">${licenseLabel}</td>
+            <td style="color:#F5F0E8; font-size:13px; padding:6px 0; text-align:right;">${escapeHtml(licenseLabel)}</td>
           </tr>
           <tr>
             <td style="color:#8a8a8a; font-size:13px; padding:6px 0;">Amount Paid</td>

@@ -1,3 +1,4 @@
+import { escapeHtml } from "@/lib/security"
 const LICENSE_LABELS: Record<string, string> = {
   basic: "Basic",
   premium: "Premium",
@@ -15,7 +16,7 @@ export function upgradeRequestNotificationEmail({
   currentLicenseType: string
   priceDifference: number
 }) {
-  const subject = `Upgrade request: ${beatTitle} → Exclusive`
+  const subject = `Upgrade request: ${escapeHtml(beatTitle)} → Exclusive`
 
   const html = `
   <div style="font-family: -apple-system, sans-serif; background:#0a0a0a; padding:40px 20px;">
@@ -24,12 +25,12 @@ export function upgradeRequestNotificationEmail({
         Upgrade Request
       </p>
       <h1 style="color:#F5F0E8; font-size:22px; margin:0 0 20px;">
-        ${beatTitle}
+        ${escapeHtml(beatTitle)}
       </h1>
       <table style="width:100%; border-collapse:collapse;">
         <tr>
           <td style="color:rgba(245,240,232,0.5); font-size:13px; padding:8px 0;">Customer</td>
-          <td style="color:#F5F0E8; font-size:13px; padding:8px 0; text-align:right;">${customerEmail}</td>
+          <td style="color:#F5F0E8; font-size:13px; padding:8px 0; text-align:right;">${escapeHtml(customerEmail)}</td>
         </tr>
         <tr>
           <td style="color:rgba(245,240,232,0.5); font-size:13px; padding:8px 0;">Current License</td>

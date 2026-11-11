@@ -54,7 +54,7 @@ export default function SimilarBeats({ beatId, title }: Props) {
 
       <div className="similar-beats-grid">
         {beats.map((beat) => (
-          <Link key={beat.id} href={`/beat/${beat.slug}`} style={{ textDecoration: "none" }}>
+          <Link key={beat.id} href={`/beatstore/${beat.slug}`} style={{ textDecoration: "none" }}>
             <div style={{
               backgroundColor: "var(--bg-card)",
               border: "1px solid var(--border-subtle)",

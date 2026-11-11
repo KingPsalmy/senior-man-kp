@@ -1,5 +1,7 @@
 "use client"
 
+import AdminSidebar from "@/components/admin/AdminSidebar"
+
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase/client"
@@ -25,13 +27,6 @@ const LICENSE_LABELS: Record<string, string> = {
   exclusive: "Exclusive",
 }
 
-const navItems = [
-  { icon: "⊞", label: "Dashboard", href: "/admin/dashboard" },
-  { icon: "♪", label: "Beats", href: "/admin/dashboard/beats" },
-  { icon: "💳", label: "Purchases", href: "/admin/dashboard/purchases", active: true },
-  { icon: "👤", label: "Customers", href: "/admin/dashboard/customers" },
-  { icon: "⚙", label: "Settings", href: "/admin/dashboard/settings" },
-]
 
 function isTestOrder(order: Order) {
   return order.paystack_reference?.startsWith("TEST_")
@@ -118,6 +113,7 @@ export default function PurchasesPage() {
         body: JSON.stringify({
           paystack_reference: selectedOrder.paystack_reference,
           beat_id: beatId,
+          refund_confirmed: true,
         }),
       })
 
@@ -150,39 +146,10 @@ export default function PurchasesPage() {
     .reduce((sum, o) => sum + Number(o.total), 0)
 
   return (
-    <main style={{ minHeight: "100vh", backgroundColor: "var(--bg-void)", display: "flex" }}>
+    <main className="admin-screen" style={{ minHeight: "100vh", backgroundColor: "var(--bg-void)", display: "flex" }}>
 
       {/* Sidebar (desktop: left rail — mobile: bottom tab bar, styled via globals.css) */}
-      <aside className="admin-sidebar" style={{
-        width: "220px", flexShrink: 0,
-        backgroundColor: "var(--bg-deep)",
-        borderRight: "1px solid var(--border-subtle)",
-        display: "flex", flexDirection: "column",
-        padding: "24px 0",
-        position: "fixed", top: 0, left: 0, bottom: 0, zIndex: 40,
-      }}>
-        <div style={{ padding: "0 24px 24px", borderBottom: "1px solid var(--border-subtle)" }}>
-          <div style={{ color: "var(--text-muted)", fontSize: "0.6rem", letterSpacing: "0.3em", textTransform: "uppercase", fontFamily: "var(--font-mono)", marginBottom: "4px" }}>Senior Man</div>
-          <div style={{ background: "linear-gradient(135deg, #C9A84C, #F5D98B)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", fontSize: "1.8rem", fontWeight: 800, fontFamily: "var(--font-ui)", lineHeight: 1 }}>KP</div>
-        </div>
-        <nav style={{ flex: 1, padding: "16px 0" }}>
-          {navItems.map((item) => (
-            <Link key={item.label} href={item.href} style={{
-              display: "flex", alignItems: "center", gap: "12px",
-              padding: "11px 24px", textDecoration: "none",
-              color: (item as any).active ? "var(--gold)" : "var(--text-secondary)",
-              fontSize: "0.9rem", fontFamily: "var(--font-ui)", fontWeight: 500,
-              backgroundColor: (item as any).active ? "rgba(201,168,76,0.06)" : "transparent",
-              borderRight: (item as any).active ? "2px solid var(--gold)" : "2px solid transparent",
-            }}>
-              <span>{item.icon}</span>{item.label}
-            </Link>
-          ))}
-          <button onClick={handleLogout} style={{ width: "100%", display: "flex", alignItems: "center", gap: "12px", padding: "11px 24px", background: "none", border: "none", color: "var(--text-muted)", fontSize: "0.9rem", fontFamily: "var(--font-ui)", cursor: "pointer" }}>
-            <span>→</span> Logout
-          </button>
-        </nav>
-      </aside>
+      <AdminSidebar />
 
       {/* Main */}
       <div className="admin-main" style={{ marginLeft: "220px", flex: 1, padding: "32px", minWidth: 0 }}>
@@ -356,6 +323,7 @@ export default function PurchasesPage() {
                 ))}
               </div>
 
+              <p style={{ color: "var(--text-secondary)", fontSize: "0.85rem", marginBottom: "16px" }}>Complete the refund in Paystack first. Recording it here revokes download access; it does not send money.</p>
               {refundError && (
                 <div style={{ backgroundColor: "rgba(255,50,50,0.08)", border: "1px solid rgba(255,50,50,0.2)", borderRadius: "6px", padding: "10px 14px", marginBottom: "16px", color: "#ff6b6b", fontSize: "0.82rem", fontFamily: "var(--font-ui)" }}>
                   {refundError}
@@ -387,7 +355,7 @@ export default function PurchasesPage() {
                               disabled={isRefunding}
                               style={{ padding: "6px 12px", borderRadius: "3px", backgroundColor: "#ff6b6b", border: "none", color: "#000", fontSize: "0.68rem", fontFamily: "var(--font-mono)", cursor: isRefunding ? "not-allowed" : "pointer", fontWeight: 700 }}
                             >
-                              {isRefunding ? "..." : "Confirm"}
+                              {isRefunding ? "..." : "Record completed refund"}
                             </button>
                             <button
                               onClick={() => setConfirmingBeatId(null)}
@@ -401,7 +369,7 @@ export default function PurchasesPage() {
                             onClick={() => setConfirmingBeatId(item.beat_id)}
                             style={{ padding: "6px 14px", borderRadius: "3px", backgroundColor: "transparent", border: "1px solid rgba(255,107,107,0.4)", color: "#ff6b6b", fontSize: "0.68rem", fontFamily: "var(--font-mono)", cursor: "pointer", flexShrink: 0 }}
                           >
-                            Refund
+                            Record refund
                           </button>
                         )}
                       </div>

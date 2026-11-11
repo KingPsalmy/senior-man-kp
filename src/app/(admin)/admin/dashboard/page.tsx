@@ -1,18 +1,12 @@
 "use client"
 
+import AdminSidebar from "@/components/admin/AdminSidebar"
+
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase/client"
 import Link from "next/link"
 
-const navItems = [
-  { icon: "⊞", label: "Dashboard", href: "/admin/dashboard", active: true },
-  { icon: "♪", label: "Beats", href: "/admin/dashboard/beats", active: false },
-  { icon: "💳", label: "Purchases", href: "/admin/dashboard/purchases", active: false },
-  { icon: "📀", label: "Sold Beats", href: "/admin/dashboard/sold-beats", active: false },
-  { icon: "👤", label: "Customers", href: "/admin/dashboard/customers", active: false },
-  { icon: "⚙", label: "Settings", href: "/admin/dashboard/settings", active: false },
-]
 
 type Order = {
   id: string
@@ -91,41 +85,9 @@ export default function AdminDashboard() {
   )
 
   return (
-    <main style={{ minHeight: "100vh", backgroundColor: "var(--bg-void)", display: "flex" }}>
+    <main className="admin-screen" style={{ minHeight: "100vh", backgroundColor: "var(--bg-void)", display: "flex" }}>
 
-      <aside className="admin-sidebar" style={{
-        width: "220px", flexShrink: 0,
-        backgroundColor: "var(--bg-deep)",
-        borderRight: "1px solid var(--border-subtle)",
-        display: "flex", flexDirection: "column",
-        padding: "24px 0",
-        position: "fixed", top: 0, left: 0, bottom: 0, zIndex: 40,
-      }}>
-        <div style={{ padding: "0 24px 24px", borderBottom: "1px solid var(--border-subtle)" }}>
-          <div style={{ color: "var(--text-muted)", fontSize: "0.6rem", letterSpacing: "0.3em", textTransform: "uppercase", fontFamily: "var(--font-mono)", marginBottom: "4px" }}>Senior Man</div>
-          <div style={{ background: "linear-gradient(135deg, #C9A84C, #F5D98B)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", fontSize: "1.8rem", fontWeight: 800, fontFamily: "var(--font-ui)", lineHeight: 1 }}>KP</div>
-        </div>
-        <nav style={{ flex: 1, padding: "16px 0" }}>
-          {navItems.map((item) => (
-            <Link key={item.label} href={item.href} style={{
-              display: "flex", alignItems: "center", gap: "12px",
-              padding: "11px 24px", textDecoration: "none",
-              color: item.active ? "var(--gold)" : "var(--text-secondary)",
-              fontSize: "0.9rem", fontFamily: "var(--font-ui)", fontWeight: 500,
-              backgroundColor: item.active ? "rgba(201,168,76,0.06)" : "transparent",
-              borderRight: item.active ? "2px solid var(--gold)" : "2px solid transparent",
-            }}>
-              <span>{item.icon}</span>{item.label}
-            </Link>
-          ))}
-          <button
-            onClick={handleLogout}
-            style={{ width: "100%", display: "flex", alignItems: "center", gap: "12px", padding: "11px 24px", background: "none", border: "none", color: "var(--text-muted)", fontSize: "0.9rem", fontFamily: "var(--font-ui)", cursor: "pointer" }}
-          >
-            <span>→</span> Logout
-          </button>
-        </nav>
-      </aside>
+      <AdminSidebar />
 
       <div className="admin-main" style={{ marginLeft: "220px", flex: 1, padding: "32px", minWidth: 0 }}>
 
@@ -134,7 +96,7 @@ export default function AdminDashboard() {
           marginBottom: "24px",
         }}>
           <span className="admin-mobile-title" style={{ color: "var(--text-primary)", fontWeight: 800, fontFamily: "var(--font-ui)", fontSize: "1.3rem" }}>Dashboard</span>
-          <Link href="/store" className="admin-mobile-store-link" style={{ fontSize: "0.85rem", color: "var(--gold)", fontFamily: "var(--font-ui)", textDecoration: "none" }}>Store →</Link>
+          <Link href="/beatstore" className="admin-mobile-store-link" style={{ fontSize: "0.85rem", color: "var(--gold)", fontFamily: "var(--font-ui)", textDecoration: "none" }}>Store →</Link>
         </div>
 
         <div className="admin-desktop-header" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "32px", flexWrap: "wrap", gap: "12px" }}>
@@ -145,7 +107,7 @@ export default function AdminDashboard() {
             <span style={{ color: "var(--text-muted)", fontSize: "0.85rem", fontFamily: "var(--font-mono)" }}>
               {new Date().toLocaleDateString("en-NG", { day: "numeric", month: "long", year: "numeric" })}
             </span>
-            <Link href="/store" style={{
+            <Link href="/beatstore" style={{
               padding: "10px 18px", fontSize: "0.8rem", fontWeight: 700,
               background: "linear-gradient(135deg, #C9A84C, #F5D98B)",
               borderRadius: "3px", textDecoration: "none", color: "#000",

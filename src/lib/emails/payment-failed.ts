@@ -1,9 +1,10 @@
+import { escapeHtml } from "@/lib/security"
 type PaymentFailedParams = {
   beatTitle: string
 }
 
 export function paymentFailedEmail({ beatTitle }: PaymentFailedParams) {
-  const storeUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/store`
+  const storeUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/beatstore/beats`
 
   const subject = `Your payment didn't go through`
 
@@ -16,7 +17,7 @@ export function paymentFailedEmail({ beatTitle }: PaymentFailedParams) {
       </div>
       <div style="padding:32px;">
         <p style="color:#c9c9c9; font-size:14px; line-height:1.6; margin:0 0 24px;">
-          Your payment for <strong style="color:#F5F0E8;">${beatTitle}</strong> wasn't successful — nothing was charged. This usually happens from a declined card or a connection hiccup mid-checkout.
+          Your payment for <strong style="color:#F5F0E8;">${escapeHtml(beatTitle)}</strong> wasn't successful — nothing was charged. This usually happens from a declined card or a connection hiccup mid-checkout.
         </p>
         <a href="${storeUrl}" style="display:block; text-align:center; padding:14px; background:linear-gradient(135deg,#C9A84C,#F5D98B); color:#000; text-decoration:none; font-weight:700; font-size:13px; letter-spacing:1px; text-transform:uppercase; border-radius:6px;">
           Try Again

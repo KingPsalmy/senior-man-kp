@@ -1,5 +1,6 @@
 {
   "crons": [
-    { "path": "/api/cron/abandoned-cart", "schedule": "0 0 * * *" }
+    { "path": "/api/cron/abandoned-cart", "schedule": "0 0 * * *" },
+    { "path": "/api/cron/receipts", "schedule": "0 1 * * *" }
   ]
 }

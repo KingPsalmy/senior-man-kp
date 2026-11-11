@@ -1,9 +1,12 @@
 "use client"
 
+import AdminSidebar from "@/components/admin/AdminSidebar"
+
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { supabase } from "@/lib/supabase/client"
+import { prepareAudioUpload } from "@/lib/upload-path"
 
 const genres = ["Afrobeat", "Afro Fusion", "Afro-Soul", "Afropop", "Amapiano", "Trap", "Drill", "R&B", "Hip-Hop", "Dancehall", "Reggae", "Highlife", "Fuji", "Gospel", "Alternative", "Pop", "Soul", "Lo-Fi", "House", "EDM", "Jersey Club", "UK Afroswing", "Afro House", "Piano Fusion", "Neo Soul"]
 const moods = ["Dark", "Euphoric", "Melancholic", "Energetic", "Romantic", "Chill", "Soulful", "Emotional", "Happy", "Uplifting", "Inspirational", "Reflective", "Dreamy", "Smooth", "Groovy", "Luxury", "Sexy", "Confident", "Aggressive", "Epic", "Cinematic", "Party", "Rave", "Spiritual", "Hopeful", "Nostalgic", "Motivational", "Passionate", "Intimate", "Triumphant"]
@@ -44,13 +47,6 @@ const emptyForm = {
   is_published: false, is_featured: false,
 }
 
-const navItems = [
-  { icon: "⊞", label: "Dashboard", href: "/admin/dashboard" },
-  { icon: "♪", label: "Beats", href: "/admin/dashboard/beats", active: true },
-  { icon: "💳", label: "Purchases", href: "/admin/dashboard/purchases" },
-  { icon: "👤", label: "Customers", href: "/admin/dashboard/customers" },
-  { icon: "⚙", label: "Settings", href: "/admin/dashboard/settings" },
-]
 
 export default function AdminBeatsPage() {
   const router = useRouter()
@@ -178,18 +174,19 @@ export default function AdminBeatsPage() {
     return data.publicUrl
   }
 
-  async function uploadToR2(file: File, path: string) {
+  async function uploadToR2(file: File, folder: "wavs" | "stems", slug: string) {
+    const { path, contentType } = prepareAudioUpload(folder, slug, file.name)
     const token = await getAuthToken()
     const presignRes = await fetch("/api/admin/upload-stems", {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ path, contentType: file.type || "application/octet-stream" }),
+      body: JSON.stringify({ path, contentType: contentType }),
     })
     const presignData = await presignRes.json()
     if (!presignRes.ok) throw new Error(presignData.error || "Failed to get R2 upload URL")
     const uploadRes = await fetch(presignData.signedUrl, {
       method: "PUT",
-      headers: { "Content-Type": file.type || "application/octet-stream" },
+      headers: { "Content-Type": contentType },
       body: file,
     })
     if (!uploadRes.ok) throw new Error("Failed to upload file to R2")
@@ -206,8 +203,8 @@ export default function AdminBeatsPage() {
 
       if (files.cover) { setUploadStatus("Uploading cover art..."); cover_url = await uploadFile(files.cover, "covers", `${slug}-${timestamp}`) }
       if (files.preview) { setUploadStatus("Uploading preview..."); preview_url = await uploadFile(files.preview, "previews", `${slug}-${timestamp}`) }
-      if (files.wav) { setUploadStatus("Uploading WAV to R2..."); wav_url = await uploadToR2(files.wav, `wavs/${slug}-${timestamp}-${files.wav.name}`) }
-      if (files.stems) { setUploadStatus("Uploading stems to R2..."); stems_url = await uploadToR2(files.stems, `stems/${slug}-${timestamp}-${files.stems.name}`) }
+      if (files.wav) { setUploadStatus("Uploading WAV to R2..."); wav_url = await uploadToR2(files.wav, "wavs", slug) }
+      if (files.stems) { setUploadStatus("Uploading stems to R2..."); stems_url = await uploadToR2(files.stems, "stems", slug) }
       setUploadStatus("Saving beat details...")
 
       const token = await getAuthToken()
@@ -254,8 +251,8 @@ export default function AdminBeatsPage() {
 
       if (editFiles.cover) { setEditUploadStatus("Uploading cover art..."); cover_url = await uploadFile(editFiles.cover, "covers", `${slug}-${timestamp}`) }
       if (editFiles.preview) { setEditUploadStatus("Uploading preview..."); preview_url = await uploadFile(editFiles.preview, "previews", `${slug}-${timestamp}`) }
-      if (editFiles.wav) { setEditUploadStatus("Uploading WAV to R2..."); wav_url = await uploadToR2(editFiles.wav, `wavs/${slug}-${timestamp}-${editFiles.wav.name}`) }
-      if (editFiles.stems) { setEditUploadStatus("Uploading stems to R2..."); stems_url = await uploadToR2(editFiles.stems, `stems/${slug}-${timestamp}-${editFiles.stems.name}`) }
+      if (editFiles.wav) { setEditUploadStatus("Uploading WAV to R2..."); wav_url = await uploadToR2(editFiles.wav, "wavs", slug) }
+      if (editFiles.stems) { setEditUploadStatus("Uploading stems to R2..."); stems_url = await uploadToR2(editFiles.stems, "stems", slug) }
       setEditUploadStatus("Saving changes...")
 
       const token = await getAuthToken()
@@ -312,38 +309,10 @@ export default function AdminBeatsPage() {
   })
 
   return (
-    <main style={{ minHeight: "100vh", backgroundColor: "var(--bg-void)", display: "flex" }}>
+    <main className="admin-screen" style={{ minHeight: "100vh", backgroundColor: "var(--bg-void)", display: "flex" }}>
 
       {/* Sidebar (desktop: left rail — mobile: bottom tab bar, styled via globals.css) */}
-      <aside className="admin-sidebar" style={{
-        width: "220px", flexShrink: 0, backgroundColor: "var(--bg-deep)",
-        borderRight: "1px solid var(--border-subtle)", display: "flex", flexDirection: "column",
-        padding: "24px 0", position: "fixed", top: 0, left: 0, bottom: 0, zIndex: 40,
-      }}>
-        <div style={{ padding: "0 24px 24px", borderBottom: "1px solid var(--border-subtle)" }}>
-          <div style={{ color: "var(--text-muted)", fontSize: "0.6rem", letterSpacing: "0.3em", textTransform: "uppercase", fontFamily: "var(--font-mono)", marginBottom: "4px" }}>Senior Man</div>
-          <div style={{ background: "linear-gradient(135deg, #C9A84C, #F5D98B)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", fontSize: "1.8rem", fontWeight: 800, fontFamily: "var(--font-ui)", lineHeight: 1 }}>KP</div>
-        </div>
-        <nav style={{ flex: 1, padding: "16px 0" }}>
-          {navItems.map((item) => (
-            <Link key={item.label} href={item.href} style={{
-              display: "flex", alignItems: "center", gap: "12px", padding: "11px 24px", textDecoration: "none",
-              color: (item as any).active ? "var(--gold)" : "var(--text-secondary)",
-              fontSize: "0.9rem", fontFamily: "var(--font-ui)", fontWeight: 500,
-              backgroundColor: (item as any).active ? "rgba(201,168,76,0.06)" : "transparent",
-              borderRight: (item as any).active ? "2px solid var(--gold)" : "2px solid transparent",
-            }}>
-              <span>{item.icon}</span>{item.label}
-            </Link>
-          ))}
-          <button
-            onClick={handleLogout}
-            style={{ width: "100%", display: "flex", alignItems: "center", gap: "12px", padding: "11px 24px", background: "none", border: "none", color: "var(--text-muted)", fontSize: "0.9rem", fontFamily: "var(--font-ui)", cursor: "pointer" }}
-          >
-            <span>→</span> Logout
-          </button>
-        </nav>
-      </aside>
+      <AdminSidebar />
 
       {/* Main */}
       <div className="admin-main" style={{ marginLeft: "220px", flex: 1, padding: "32px", minWidth: 0 }}>

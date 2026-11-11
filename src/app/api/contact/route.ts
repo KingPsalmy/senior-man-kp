@@ -1,3 +1,5 @@
+import { errorResponse, readJson } from "@/lib/security"
+import { rateLimit } from "@/lib/rate-limit"
 import { NextRequest, NextResponse } from "next/server"
 import { Resend } from "resend"
 
@@ -16,7 +18,7 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json()
+    const body = await readJson(req)
     const name = String(body.name ?? "").trim()
     const email = String(body.email ?? "").trim()
     const message = String(body.message ?? "").trim()
@@ -37,6 +39,8 @@ export async function POST(req: NextRequest) {
     if (message.length < 10) {
       return NextResponse.json({ error: "Your message is a bit short. Add a few more details." }, { status: 400 })
     }
+
+    await rateLimit(req, "contact", 5)
 
     // Created inside the handler so a missing key can't break the build
     const resend = new Resend(process.env.RESEND_API_KEY)
@@ -77,6 +81,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: true })
   } catch (err) {
     console.error("[contact] error:", err)
-    return NextResponse.json({ error: "Something went wrong. Please try again." }, { status: 500 })
+    return errorResponse(err)
   }
 }

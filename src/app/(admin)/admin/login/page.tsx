@@ -29,6 +29,12 @@ export default function AdminLoginPage() {
         return
       }
 
+      const { data: admin } = await supabase.from("admin_users").select("id").eq("email", data.user.email!).maybeSingle()
+      if (!admin) {
+        await supabase.auth.signOut()
+        setError("This account does not have administrator access.")
+        return
+      }
       router.push("/admin/dashboard")
       router.refresh()
     } catch (err) {
@@ -67,12 +73,13 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <main style={{
+    <main className="admin-login" style={{
       minHeight: "100vh", backgroundColor: "var(--bg-void)",
       display: "flex", alignItems: "center", justifyContent: "center",
       padding: "24px",
     }}>
-      <div style={{
+      <section className="login-intro"><a href="/beatstore" className="eyebrow">SENIOR MAN KP / STUDIO</a><h1>Behind every<br/>great record</h1><p>Your catalog · Your artists · Your business<br/>Welcome back to your studio</p><a href="/beatstore" className="text-link">Return to the storefront ↗</a></section>
+      <div className="login-card" style={{
         width: "100%", maxWidth: "420px",
         backgroundColor: "var(--bg-card)",
         border: "1px solid rgba(255,255,255,0.07)",

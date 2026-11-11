@@ -21,11 +21,22 @@ function HeartButton({ beatId }: { beatId: string }) {
 
 export default function FloatingPlayer() {
   const {
-    currentBeat, isPlaying,
-    pause, toggle, next, prev,
-    volume, setVolume,
-    progress, setProgress,
-    duration, setDuration,
+    currentBeat,
+    isPlaying,
+    autoplayBlocked,
+    playbackError,
+    pause,
+    resume,
+    playbackBlocked,
+    playbackFailed,
+    next,
+    prev,
+    volume,
+    setVolume,
+    progress,
+    setProgress,
+    duration,
+    setDuration,
   } = usePlayerStore()
 
   const audioRef = useRef<HTMLAudioElement>(null)
@@ -36,12 +47,20 @@ export default function FloatingPlayer() {
   useEffect(() => {
     const audio = audioRef.current
     if (!audio) return
+    let cancelled = false
     if (isPlaying) {
-      audio.play().catch(() => {})
+      audio.play().catch((error: DOMException) => {
+        if (cancelled || !usePlayerStore.getState().isPlaying) return
+        if (error.name === "NotAllowedError") playbackBlocked()
+        else if (error.name !== "AbortError") playbackFailed()
+      })
     } else {
       audio.pause()
     }
-  }, [isPlaying, currentBeat])
+    return () => {
+      cancelled = true
+    }
+  }, [isPlaying, currentBeat, playbackBlocked, playbackFailed])
 
   useEffect(() => {
     const audio = audioRef.current
@@ -49,11 +68,45 @@ export default function FloatingPlayer() {
     if (progress === 0 && audio.currentTime > 0.5) {
       audio.currentTime = 0
     }
-  }, [progress])
+  }, [progress, isSeeking])
 
   useEffect(() => {
     if (audioRef.current) audioRef.current.volume = volume
-  }, [volume])
+  }, [volume, currentBeat])
+
+  // Retry only after a real interaction when the browser rejected autoplay.
+  // Explicit pause clears this flag, so later clicks cannot override the listener.
+  useEffect(() => {
+    if (!autoplayBlocked) return
+    function retry(event: Event) {
+      if (!event.isTrusted || !usePlayerStore.getState().autoplayBlocked) return
+      if (event instanceof KeyboardEvent && !["Enter", " "].includes(event.key))
+        return
+      resume()
+      void audioRef.current?.play().catch((error: DOMException) => {
+        if (error.name === "NotAllowedError") playbackBlocked()
+        else if (error.name !== "AbortError") playbackFailed()
+      })
+    }
+    document.addEventListener("click", retry)
+    document.addEventListener("keydown", retry)
+    return () => {
+      document.removeEventListener("click", retry)
+      document.removeEventListener("keydown", retry)
+    }
+  }, [autoplayBlocked, resume, playbackBlocked, playbackFailed])
+
+  function handleToggle() {
+    if (isPlaying) {
+      pause()
+      return
+    }
+    resume()
+    void audioRef.current?.play().catch((error: DOMException) => {
+      if (error.name === "NotAllowedError") playbackBlocked()
+      else if (error.name !== "AbortError") playbackFailed()
+    })
+  }
 
   function handleTimeUpdate() {
     const audio = audioRef.current
@@ -68,7 +121,11 @@ export default function FloatingPlayer() {
   }
 
   function handleEnded() {
-    next()
+    if (usePlayerStore.getState().queue.length === 1 && audioRef.current) {
+      audioRef.current.currentTime = 0
+      setProgress(0)
+      void audioRef.current.play().catch(() => playbackFailed())
+    } else next()
   }
 
   // Desktop: click anywhere on the progress bar
@@ -138,6 +195,8 @@ export default function FloatingPlayer() {
       {beat.preview_url && (
         <audio
           ref={audioRef}
+          preload="metadata"
+          onError={playbackFailed}
           src={beat.preview_url}
           onTimeUpdate={handleTimeUpdate}
           onEnded={handleEnded}
@@ -146,7 +205,6 @@ export default function FloatingPlayer() {
       )}
 
       <div className="fp">
-
         {/* Mobile seek line (hidden on desktop) */}
         <div
           className="fp-seek"
@@ -156,20 +214,28 @@ export default function FloatingPlayer() {
           onPointerCancel={handleMobileSeekPointerUp}
         >
           <div className="fp-seek-track">
-            <div className="fp-seek-fill" style={{ width: `${progressPercent}%` }} />
-            {isSeeking && <div className="fp-seek-thumb" style={{ left: `${progressPercent}%` }} />}
+            <div
+              className="fp-seek-fill"
+              style={{ width: `${progressPercent}%` }}
+            />
+            {isSeeking && (
+              <div
+                className="fp-seek-thumb"
+                style={{ left: `${progressPercent}%` }}
+              />
+            )}
           </div>
         </div>
 
         <div className="fp-bar">
-
           {/* Left: beat info */}
           <div className="fp-info">
             <div className="fp-cover">
-              {beat.cover_url
-                ? <img src={beat.cover_url} alt={beat.title} />
-                : <span>♪</span>
-              }
+              {beat.cover_url ? (
+                <img src={beat.cover_url} alt={beat.title} />
+              ) : (
+                <span>♪</span>
+              )}
             </div>
 
             <div className="fp-text">
@@ -183,7 +249,14 @@ export default function FloatingPlayer() {
                   </div>
                 )}
               </div>
-              <div className="fp-sub">{beat.genre} · {beat.bpm} BPM</div>
+              <div className="fp-sub">
+                {beat.genre} · {beat.bpm} BPM
+              </div>
+              {(autoplayBlocked || playbackError) && (
+                <div className="fp-sub" role="status">
+                  {playbackError || "Tap play to start the music"}
+                </div>
+              )}
             </div>
 
             <HeartButton beatId={String(beat.id)} />
@@ -193,32 +266,79 @@ export default function FloatingPlayer() {
           <div className="fp-center">
             <div className="fp-buttons">
               <button className="fp-skip" onClick={prev} aria-label="Previous">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
                   <polygon points="19,20 9,12 19,4" />
-                  <line x1="5" y1="4" x2="5" y2="20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                  <line
+                    x1="5"
+                    y1="4"
+                    x2="5"
+                    y2="20"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                  />
                 </svg>
               </button>
 
-              <button className="fp-play" onClick={toggle} aria-label={isPlaying ? "Pause" : "Play"}>
-                {isPlaying
-                  ? <svg width="13" height="13" viewBox="0 0 12 12" fill="#000"><rect x="1" y="0" width="4" height="12" rx="1" /><rect x="7" y="0" width="4" height="12" rx="1" /></svg>
-                  : <span style={{ color: "#000", fontSize: "0.8rem", marginLeft: "2px" }}>▶</span>
-                }
+              <button
+                className="fp-play"
+                onClick={handleToggle}
+                aria-label={isPlaying ? "Pause" : "Play"}
+              >
+                {isPlaying ? (
+                  <svg width="13" height="13" viewBox="0 0 12 12" fill="#000">
+                    <rect x="1" y="0" width="4" height="12" rx="1" />
+                    <rect x="7" y="0" width="4" height="12" rx="1" />
+                  </svg>
+                ) : (
+                  <span
+                    style={{
+                      color: "#000",
+                      fontSize: "0.8rem",
+                      marginLeft: "2px",
+                    }}
+                  >
+                    ▶
+                  </span>
+                )}
               </button>
 
               <button className="fp-skip" onClick={next} aria-label="Next">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
                   <polygon points="5,4 15,12 5,20" />
-                  <line x1="19" y1="4" x2="19" y2="20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                  <line
+                    x1="19"
+                    y1="4"
+                    x2="19"
+                    y2="20"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                  />
                 </svg>
               </button>
             </div>
 
             <div className="fp-progress">
-              <span className="fp-time fp-time-left">{formatTime(progress)}</span>
+              <span className="fp-time fp-time-left">
+                {formatTime(progress)}
+              </span>
               <div className="fp-track-hit" onClick={handleProgressClick}>
                 <div className="fp-track">
-                  <div className="fp-track-fill" style={{ width: `${progressPercent}%` }} />
+                  <div
+                    className="fp-track-fill"
+                    style={{ width: `${progressPercent}%` }}
+                  />
                 </div>
               </div>
               <span className="fp-time">{formatTime(duration)}</span>
@@ -228,22 +348,42 @@ export default function FloatingPlayer() {
           {/* Right: volume + license */}
           <div className="fp-right">
             <div className="fp-volume">
-              <button className="fp-mute" onClick={toggleMute} aria-label="Mute">
-                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <button
+                className="fp-mute"
+                onClick={toggleMute}
+                aria-label="Mute"
+              >
+                <svg
+                  width="17"
+                  height="17"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
                   <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
                   {volume > 0.5 && <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />}
                   {volume > 0 && <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />}
                 </svg>
               </button>
               <input
-                type="range" min="0" max="1" step="0.01" value={volume}
+                type="range"
+                min="0"
+                max="1"
+                step="0.01"
+                value={volume}
                 onChange={(e) => setVolume(parseFloat(e.target.value))}
                 className="fp-range"
                 aria-label="Volume"
               />
             </div>
 
-            <Link href={`/beat/${(beat as any).slug || ""}`} className="fp-license">
+            <Link
+              href={beat.slug ? `/beatstore/${beat.slug}` : "/beatstore/beats"}
+              className="fp-license"
+            >
               License
             </Link>
           </div>
