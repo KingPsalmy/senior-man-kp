@@ -1,8 +1,10 @@
 "use client"
 
 import { useState } from "react"
+import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase/client"
+import LoginBackdrop from "@/components/admin/LoginBackdrop"
 
 export default function AdminLoginPage() {
   const router = useRouter()
@@ -37,7 +39,7 @@ export default function AdminLoginPage() {
       }
       router.push("/admin/dashboard")
       router.refresh()
-    } catch (err) {
+    } catch {
       setError("Something went wrong. Please try again.")
     } finally {
       setLoading(false)
@@ -78,7 +80,8 @@ export default function AdminLoginPage() {
       display: "flex", alignItems: "center", justifyContent: "center",
       padding: "24px",
     }}>
-      <section className="login-intro"><a href="/beatstore" className="eyebrow">SENIOR MAN KP / STUDIO</a><h1>Behind every<br/>great record</h1><p>Your catalog · Your artists · Your business<br/>Welcome back to your studio</p><a href="/beatstore" className="text-link">Return to the storefront ↗</a></section>
+      <LoginBackdrop />
+      <section className="login-intro"><Link href="/beatstore" className="eyebrow">SENIOR MAN KP / STUDIO</Link><h1>Behind every<br/>great record</h1><p>Your catalog · Your artists · Your business<br/>Welcome back to your studio</p><Link href="/beatstore" className="text-link">Return to the storefront ↗</Link></section>
       <div className="login-card" style={{
         width: "100%", maxWidth: "420px",
         backgroundColor: "var(--bg-card)",
@@ -97,7 +100,7 @@ export default function AdminLoginPage() {
           <div style={{ background: "linear-gradient(135deg, #C9A84C, #F5D98B)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", fontSize: "2.8rem", fontWeight: 800, fontFamily: "var(--font-ui)", lineHeight: 1 }}>
             KP
           </div>
-          <div style={{ color: "rgba(245,240,232,0.4)", fontSize: "0.78rem", fontFamily: "var(--font-mono)", letterSpacing: "0.2em", textTransform: "uppercase", marginTop: "8px" }}>
+          <div style={{ color: "var(--text-secondary)", fontSize: "0.78rem", fontFamily: "var(--font-mono)", letterSpacing: "0.2em", textTransform: "uppercase", marginTop: "8px" }}>
             Admin Portal
           </div>
         </div>
@@ -117,10 +120,11 @@ export default function AdminLoginPage() {
 
         <form onSubmit={handleLogin} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
           <div>
-            <label style={{ display: "block", color: "rgba(245,240,232,0.5)", fontSize: "0.7rem", fontFamily: "var(--font-mono)", letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: "8px" }}>
+            <label htmlFor="admin-email" style={{ display: "block", color: "var(--text-secondary)", fontSize: "0.7rem", fontFamily: "var(--font-mono)", letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: "8px" }}>
               Email
             </label>
             <input
+              id="admin-email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -132,10 +136,11 @@ export default function AdminLoginPage() {
           </div>
 
           <div>
-            <label style={{ display: "block", color: "rgba(245,240,232,0.5)", fontSize: "0.7rem", fontFamily: "var(--font-mono)", letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: "8px" }}>
+            <label htmlFor="admin-password" style={{ display: "block", color: "var(--text-secondary)", fontSize: "0.7rem", fontFamily: "var(--font-mono)", letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: "8px" }}>
               Password
             </label>
             <input
+              id="admin-password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
