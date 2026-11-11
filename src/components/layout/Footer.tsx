@@ -1,6 +1,6 @@
 "use client"
 import Link from "next/link"
-import { ArrowUpRight, ArrowRight, Music2 } from "lucide-react"
+import { ArrowUpRight, ArrowRight } from "lucide-react"
 const socials = [
   { href: "https://instagram.com/kingpsalmy_", label: "Instagram" },
   { href: "https://youtube.com/@kingpsalmy", label: "YouTube" },
@@ -77,7 +77,7 @@ export default function Footer() {
         </div>
         <div className="footer-bottom">
           <span>
-            <Music2 size={14} /> © {new Date().getFullYear()} Senior Man KP
+          © {new Date().getFullYear()} Senior Man KP
           </span>
           <div>
             <Link href="/terms">Terms of use</Link>
