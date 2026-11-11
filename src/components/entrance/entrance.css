@@ -11,7 +11,7 @@
 .stage-reveal {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, #070a0955, #070a09e0), url('/hero-pic.png') center / cover;
+  background: linear-gradient(180deg, #070a0955, #070a09e0), url('/hero-pic-left-2.png') center / cover;
   transform: scale(1.04);
   transition: transform 1.4s ease;
 }
