@@ -1,6 +1,8 @@
 .stage-entrance {
   position: relative;
   isolation: isolate;
+  /* Older Android Chrome ignores svh, so keep a full-height fallback. */
+  min-height: 100vh;
   min-height: 100svh;
   display: grid;
   place-items: center;
@@ -70,9 +72,17 @@
   letter-spacing: .04em;
   text-decoration: none;
 }
-.stage-enter svg { transition: transform .2s ease; }
+.stage-enter svg {
+  flex-shrink: 0;
+  transition: transform .2s ease;
+  animation: stage-arrow-invite 2.4s ease-in-out 2;
+}
+@keyframes stage-arrow-invite {
+  0%, 60%, 100% { transform: translateX(0); }
+  30% { transform: translateX(6px); }
+}
 .stage-enter:hover { color: #fff4d8; border-color: #fff4d8; }
-.stage-enter:hover svg { transform: translateX(5px); }
+.stage-enter:hover svg, .stage-enter:focus-visible svg { animation: none; transform: translateX(5px); }
 .stage-enter:focus-visible { outline: 2px solid #eed59c; outline-offset: 10px; }
 .stage-opening .stage-curtain-left { transform: translateX(-100%) skewY(-3deg); }
 .stage-opening .stage-curtain-right { transform: translateX(100%) skewY(3deg); }
@@ -96,35 +106,24 @@
   }
   .stage-invitation {
     width: 100%;
+    min-height: 100vh;
     min-height: 100svh;
     justify-content: space-between;
     gap: 40px;
+    padding: 32px 24px 40px;
+    padding: max(32px, 7vh, env(safe-area-inset-top)) 24px max(40px, 8vh, calc(env(safe-area-inset-bottom) + 24px));
     padding: max(32px, 7svh, env(safe-area-inset-top)) 24px max(40px, 8svh, calc(env(safe-area-inset-bottom) + 24px));
   }
   .stage-invitation h1 img { width: 94px; height: 72px; }
   .stage-enter {
-    width: min(100%, 300px);
-    min-height: 58px;
-    justify-content: space-between;
-    padding: 16px 22px;
-    border: 1px solid #edcd89;
-    border-radius: 8px;
-    background: #e2bf75;
-    color: #101710;
-    box-shadow: 0 8px 32px #0006;
     font-size: 16px;
-    font-weight: 600;
-    letter-spacing: .01em;
     gap: 18px;
   }
-  .stage-enter:hover { background: #efd193; color: #101710; border-color: #efd193; }
-  .stage-enter:active { background: #d2ad62; }
-  .stage-enter svg { flex-shrink: 0; }
 }
 @media (max-width: 600px) and (max-height: 500px) {
   .stage-invitation { padding-block: 20px; gap: 24px; }
   .stage-invitation h1 img { width: 72px; height: 55px; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .stage-entrance *, .stage-entrance *::before { transition: none; }
+  .stage-entrance *, .stage-entrance *::before { transition: none; animation: none; }
 }
