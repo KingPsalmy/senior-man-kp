@@ -53,7 +53,7 @@ export default function Footer() {
           <div className="footer-contact">
             <h3>Something more personal?</h3>
             <p>
-              Let’s talk custom beats
+              Let’s talk custom beats{" "}
               <br />
               and collaborations
             </p>
