@@ -19,7 +19,7 @@
   position: absolute;
   top: -2%;
   bottom: -2%;
-  width: 47%;
+  width: 50.15%;
   z-index: 1;
   background:
     linear-gradient(180deg, #0008, transparent 22%, #0003 65%, #000c),
@@ -27,8 +27,16 @@
   box-shadow: 0 0 55px 20px #0009;
   transition: transform 1.4s cubic-bezier(.65, 0, .25, 1);
 }
-.stage-curtain-left { left: 0; border-right: 1px solid #c3a46744; transform-origin: left top; }
-.stage-curtain-right { right: 0; border-left: 1px solid #c3a46744; transform-origin: right top; }
+.stage-curtain-left {
+  left: 0;
+  transform-origin: left top;
+  clip-path: polygon(0 0, 100% 0, 99% 10%, 97% 22%, 94% 36%, 89% 52%, 83% 68%, 75% 84%, 66% 100%, 0 100%);
+}
+.stage-curtain-right {
+  right: 0;
+  transform-origin: right top;
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 34% 100%, 25% 84%, 17% 68%, 11% 52%, 6% 36%, 3% 22%, 1% 10%);
+}
 .stage-light {
   position: absolute;
   inset: 0;
