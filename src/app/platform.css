@@ -2911,14 +2911,14 @@ button:disabled {
   height: 100%;
   object-fit: cover;
   object-position: center 25%;
-  filter: brightness(.85) contrast(1.1) grayscale(1);
+  filter: brightness(1) contrast(1.05) grayscale(1);
   mix-blend-mode: luminosity;
   opacity: 0;
   transition: opacity 1.5s ease-in-out;
   -webkit-mask-image: linear-gradient(to right, #0009, #000 35%, transparent 100%);
   mask-image: linear-gradient(to right, #0009, #000 35%, transparent 100%);
 }
-.login-portraits > img.is-active { opacity: .8; }
+.login-portraits > img.is-active { opacity: .85; }
 .login-portrait-shade {
   position: absolute;
   inset: 0;
@@ -3287,7 +3287,7 @@ button:disabled {
   object-position: center 20%;
   opacity: 0;
   mix-blend-mode: luminosity;
-  filter: brightness(0.85) contrast(1.1) grayscale(1);
+  filter: brightness(1) contrast(1.05) grayscale(1);
   transition: opacity 1.5s ease-in-out;
   mask-image: linear-gradient(
     to right,
@@ -3307,7 +3307,7 @@ button:disabled {
   );
 }
 .hero-portrait-layer > img.portrait-active {
-  opacity: 0.75;
+  opacity: 0.85;
 }
 .portrait-fades {
   position: absolute;
@@ -3432,7 +3432,7 @@ button:disabled {
       linear-gradient(to right, rgba(11, 14, 13, 0.55), transparent);
   }
   .hero-portrait-layer > img.portrait-active {
-    opacity: 0.55;
+    opacity: 0.7;
   }
   .blend-caption {
     left: 22px;

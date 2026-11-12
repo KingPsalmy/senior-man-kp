@@ -9,6 +9,14 @@ These generated URLs contain a hash of the image bytes and have a one-year immut
 cache lifetime. Only content-addressed files should go in `public/media`.
 Photos retain their original dimensions and use quality 95 with smart chroma
 subsampling. The logo retains its original dimensions and uses lossless WebP.
+The home and admin-login portrait slides request only portrait 1 initially.
+Once it has loaded, a running slideshow waits five seconds before requesting the
+next portrait, then rotates after 25 seconds. It keeps the current picture visible
+until the requested replacement has loaded. Pause and reduced-motion preferences
+stop automatic requests and rotation; manual selection still works. Failed slides
+are skipped. Cached images are recognized on mount as well as through load events.
+The portrait brightness filter is neutral, with less transparent active layers,
+to improve visibility while keeping the original masks and monochrome blend.
 
 `CoverImage` uses Next's image optimizer to send appropriately sized artwork. It
 only optimizes this project's HTTPS public `covers` bucket, with no query string

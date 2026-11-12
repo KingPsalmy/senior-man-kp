@@ -1,4 +1,5 @@
 "use client"
+import { usePortraitRotation } from "@/hooks/usePortraitRotation"
 import { mediaAssets } from "@/lib/media-assets"
 import { useEffect, useState } from "react"
 import Link from "next/link"
@@ -35,9 +36,9 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
   const [retry, setRetry] = useState(0)
-  const [portrait, setPortrait] = useState(0)
   const [motionPaused, setMotionPaused] = useState(false)
-  const [reducedMotion, setReducedMotion] = useState(false)
+  const [reducedMotion, setReducedMotion] = useState(true)
+  const { portrait, requestedPortraits, selectPortrait, onPortraitLoad, onPortraitError } = usePortraitRotation(portraits.length, !motionPaused && !reducedMotion)
   useEffect(() => {
     const preference = window.matchMedia("(prefers-reduced-motion: reduce)")
     const update = () => setReducedMotion(preference.matches)
@@ -45,14 +46,6 @@ export default function HomePage() {
     preference.addEventListener("change", update)
     return () => preference.removeEventListener("change", update)
   }, [])
-  useEffect(() => {
-    if (motionPaused || reducedMotion) return
-    const timer = window.setInterval(
-      () => setPortrait((i) => (i + 1) % portraits.length),
-      25000,
-    )
-    return () => window.clearInterval(timer)
-  }, [motionPaused, reducedMotion])
   const lastPlayed = usePlayerStore((s) => s.lastPlayed)
   useEffect(() => {
     let active = true
@@ -92,10 +85,13 @@ export default function HomePage() {
           <div className="studio-floor" />
         </div>
         <div className="hero-portrait-layer">
-          {portraits.map((src, i) => (
+          {portraits.map((src, i) => requestedPortraits.includes(i) && (
             <img
               key={src}
               src={src}
+              ref={(image) => { if (image?.complete && image.naturalWidth) onPortraitLoad(i) }}
+              onLoad={() => onPortraitLoad(i)}
+              onError={() => onPortraitError(i)}
               fetchPriority={i === 0 ? "high" : "low"}
               decoding="async"
               alt={i === portrait ? "Portrait of Senior Man KP" : ""}
@@ -132,7 +128,7 @@ export default function HomePage() {
               <button
                 key={i}
                 onClick={() => {
-                  setPortrait(i)
+                  selectPortrait(i)
                   setMotionPaused(true)
                 }}
                 aria-label={"Show portrait " + (i + 1)}
