@@ -15,7 +15,7 @@
   inset: 0;
   background: linear-gradient(180deg, #070a0955, #070a09e0), var(--stage-photo) center / cover;
   transform: scale(1.04);
-  transition: transform 1.4s ease;
+  transform-origin: 50% 40%;
 }
 .stage-curtain {
   position: absolute;
@@ -84,10 +84,38 @@
 .stage-enter:hover { color: #fff4d8; border-color: #fff4d8; }
 .stage-enter:hover svg, .stage-enter:focus-visible svg { animation: none; transform: translateX(5px); }
 .stage-enter:focus-visible { outline: 2px solid #eed59c; outline-offset: 10px; }
-.stage-opening .stage-curtain-left { transform: translateX(-100%) skewY(-3deg); }
-.stage-opening .stage-curtain-right { transform: translateX(100%) skewY(3deg); }
-.stage-opening .stage-invitation { opacity: 0; transform: translateY(-12px); pointer-events: none; }
-.stage-opening .stage-reveal { transform: scale(1); }
+.stage-transition { position: fixed; inset: 0; z-index: 10000; overflow: hidden; }
+.stage-transition .stage-entrance { height: 100vh; height: 100svh; background: transparent; }
+.stage-opening .stage-curtain-left { animation: stage-curtain-left-open .9s cubic-bezier(.65, 0, .25, 1) both; }
+.stage-opening .stage-curtain-right { animation: stage-curtain-right-open .9s cubic-bezier(.65, 0, .25, 1) both; }
+.stage-opening .stage-invitation { animation: stage-invitation-exit .3s ease both; pointer-events: none; }
+.stage-opening .stage-reveal { animation: stage-photo-approach .9s ease-out both; will-change: transform, opacity; }
+.stage-store-ready .stage-reveal { animation: stage-photo-exit .8s cubic-bezier(.2, .6, .35, 1) both; }
+.stage-store-ready .stage-light { animation: stage-light-exit .6s ease both; }
+@keyframes stage-curtain-left-open {
+  from { transform: translateX(0) skewY(0); }
+  to { transform: translateX(-110%) skewY(-3deg); }
+}
+@keyframes stage-curtain-right-open {
+  from { transform: translateX(0) skewY(0); }
+  to { transform: translateX(110%) skewY(3deg); }
+}
+@keyframes stage-invitation-exit {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(-12px); }
+}
+@keyframes stage-photo-approach {
+  from { transform: scale(1.04); }
+  to { transform: scale(1.12); }
+}
+@keyframes stage-photo-exit {
+  from { transform: scale(1.12); opacity: 1; }
+  to { transform: scale(1.5); opacity: 0; }
+}
+@keyframes stage-light-exit {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
 @media (max-width: 600px) {
   .stage-reveal {
     background-image: linear-gradient(180deg, #070a0926 15%, #070a0914 42%, #070a09eb 100%), var(--stage-photo);
@@ -126,4 +154,5 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .stage-entrance *, .stage-entrance *::before { transition: none; animation: none; }
+  .stage-transition { display: none; }
 }
