@@ -7,6 +7,7 @@ const nextConfig: NextConfig = {
     remotePatterns: coverPattern ? [coverPattern] : [],
     maximumRedirects: 0,
     minimumCacheTTL: 86400,
+    qualities: [75, 90],
   },
   async redirects() {
     return [

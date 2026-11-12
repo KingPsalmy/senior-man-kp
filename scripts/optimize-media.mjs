@@ -8,7 +8,11 @@ await mkdir("public/media", { recursive: true })
 const assets = {}
 for (const name of ["hero-pic", "hero-pic-left", "hero-pic-left-2", "hero-pic-left-3", "logo-white"]) {
   const source = await readFile(`public/${name}.png`)
-  const output = await sharp(source).resize({ width: name === "logo-white" ? 320 : 1536, withoutEnlargement: true }).webp({ quality: 85, effort: 6 }).toBuffer()
+  // Preserve native dimensions. Photos use gentler compression; the logo is
+  // encoded losslessly so its fine edges are not softened by lossy compression.
+  const output = await sharp(source).webp(name === "logo-white"
+    ? { lossless: true, effort: 6 }
+    : { quality: 95, smartSubsample: true, effort: 6 }).toBuffer()
   const hash = createHash("sha256").update(output).digest("hex").slice(0, 12)
   const path = `/media/${name}.${hash}.webp`
   await writeFile(`public${path}`, output)

@@ -22,5 +22,5 @@ export default function CoverImage({ src, alt, sizes = "(max-width: 600px) 50vw,
   }
   // A cold optimizer request can time out on a slow upstream connection. Keep
   // the original artwork available rather than leaving a broken image.
-  return <Image src={src} alt={alt} width={1024} height={1024} sizes={sizes} style={style} loading={loading} onError={() => setFailedSource(src)} />
+  return <Image src={src} alt={alt} width={1024} height={1024} quality={90} sizes={sizes} style={style} loading={loading} onError={() => setFailedSource(src)} />
 }

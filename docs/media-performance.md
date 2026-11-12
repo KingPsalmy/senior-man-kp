@@ -7,11 +7,15 @@ creates WebP copies in `public/media` and updates `src/lib/media-assets.ts`.
 Run it after changing a source image and commit both the generated files and manifest.
 These generated URLs contain a hash of the image bytes and have a one-year immutable
 cache lifetime. Only content-addressed files should go in `public/media`.
+Photos retain their original dimensions and use quality 95 with smart chroma
+subsampling. The logo retains its original dimensions and uses lossless WebP.
 
 `CoverImage` uses Next's image optimizer to send appropriately sized artwork. It
 only optimizes this project's HTTPS public `covers` bucket, with no query string
 or redirects. Other legacy artwork and failed optimization requests use the original
 image. Cards below the viewport load lazily; the beat-detail cover loads eagerly.
+Cover quality is 90 (previously 75); both values remain allowed so older page
+versions still work. The quality parameter changes the cache key automatically.
 
 ## Public audio and storage
 
@@ -44,8 +48,9 @@ Expected: hashed local media `max-age=31536000, immutable`; public preview GET/2
 from the original); protected APIs `private, no-store`. A repeated optimized-image
 request should report `x-nextjs-cache: HIT` locally.
 
-Measured: hero photos plus logo 8,076,140 → 326,714 bytes; After Hours card artwork
-at 384 pixels 10,566 bytes. File-size savings are not a promise of a particular
+Measured after the visual-quality adjustment: hero photos plus logo
+8,076,140 → 1,039,138 bytes (about 87% smaller). The previous, more aggressive
+settings produced 326,714 bytes. File-size savings are not a promise of a particular
 page-load time; network speed, first-time image optimization and browser cache
 retention still matter. Source changes need deployment; the storage header update
 is already live.
