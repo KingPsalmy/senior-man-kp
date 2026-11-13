@@ -3,26 +3,27 @@
   isolation: isolate;
   display: flex;
   align-items: center;
-  min-height: clamp(460px, 38vw, 640px);
+  min-height: clamp(500px, 42vw, 640px);
   background: var(--bg-void);
 }
 
 .contact-hero-photo {
   position: absolute;
-  inset: 0;
+  inset: 0 max(48px, calc((100% - 1280px) / 2 + 80px)) 0 auto;
+  width: clamp(375px, 31.5vw, 480px);
   z-index: -1;
   overflow: hidden;
   background: var(--bg-void);
 }
 
 .contact-hero-photo img {
-  object-fit: cover;
-  object-position: center 48%;
+  object-fit: contain;
+  object-position: center;
   filter: grayscale(1) brightness(1) contrast(1.05);
   mix-blend-mode: luminosity;
   opacity: .85;
-  -webkit-mask-image: linear-gradient(to right, transparent, #0005 20%, #000 54%, #000 86%, transparent);
-  mask-image: linear-gradient(to right, transparent, #0005 20%, #000 54%, #000 86%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 25%, #000 75%, transparent);
+  mask-image: linear-gradient(to right, transparent, #000 25%, #000 75%, transparent);
 }
 
 .contact-hero-photo::after {
@@ -30,9 +31,8 @@
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(to top, var(--bg-void), transparent 45%),
-    linear-gradient(to bottom, var(--bg-void), transparent 20%),
-    linear-gradient(to right, var(--bg-void) 3%, rgba(11, 14, 13, .8) 24%, rgba(11, 14, 13, .3) 44%, transparent 67%);
+    linear-gradient(to top, var(--bg-void), transparent 30%),
+    linear-gradient(to bottom, var(--bg-void), transparent 15%);
 }
 
 .contact-hero-content {
@@ -41,11 +41,16 @@
 
 .contact-hero h1 {
   max-width: 480px;
-  width: 43%;
+  width: 46%;
   font: 600 clamp(52px, 5.2vw, 80px)/1.02 var(--font-display);
   letter-spacing: -.025em;
   text-wrap: balance;
   color: var(--text-primary);
+}
+
+.contact-layout {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(40px, 6vw, 96px);
 }
 
 .contact-hero-description {
@@ -63,12 +68,14 @@
   }
 
   .contact-hero-photo {
-    bottom: auto;
+    inset: 0 0 auto;
+    width: 100%;
     height: clamp(320px, 58vw, 460px);
   }
 
   .contact-hero-photo img {
-    object-position: 72% 40%;
+    object-fit: cover;
+    object-position: center 18%;
     -webkit-mask-image: linear-gradient(to right, transparent, #000 18%, #000 82%, transparent);
     mask-image: linear-gradient(to right, transparent, #000 18%, #000 82%, transparent);
   }
@@ -95,5 +102,9 @@
     width: 100%;
     max-width: 440px;
     margin-top: 18px;
+  }
+
+  .contact-layout {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
