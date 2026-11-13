@@ -66,6 +66,8 @@ export function shuffleBeats(beats: PlayerBeat[]): PlayerBeat[] {
   return shuffled
 }
 
+export type RepeatMode = "off" | "all" | "one"
+
 type PlayerStore = {
   currentBeat: PlayerBeat | null
   isPlaying: boolean
@@ -79,6 +81,9 @@ type PlayerStore = {
   orderedQueue: PlayerBeat[]
   shuffleEnabled: boolean
   toggleShuffle: () => void
+  repeatMode: RepeatMode
+  cycleRepeat: () => void
+  finishTrack: () => "stop" | "advance" | "replay"
   currentIndex: number
   volume: number
   progress: number
@@ -109,6 +114,7 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
   queue: [],
   orderedQueue: [],
   shuffleEnabled: true,
+  repeatMode: "off",
   currentIndex: 0,
   volume: 0.8,
   progress: 0,
@@ -156,6 +162,25 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
     }
     // Preserve the exact currentBeat reference and all audio/playback state.
     set({ shuffleEnabled: enabled, queue, currentIndex })
+  },
+  cycleRepeat: () => {
+    const mode = get().repeatMode
+    set({ repeatMode: mode === "off" ? "all" : mode === "all" ? "one" : "off" })
+  },
+  finishTrack: () => {
+    const { currentBeat, currentIndex, queue, repeatMode } = get()
+    if (currentBeat && repeatMode === "one") {
+      get().restart()
+      return "replay"
+    }
+    if (!currentBeat || !queue.length ||
+      (repeatMode === "off" && currentIndex + 1 >= queue.length)) {
+      get().pause()
+      return "stop"
+    }
+    // Manual skips remain independent of repeat; only natural endings stop.
+    get().next()
+    return get().currentBeat?.preview_url === currentBeat.preview_url ? "replay" : "advance"
   },
   resume: () => {
     if (get().currentBeat)

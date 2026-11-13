@@ -39,6 +39,10 @@
   :root { --player-h: 58px; }
 }
 
+@media (max-width: 480px) {
+  :root { --player-h: 102px; }
+}
+
 * {
   margin: 0;
   padding: 0;

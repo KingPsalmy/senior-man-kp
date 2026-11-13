@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react"
 import { usePlayerStore } from "@/store/playerStore"
 import { useFavorite } from "@/hooks/useFavorites"
 import Link from "next/link"
-import { Shuffle } from "lucide-react"
+import { Repeat, Repeat1, Shuffle } from "lucide-react"
 
 function HeartButton({ beatId }: { beatId: string }) {
   const { favorited, toggle } = useFavorite(beatId)
@@ -27,6 +27,8 @@ export default function FloatingPlayer() {
     isPlaying,
     shuffleEnabled,
     toggleShuffle,
+    repeatMode,
+    cycleRepeat,
     autoplayBlocked,
     playbackError,
     pause,
@@ -125,11 +127,14 @@ export default function FloatingPlayer() {
   }
 
   function handleEnded() {
-    if (usePlayerStore.getState().queue.length === 1 && audioRef.current) {
+    if (usePlayerStore.getState().finishTrack() === "replay" && audioRef.current) {
       audioRef.current.currentTime = 0
-      setProgress(0)
-      void audioRef.current.play().catch(() => playbackFailed())
-    } else next()
+      void audioRef.current.play().catch((error: DOMException) => {
+        if (!usePlayerStore.getState().isPlaying) return
+        if (error.name === "NotAllowedError") playbackBlocked()
+        else if (error.name !== "AbortError") playbackFailed()
+      })
+    }
   }
 
   // Desktop: click anywhere on the progress bar
@@ -193,6 +198,7 @@ export default function FloatingPlayer() {
 
   const beat = currentBeat
   const progressPercent = duration ? (progress / duration) * 100 : 0
+  const repeatLabel = `Repeat ${repeatMode} — switch to ${repeatMode === "off" ? "repeat all" : repeatMode === "all" ? "repeat one" : "repeat off"}`
 
   return (
     <>
@@ -271,7 +277,7 @@ export default function FloatingPlayer() {
             <div className="fp-buttons">
               <button
                 type="button"
-                className="fp-shuffle"
+                className="fp-mode fp-shuffle"
                 aria-label="Shuffle"
                 aria-pressed={shuffleEnabled}
                 title={shuffleEnabled ? "Shuffle on — turn off" : "Shuffle off — turn on"}
@@ -347,6 +353,22 @@ export default function FloatingPlayer() {
                     strokeLinecap="round"
                   />
                 </svg>
+              </button>
+              <button
+                type="button"
+                className="fp-mode fp-repeat"
+                aria-label={repeatLabel}
+                title={repeatLabel}
+                data-active={repeatMode !== "off"}
+                onClick={(event) => {
+                  event.stopPropagation()
+                  cycleRepeat()
+                }}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") event.stopPropagation()
+                }}
+              >
+                {repeatMode === "one" ? <Repeat1 size={18} aria-hidden="true" /> : <Repeat size={18} aria-hidden="true" />}
               </button>
             </div>
 
@@ -468,17 +490,19 @@ export default function FloatingPlayer() {
 
         .fp-center { display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 0; }
         .fp-buttons { position: relative; display: flex; align-items: center; gap: 18px; padding-inline: 52px; }
-        .fp-shuffle {
-          position: absolute; left: 0; top: 50%; transform: translateY(-50%);
+        .fp-mode {
+          position: absolute; top: 50%; transform: translateY(-50%);
           width: 44px; height: 44px; flex-shrink: 0;
           display: grid; place-items: center; cursor: pointer;
           color: #a7b3a6; background: transparent;
           border: 1px solid transparent; border-radius: 8px;
           transition: color .2s ease, background-color .2s ease;
         }
-        .fp-shuffle[aria-pressed="true"] { color: var(--gold); background: #d6b87518; border-color: #d6b87555; }
-        .fp-shuffle:hover { color: var(--text-primary); background: #ffffff0a; }
-        .fp-shuffle:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+        .fp-shuffle { left: 0; }
+        .fp-repeat { right: 0; }
+        .fp-mode[aria-pressed="true"], .fp-mode[data-active="true"] { color: var(--gold); background: #d6b87518; border-color: #d6b87555; }
+        .fp-mode:hover { color: var(--text-primary); background: #ffffff0a; }
+        .fp-mode:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
         .fp-skip {
           background: none; border: none; cursor: pointer;
           color: rgba(245,240,232,0.55);
@@ -552,7 +576,7 @@ export default function FloatingPlayer() {
 
           .fp-center { flex: 0 0 auto; }
           .fp-buttons { padding-inline: 0; gap: 4px; }
-          .fp-shuffle { position: static; transform: none; }
+          .fp-mode { position: static; transform: none; }
           .fp-skip { display: none; }
           .fp-progress { display: none; }
           .fp-play { width: 36px; height: 36px; }
@@ -580,6 +604,20 @@ export default function FloatingPlayer() {
             box-shadow: 0 0 8px rgba(0,0,0,0.6);
             pointer-events: none;
           }
+        }
+        @media (max-width: 480px) {
+          .fp-bar {
+            display: grid; grid-template-columns: minmax(0, 1fr) auto;
+            grid-template-rows: 44px 44px; gap: 4px 12px;
+            height: 100px; padding: 4px 12px;
+          }
+          .fp-info { grid-column: 1; grid-row: 1; }
+          .fp-text { flex: 1; }
+          .fp-right { grid-column: 2; grid-row: 1; }
+          .fp-center { grid-column: 1 / -1; grid-row: 2; }
+          .fp-buttons { gap: 12px; }
+          .fp-skip { display: flex; justify-content: center; width: 44px; height: 44px; }
+          .fp-play { width: 44px; height: 44px; }
         }
       `}</style>
     </>
