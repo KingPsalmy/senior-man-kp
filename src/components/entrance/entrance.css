@@ -1,14 +1,18 @@
 .stage-entrance {
   position: relative;
   isolation: isolate;
-  /* Older Android Chrome ignores svh, so keep a full-height fallback. */
-  min-height: 100vh;
-  min-height: 100svh;
+  /* Keep the legacy value in a variable: production optimization otherwise
+     removes consecutive vh/svh declarations, breaking older Android Chrome. */
+  --stage-viewport-height: 100vh;
+  min-height: var(--stage-viewport-height);
   display: grid;
   place-items: center;
   overflow: hidden;
   background: #070a09;
   color: #f5f0e4;
+}
+@supports (height: 100svh) {
+  .stage-entrance { --stage-viewport-height: 100svh; }
 }
 .stage-reveal {
   position: absolute;
@@ -85,7 +89,7 @@
 .stage-enter:hover svg, .stage-enter:focus-visible svg { animation: none; transform: translateX(5px); }
 .stage-enter:focus-visible { outline: 2px solid #eed59c; outline-offset: 10px; }
 .stage-transition { position: fixed; inset: 0; z-index: 10000; overflow: hidden; }
-.stage-transition .stage-entrance { height: 100vh; height: 100svh; background: transparent; }
+.stage-transition .stage-entrance { height: var(--stage-viewport-height); background: transparent; }
 .stage-opening .stage-curtain-left { animation: stage-curtain-left-open .9s cubic-bezier(.65, 0, .25, 1) both; }
 .stage-opening .stage-curtain-right { animation: stage-curtain-right-open .9s cubic-bezier(.65, 0, .25, 1) both; }
 .stage-opening .stage-invitation { animation: stage-invitation-exit .3s ease both; pointer-events: none; }
@@ -134,8 +138,7 @@
   }
   .stage-invitation {
     width: 100%;
-    min-height: 100vh;
-    min-height: 100svh;
+    min-height: var(--stage-viewport-height);
     justify-content: space-between;
     gap: 40px;
     padding: 32px 24px 40px;
