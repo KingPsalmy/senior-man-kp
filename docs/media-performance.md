@@ -2,13 +2,16 @@
 
 ## Images
 
-The original hero photos and logo stay in `public`. `node scripts/optimize-media.mjs`
+The original hero photos, contact studio photo, and logo stay in `public`. `node scripts/optimize-media.mjs`
 creates WebP copies in `public/media` and updates `src/lib/media-assets.ts`.
 Run it after changing a source image and commit both the generated files and manifest.
 These generated URLs contain a hash of the image bytes and have a one-year immutable
 cache lifetime. Only content-addressed files should go in `public/media`.
 Photos retain their original dimensions and use quality 95 with smart chroma
 subsampling. The logo retains its original dimensions and uses lossless WebP.
+The contact header preloads its generated WebP without a second compression pass.
+It uses the homepage's grayscale/luminosity treatment, with edge masks and gradients
+blending the studio scene into the page. The original image retains its color.
 The home and admin-login portrait slides request only portrait 1 initially.
 Once it has loaded, a running slideshow waits five seconds before requesting the
 next portrait, then rotates after 25 seconds. It keeps the current picture visible

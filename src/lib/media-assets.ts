@@ -4,5 +4,6 @@ export const mediaAssets = {
   "hero-pic-left": "/media/hero-pic-left.6aea01716ea7.webp",
   "hero-pic-left-2": "/media/hero-pic-left-2.4f678c053b26.webp",
   "hero-pic-left-3": "/media/hero-pic-left-3.5be9e3ad26d8.webp",
-  "logo-white": "/media/logo-white.b91be1d220c7.webp"
+  "logo-white": "/media/logo-white.b91be1d220c7.webp",
+  "contact-kp": "/media/contact-kp.445e65884f98.webp"
 } as const

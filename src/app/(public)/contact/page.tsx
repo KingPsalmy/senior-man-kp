@@ -1,9 +1,11 @@
 "use client"
 import { useState } from "react"
 import Link from "next/link"
+import Image from "next/image"
 import { ArrowUpRight, Mail, CheckCircle2 } from "lucide-react"
 import Navbar from "@/components/layout/Navbar"
-import PageIntro from "@/components/ui/PageIntro"
+import { mediaAssets } from "@/lib/media-assets"
+import "./contact.css"
 export default function ContactPage() {
   const [status, setStatus] = useState("idle"),
     [error, setError] = useState("")
@@ -30,11 +32,26 @@ export default function ContactPage() {
   return (
     <main>
       <Navbar />
-      <PageIntro
-        eyebrow="Talk to the producer"
-        title="Let’s make something"
-        description="Custom production, a license question, or help with your order Start the conversation"
-      />
+      <header className="contact-hero">
+        <div className="contact-hero-photo">
+          <Image
+            src={mediaAssets["contact-kp"]}
+            alt="A producer at the mixing desk during a live studio session"
+            fill
+            preload
+            unoptimized
+          />
+        </div>
+        <div className="container contact-hero-content">
+          <p className="eyebrow">Talk to the producer</p>
+          <h1>Let’s make something</h1>
+          <p className="contact-hero-description">
+            Custom production, a license question, or help with your order
+            <br />
+            Start the conversation
+          </p>
+        </div>
+      </header>
       <div className="container section contact-layout">
         <section>
           <span className="eyebrow">Direct from the studio</span>

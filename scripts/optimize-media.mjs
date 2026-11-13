@@ -6,7 +6,7 @@ import { mkdir, readFile, writeFile } from "node:fs/promises"
 
 await mkdir("public/media", { recursive: true })
 const assets = {}
-for (const name of ["hero-pic", "hero-pic-left", "hero-pic-left-2", "hero-pic-left-3", "logo-white"]) {
+for (const name of ["hero-pic", "hero-pic-left", "hero-pic-left-2", "hero-pic-left-3", "logo-white", "contact-kp"]) {
   const source = await readFile(`public/${name}.png`)
   // Preserve native dimensions. Photos use gentler compression; the logo is
   // encoded losslessly so its fine edges are not softened by lossy compression.
