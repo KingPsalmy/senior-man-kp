@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react"
 import { usePlayerStore } from "@/store/playerStore"
 import { useFavorite } from "@/hooks/useFavorites"
 import Link from "next/link"
+import { Shuffle } from "lucide-react"
 
 function HeartButton({ beatId }: { beatId: string }) {
   const { favorited, toggle } = useFavorite(beatId)
@@ -24,6 +25,8 @@ export default function FloatingPlayer() {
   const {
     currentBeat,
     isPlaying,
+    shuffleEnabled,
+    toggleShuffle,
     autoplayBlocked,
     playbackError,
     pause,
@@ -266,6 +269,23 @@ export default function FloatingPlayer() {
           {/* Center: controls + progress */}
           <div className="fp-center">
             <div className="fp-buttons">
+              <button
+                type="button"
+                className="fp-shuffle"
+                aria-label="Shuffle"
+                aria-pressed={shuffleEnabled}
+                title={shuffleEnabled ? "Shuffle on — turn off" : "Shuffle off — turn on"}
+                onClick={(event) => {
+                  // Changing the queue mode must not trigger blocked autoplay.
+                  event.stopPropagation()
+                  toggleShuffle()
+                }}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") event.stopPropagation()
+                }}
+              >
+                <Shuffle size={18} aria-hidden="true" />
+              </button>
               <button className="fp-skip" onClick={prev} aria-label="Previous">
                 <svg
                   width="18"
@@ -447,7 +467,18 @@ export default function FloatingPlayer() {
         }
 
         .fp-center { display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 0; }
-        .fp-buttons { display: flex; align-items: center; gap: 18px; }
+        .fp-buttons { position: relative; display: flex; align-items: center; gap: 18px; padding-inline: 52px; }
+        .fp-shuffle {
+          position: absolute; left: 0; top: 50%; transform: translateY(-50%);
+          width: 44px; height: 44px; flex-shrink: 0;
+          display: grid; place-items: center; cursor: pointer;
+          color: #a7b3a6; background: transparent;
+          border: 1px solid transparent; border-radius: 8px;
+          transition: color .2s ease, background-color .2s ease;
+        }
+        .fp-shuffle[aria-pressed="true"] { color: var(--gold); background: #d6b87518; border-color: #d6b87555; }
+        .fp-shuffle:hover { color: var(--text-primary); background: #ffffff0a; }
+        .fp-shuffle:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
         .fp-skip {
           background: none; border: none; cursor: pointer;
           color: rgba(245,240,232,0.55);
@@ -520,6 +551,8 @@ export default function FloatingPlayer() {
           .fp-heart { font-size: 1rem; padding: 2px; }
 
           .fp-center { flex: 0 0 auto; }
+          .fp-buttons { padding-inline: 0; gap: 4px; }
+          .fp-shuffle { position: static; transform: none; }
           .fp-skip { display: none; }
           .fp-progress { display: none; }
           .fp-play { width: 36px; height: 36px; }

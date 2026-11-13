@@ -49,12 +49,16 @@ function recordPlay(beat: PlayerBeat, history: PlayerBeat[]) {
   return updated
 }
 
-export function shuffleBeats(beats: PlayerBeat[]): PlayerBeat[] {
-  const shuffled = [
+function playableBeats(beats: PlayerBeat[]): PlayerBeat[] {
+  return [
     ...new Map(
       beats.filter((b) => b.preview_url).map((b) => [String(b.id), b]),
     ).values(),
   ]
+}
+
+export function shuffleBeats(beats: PlayerBeat[]): PlayerBeat[] {
+  const shuffled = playableBeats(beats)
   for (let i = shuffled.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1))
     ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
@@ -72,6 +76,9 @@ type PlayerStore = {
   playbackBlocked: () => void
   playbackFailed: () => void
   queue: PlayerBeat[]
+  orderedQueue: PlayerBeat[]
+  shuffleEnabled: boolean
+  toggleShuffle: () => void
   currentIndex: number
   volume: number
   progress: number
@@ -100,6 +107,8 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
   autoplayBlocked: false,
   playbackError: null,
   queue: [],
+  orderedQueue: [],
+  shuffleEnabled: true,
   currentIndex: 0,
   volume: 0.8,
   progress: 0,
@@ -112,10 +121,12 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
     // A route transition, a repeated response, or an intentional pause must never
     // choose a new track or reset the current audio position.
     if (get().currentBeat) return
-    const queue = shuffleBeats(beats)
+    const orderedQueue = playableBeats(beats)
+    const queue = get().shuffleEnabled ? shuffleBeats(orderedQueue) : orderedQueue
     if (!queue.length) return
     set({
       queue,
+      orderedQueue,
       currentIndex: 0,
       currentBeat: queue[0],
       isPlaying: true,
@@ -126,11 +137,25 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
     })
   },
   setQueue: (beats) => {
-    const queue = shuffleBeats(beats)
+    const orderedQueue = playableBeats(beats)
+    const queue = get().shuffleEnabled ? shuffleBeats(orderedQueue) : orderedQueue
     const index = queue.findIndex(
       (b) => String(b.id) === String(get().currentBeat?.id),
     )
-    set({ queue, currentIndex: index >= 0 ? index : -1 })
+    set({ queue, orderedQueue, currentIndex: index >= 0 ? index : -1 })
+  },
+  toggleShuffle: () => {
+    const { shuffleEnabled, orderedQueue, currentBeat } = get()
+    const enabled = !shuffleEnabled
+    const queue = enabled ? shuffleBeats(orderedQueue) : [...orderedQueue]
+    let currentIndex = queue.findIndex((beat) => String(beat.id) === String(currentBeat?.id))
+    // A new shuffle cycle starts from the playing track, then visits the others.
+    if (enabled && currentIndex >= 0) {
+      queue.unshift(...queue.splice(currentIndex, 1))
+      currentIndex = 0
+    }
+    // Preserve the exact currentBeat reference and all audio/playback state.
+    set({ shuffleEnabled: enabled, queue, currentIndex })
   },
   resume: () => {
     if (get().currentBeat)
@@ -185,14 +210,16 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
 
   next: () => {
     let { queue } = get()
-    const { currentIndex } = get()
+    const { currentIndex, shuffleEnabled } = get()
     const { currentBeat, lastPlayed } = get()
     if (!queue.length) return
     let nextIndex = currentIndex + 1
     if (nextIndex >= queue.length) {
-      queue = shuffleBeats(queue)
-      if (queue.length > 1 && String(queue[0].id) === String(currentBeat?.id))
-        [queue[0], queue[1]] = [queue[1], queue[0]]
+      if (shuffleEnabled) {
+        queue = shuffleBeats(queue)
+        if (queue.length > 1 && String(queue[0].id) === String(currentBeat?.id))
+          [queue[0], queue[1]] = [queue[1], queue[0]]
+      }
       nextIndex = 0
     }
     const nextBeat = queue[nextIndex]
@@ -217,6 +244,7 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
       progress,
       lastBeatId,
       lastPlayed,
+      shuffleEnabled,
     } = get()
     if (!queue.length) return
 
@@ -225,7 +253,7 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
       return
     }
 
-    if (lastBeatId !== null) {
+    if (shuffleEnabled && lastBeatId !== null) {
       const lastIndex = queue.findIndex((b) => b.id === lastBeatId)
       if (lastIndex >= 0) {
         const targetBeat = queue[lastIndex]
