@@ -36,11 +36,7 @@
 :root { --player-h: 74px; }
 
 @media (max-width: 768px) {
-  :root { --player-h: 58px; }
-}
-
-@media (max-width: 480px) {
-  :root { --player-h: 102px; }
+  :root { --player-h: 62px; }
 }
 
 * {

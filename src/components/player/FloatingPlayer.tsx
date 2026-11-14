@@ -1,5 +1,6 @@
 "use client"
 import CoverImage from "@/components/ui/CoverImage"
+import MobilePlayer from "./MobilePlayer"
 
 import { useEffect, useRef, useState } from "react"
 import { usePlayerStore } from "@/store/playerStore"
@@ -237,6 +238,10 @@ export default function FloatingPlayer() {
           </div>
         </div>
 
+        <MobilePlayer beat={beat} onToggle={handleToggle} onSeek={(seconds) => {
+          if (audioRef.current) audioRef.current.currentTime = seconds
+          setProgress(seconds)
+        }} />
         <div className="fp-bar">
           {/* Left: beat info */}
           <div className="fp-info">
@@ -562,28 +567,7 @@ export default function FloatingPlayer() {
 
         /* ═════════ MOBILE ═════════ */
         @media (max-width: 768px) {
-          .fp-bar {
-            display: flex;
-            height: 56px;
-            gap: 10px;
-            padding: 0 12px;
-          }
-          .fp-info { flex: 1 1 auto; gap: 10px; }
-          .fp-cover { width: 38px; height: 38px; border-radius: 5px; }
-          .fp-title { font-size: 0.84rem; max-width: 150px; }
-          .fp-sub { font-size: 0.68rem; }
-          .fp-heart { font-size: 1rem; padding: 2px; }
-
-          .fp-center { flex: 0 0 auto; }
-          .fp-buttons { padding-inline: 0; gap: 4px; }
-          .fp-mode { position: static; transform: none; }
-          .fp-skip { display: none; }
-          .fp-progress { display: none; }
-          .fp-play { width: 36px; height: 36px; }
-
-          .fp-right { flex: 0 0 auto; gap: 0; }
-          .fp-volume { display: none; }
-          .fp-license { padding: 8px 13px; font-size: 0.64rem; border-radius: 5px; }
+          .fp-bar { display: none; }
 
           /* seek line sits ON the top border: no extra height */
           .fp-seek {
@@ -604,20 +588,6 @@ export default function FloatingPlayer() {
             box-shadow: 0 0 8px rgba(0,0,0,0.6);
             pointer-events: none;
           }
-        }
-        @media (max-width: 480px) {
-          .fp-bar {
-            display: grid; grid-template-columns: minmax(0, 1fr) auto;
-            grid-template-rows: 44px 44px; gap: 4px 12px;
-            height: 100px; padding: 4px 12px;
-          }
-          .fp-info { grid-column: 1; grid-row: 1; }
-          .fp-text { flex: 1; }
-          .fp-right { grid-column: 2; grid-row: 1; }
-          .fp-center { grid-column: 1 / -1; grid-row: 2; }
-          .fp-buttons { gap: 12px; }
-          .fp-skip { display: flex; justify-content: center; width: 44px; height: 44px; }
-          .fp-play { width: 44px; height: 44px; }
         }
       `}</style>
     </>

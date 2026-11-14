@@ -3,36 +3,51 @@
   isolation: isolate;
   display: flex;
   align-items: center;
-  min-height: clamp(500px, 42vw, 640px);
+  min-height: clamp(500px, 42vw, 680px);
   background: var(--bg-void);
 }
 
 .contact-hero-photo {
   position: absolute;
-  inset: 0 max(48px, calc((100% - 1280px) / 2 + 80px)) 0 auto;
-  width: clamp(375px, 31.5vw, 480px);
+  inset: 0;
   z-index: -1;
   overflow: hidden;
   background: var(--bg-void);
 }
 
 .contact-hero-photo img {
-  object-fit: contain;
-  object-position: center;
+  object-fit: cover;
+  object-position: center 18%;
   filter: grayscale(1) brightness(1) contrast(1.05);
   mix-blend-mode: luminosity;
   opacity: .85;
-  -webkit-mask-image: linear-gradient(to right, transparent, #000 25%, #000 75%, transparent);
-  mask-image: linear-gradient(to right, transparent, #000 25%, #000 75%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 30%, #000 70%, transparent);
+  mask-image: linear-gradient(to right, transparent, #000 30%, #000 70%, transparent);
+}
+
+/* Soften only the outer studio walls; the producer stays in sharp focus. */
+.contact-hero-photo::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  -webkit-mask-image: linear-gradient(to right, #000, transparent 38%, transparent 62%, #000);
+  mask-image: linear-gradient(to right, #000, transparent 38%, transparent 62%, #000);
 }
 
 .contact-hero-photo::after {
   content: "";
   position: absolute;
   inset: 0;
+  z-index: 2;
+  pointer-events: none;
   background:
     linear-gradient(to top, var(--bg-void), transparent 30%),
-    linear-gradient(to bottom, var(--bg-void), transparent 15%);
+    linear-gradient(to bottom, var(--bg-void), transparent 15%),
+    linear-gradient(to right, var(--bg-void) 3%, rgba(11, 14, 13, .75) 18%, transparent 42%, transparent 76%, var(--bg-void));
 }
 
 .contact-hero-content {
@@ -40,9 +55,9 @@
 }
 
 .contact-hero h1 {
-  max-width: 480px;
-  width: 46%;
-  font: 600 clamp(52px, 5.2vw, 80px)/1.02 var(--font-display);
+  max-width: 370px;
+  width: 32%;
+  font: 600 clamp(48px, 4.4vw, 68px)/1.02 var(--font-display);
   letter-spacing: -.025em;
   text-wrap: balance;
   color: var(--text-primary);
@@ -54,8 +69,8 @@
 }
 
 .contact-hero-description {
-  max-width: 380px;
-  width: 40%;
+  max-width: 320px;
+  width: 30%;
   margin-top: 24px;
   color: var(--text-secondary);
   line-height: 1.8;
@@ -78,6 +93,13 @@
     object-position: center 18%;
     -webkit-mask-image: linear-gradient(to right, transparent, #000 18%, #000 82%, transparent);
     mask-image: linear-gradient(to right, transparent, #000 18%, #000 82%, transparent);
+  }
+
+  .contact-hero-photo::before {
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
+    -webkit-mask-image: linear-gradient(to right, #000, transparent 25%, transparent 75%, #000);
+    mask-image: linear-gradient(to right, #000, transparent 25%, transparent 75%, #000);
   }
 
   .contact-hero-photo::after {
